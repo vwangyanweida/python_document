@@ -1,0 +1,74 @@
+文件和目录访问
+**************
+
+本章中描述的模块处理磁盘文件和目录。 例如，有一些模块用于读取文件的属
+性，以可移植的方式操作路径以及创建临时文件。 本章的完整模块列表如下：
+
+* "pathlib" --- 面向对象的文件系统路径
+
+  * 基础使用
+
+  * 纯路径
+
+    * 通用性质
+
+    * 运算符
+
+    * 访问个别部分
+
+    * 方法和特征属性
+
+  * 具体路径
+
+    * 方法
+
+  * 对应的 "os" 模块的工具
+
+* "os.path" --- 常见路径名操作
+
+* "fileinput" --- Iterate over lines from multiple input streams
+
+* "stat" --- Interpreting "stat()" results
+
+* "filecmp" --- 文件及目录的比较
+
+  * "dircmp" 类
+
+* "tempfile" --- 生成临时文件和目录
+
+  * 示例
+
+  * 已弃用的函数和变量
+
+* "glob" --- Unix style pathname pattern expansion
+
+* "fnmatch" --- Unix filename pattern matching
+
+* "linecache" --- 随机读写文本行
+
+* "shutil" --- High-level file operations
+
+  * Directory and files operations
+
+    * Platform-dependent efficient copy operations
+
+    * copytree example
+
+    * rmtree example
+
+  * Archiving operations
+
+    * Archiving example
+
+  * Querying the size of the output terminal
+
+参见:
+
+  模块 "os"
+     操作系统接口，包括处理比 Python *文件对象* 更低级别文件的功能。
+
+  模块 "io"
+     Python的内置 I/O 库，包括抽象类和一些具体的类，如文件 I/O 。
+
+  内置函数 "open()"
+     使用 Python 打开文件进行读写的标准方法。

@@ -1,0 +1,49 @@
+加密服务
+********
+
+本章中描述的模块实现了加密性质的各种算法。 它们可由安装人员自行决定。
+在Unix系统上，"crypt" 模块也可以使用。 这是一个概述：
+
+* "hashlib" --- 安全哈希与消息摘要
+
+  * 哈希算法
+
+  * SHAKE variable length digests
+
+  * Key derivation
+
+  * BLAKE2
+
+    * Creating hash objects
+
+    * 常数
+
+    * 示例
+
+      * Simple hashing
+
+      * Using different digest sizes
+
+      * Keyed hashing
+
+      * Randomized hashing
+
+      * Personalization
+
+      * Tree mode
+
+    * Credits
+
+* "hmac" --- 基于密钥的消息验证
+
+* "secrets" --- Generate secure random numbers for managing secrets
+
+  * Random numbers
+
+  * Generating tokens
+
+    * How many bytes should tokens use?
+
+  * 其他功能
+
+  * Recipes and best practices

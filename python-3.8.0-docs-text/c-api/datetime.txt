@@ -1,0 +1,222 @@
+DateTime 对象
+*************
+
+"datetime" 模块提供了各种日期和时间对象。 在使用任何这些函数之前，必须
+在你的源码中包含头文件 "datetime.h" (请注意此文件并未包含在 "Python.h"
+中)，并且宏 "PyDateTime_IMPORT" 必须被发起调用，通常是作为模块初始化函
+数的一部分。 这个宏会将指向特定 C 结构的指针放入一个静态变量
+"PyDateTimeAPI" 中，它会由下面的宏来使用。
+
+宏访问UTC单例:
+
+PyObject* PyDateTime_TimeZone_UTC
+
+   返回表示 UTC 的时区单例，与 "datetime.timezone.utc" 为同一对象。
+
+   3.7 新版功能.
+
+类型检查宏：
+
+int PyDate_Check(PyObject *ob)
+
+   如果 *ob* 为 "PyDateTime_DateType" 类型或 "PyDateTime_DateType" 的
+   某个子类型则返回真值。 *ob* 不能为 "NULL"。
+
+int PyDate_CheckExact(PyObject *ob)
+
+   如果 *ob* 为 "PyDateTime_DateType" 类型则返回真值。 *ob* 不能为
+   "NULL"。
+
+int PyDateTime_Check(PyObject *ob)
+
+   如果 *ob* 为 "PyDateTime_DateTimeType" 类型或
+   "PyDateTime_DateTimeType" 的某个子类型则返回真值。 *ob* 不能为
+   "NULL"。
+
+int PyDateTime_CheckExact(PyObject *ob)
+
+   如果 *ob* 为 "PyDateTime_DateTimeType" 类型则返回真值。 *ob* 不能为
+   "NULL"。
+
+int PyTime_Check(PyObject *ob)
+
+   如果 *ob* 的类型是 "PyDateTime_TimeType" 或是 "PyDateTime_TimeType"
+   的子类型则返回真值。 *ob* 必须不为 "NULL"。
+
+int PyTime_CheckExact(PyObject *ob)
+
+   如果 *ob* 的类型是 "PyDateTime_TimeType" 则返回真值。 *ob* 必须不为
+   "NULL"。
+
+int PyDelta_Check(PyObject *ob)
+
+   如果 *ob* 为 "PyDateTime_DeltaType" 类型或 "PyDateTime_DeltaType"
+   的某个子类型则返回真值。 *ob* 不能为 "NULL"。
+
+int PyDelta_CheckExact(PyObject *ob)
+
+   如果 *ob* 为 "PyDateTime_DeltaType" 类型则返回真值。 *ob* 不能为
+   "NULL"。
+
+int PyTZInfo_Check(PyObject *ob)
+
+   如果 *ob* 为 "PyDateTime_TZInfoType" 类型或 "PyDateTime_TZInfoType"
+   的某个子类型则返回真值。 *ob* 不能为  "NULL"。
+
+int PyTZInfo_CheckExact(PyObject *ob)
+
+   如果 *ob* 的类型是 "PyDateTime_TZInfoType" 则返回真值。 *ob* 不能为
+   "NULL"。
+
+用于创建对象的宏：
+
+PyObject* PyDate_FromDate(int year, int month, int day)
+    *Return value: New reference.*
+
+   返回指定年、月、日的 "datetime.date" 对象。
+
+PyObject* PyDateTime_FromDateAndTime(int year, int month, int day, int hour, int minute, int second, int usecond)
+    *Return value: New reference.*
+
+   Return a "datetime.datetime" object with the specified year, month,
+   day, hour, minute, second and microsecond.
+
+PyObject* PyDateTime_FromDateAndTimeAndFold(int year, int month, int day, int hour, int minute, int second, int usecond, int fold)
+    *Return value: New reference.*
+
+   Return a "datetime.datetime" object with the specified year, month,
+   day, hour, minute, second, microsecond and fold.
+
+   3.6 新版功能.
+
+PyObject* PyTime_FromTime(int hour, int minute, int second, int usecond)
+    *Return value: New reference.*
+
+   Return a "datetime.time" object with the specified hour, minute,
+   second and microsecond.
+
+PyObject* PyTime_FromTimeAndFold(int hour, int minute, int second, int usecond, int fold)
+    *Return value: New reference.*
+
+   Return a "datetime.time" object with the specified hour, minute,
+   second, microsecond and fold.
+
+   3.6 新版功能.
+
+PyObject* PyDelta_FromDSU(int days, int seconds, int useconds)
+    *Return value: New reference.*
+
+   Return a "datetime.timedelta" object representing the given number
+   of days, seconds and microseconds.  Normalization is performed so
+   that the resulting number of microseconds and seconds lie in the
+   ranges documented for "datetime.timedelta" objects.
+
+PyObject* PyTimeZone_FromOffset(PyDateTime_DeltaType* offset)
+    *Return value: New reference.*
+
+   Return a "datetime.timezone" object with an unnamed fixed offset
+   represented by the *offset* argument.
+
+   3.7 新版功能.
+
+PyObject* PyTimeZone_FromOffsetAndName(PyDateTime_DeltaType* offset, PyUnicode* name)
+    *Return value: New reference.*
+
+   Return a "datetime.timezone" object with a fixed offset represented
+   by the *offset* argument and with tzname *name*.
+
+   3.7 新版功能.
+
+Macros to extract fields from date objects.  The argument must be an
+instance of "PyDateTime_Date", including subclasses (such as
+"PyDateTime_DateTime").  The argument must not be "NULL", and the type
+is not checked:
+
+int PyDateTime_GET_YEAR(PyDateTime_Date *o)
+
+   Return the year, as a positive int.
+
+int PyDateTime_GET_MONTH(PyDateTime_Date *o)
+
+   返回月，从0到12的整数。
+
+int PyDateTime_GET_DAY(PyDateTime_Date *o)
+
+   返回日期，从0到31的整数。
+
+Macros to extract fields from datetime objects.  The argument must be
+an instance of "PyDateTime_DateTime", including subclasses. The
+argument must not be "NULL", and the type is not checked:
+
+int PyDateTime_DATE_GET_HOUR(PyDateTime_DateTime *o)
+
+   返回小时，从0到23的整数。
+
+int PyDateTime_DATE_GET_MINUTE(PyDateTime_DateTime *o)
+
+   返回分钟，从0到59的整数。
+
+int PyDateTime_DATE_GET_SECOND(PyDateTime_DateTime *o)
+
+   返回秒，从0到59的整数。
+
+int PyDateTime_DATE_GET_MICROSECOND(PyDateTime_DateTime *o)
+
+   返回微秒，从0到999999的整数。
+
+Macros to extract fields from time objects.  The argument must be an
+instance of "PyDateTime_Time", including subclasses. The argument must
+not be "NULL", and the type is not checked:
+
+int PyDateTime_TIME_GET_HOUR(PyDateTime_Time *o)
+
+   返回小时，从0到23的整数。
+
+int PyDateTime_TIME_GET_MINUTE(PyDateTime_Time *o)
+
+   返回分钟，从0到59的整数。
+
+int PyDateTime_TIME_GET_SECOND(PyDateTime_Time *o)
+
+   返回秒，从0到59的整数。
+
+int PyDateTime_TIME_GET_MICROSECOND(PyDateTime_Time *o)
+
+   返回微秒，从0到999999的整数。
+
+Macros to extract fields from time delta objects.  The argument must
+be an instance of "PyDateTime_Delta", including subclasses. The
+argument must not be "NULL", and the type is not checked:
+
+int PyDateTime_DELTA_GET_DAYS(PyDateTime_Delta *o)
+
+   返回天数，从-999999999到999999999的整数。
+
+   3.3 新版功能.
+
+int PyDateTime_DELTA_GET_SECONDS(PyDateTime_Delta *o)
+
+   返回秒数，从0到86399的整数。
+
+   3.3 新版功能.
+
+int PyDateTime_DELTA_GET_MICROSECONDS(PyDateTime_Delta *o)
+
+   返回微秒数，从0到999999的整数。
+
+   3.3 新版功能.
+
+Macros for the convenience of modules implementing the DB API:
+
+PyObject* PyDateTime_FromTimestamp(PyObject *args)
+    *Return value: New reference.*
+
+   Create and return a new "datetime.datetime" object given an
+   argument tuple suitable for passing to
+   "datetime.datetime.fromtimestamp()".
+
+PyObject* PyDate_FromTimestamp(PyObject *args)
+    *Return value: New reference.*
+
+   Create and return a new "datetime.date" object given an argument
+   tuple suitable for passing to "datetime.date.fromtimestamp()".

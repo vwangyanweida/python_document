@@ -1,0 +1,56 @@
+文件格式
+********
+
+本章中描述的模块解析各种不是标记语言且与电子邮件无关的杂项文件格式。
+
+* "csv" --- CSV 文件读写
+
+  * 模块内容
+
+  * 变种与格式参数
+
+  * Reader 对象
+
+  * Writer 对象
+
+  * 示例
+
+* "configparser" --- Configuration file parser
+
+  * Quick Start
+
+  * Supported Datatypes
+
+  * Fallback Values
+
+  * Supported INI File Structure
+
+  * Interpolation of values
+
+  * Mapping Protocol Access
+
+  * Customizing Parser Behaviour
+
+  * Legacy API Examples
+
+  * ConfigParser Objects
+
+  * RawConfigParser Objects
+
+  * 异常
+
+* "netrc" --- netrc file processing
+
+  * netrc Objects
+
+* "xdrlib" --- Encode and decode XDR data
+
+  * Packer Objects
+
+  * Unpacker Objects
+
+  * 异常
+
+* "plistlib" --- Generate and parse Mac OS X ".plist" files
+
+  * 示例

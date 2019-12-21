@@ -1,0 +1,158 @@
+序列协议
+********
+
+int PySequence_Check(PyObject *o)
+
+   如果对象提供序列协议，函数返回 "1"，否则返回 "0"。 请注意它将为具有
+   "__getitem__()" 方法的 Python 类返回 "1"，除非它们是 "dict" 的子类
+   ，因为在一般情况下无法确定它所支持键类型。 此函数总是会成功执行。
+
+Py_ssize_t PySequence_Size(PyObject *o)
+Py_ssize_t PySequence_Length(PyObject *o)
+
+   到哪里积分返回序列 *o* 中对象的数量，失败时返回 "-1"。 这相当于
+   Python 表达式 "len(o)"。
+
+PyObject* PySequence_Concat(PyObject *o1, PyObject *o2)
+    *Return value: New reference.*
+
+   Return the concatenation of *o1* and *o2* on success, and "NULL" on
+   failure. This is the equivalent of the Python expression "o1 + o2".
+
+PyObject* PySequence_Repeat(PyObject *o, Py_ssize_t count)
+    *Return value: New reference.*
+
+   Return the result of repeating sequence object *o* *count* times,
+   or "NULL" on failure.  This is the equivalent of the Python
+   expression "o * count".
+
+PyObject* PySequence_InPlaceConcat(PyObject *o1, PyObject *o2)
+    *Return value: New reference.*
+
+   Return the concatenation of *o1* and *o2* on success, and "NULL" on
+   failure. The operation is done *in-place* when *o1* supports it.
+   This is the equivalent of the Python expression "o1 += o2".
+
+PyObject* PySequence_InPlaceRepeat(PyObject *o, Py_ssize_t count)
+    *Return value: New reference.*
+
+   Return the result of repeating sequence object *o* *count* times,
+   or "NULL" on failure.  The operation is done *in-place* when *o*
+   supports it.  This is the equivalent of the Python expression "o *=
+   count".
+
+PyObject* PySequence_GetItem(PyObject *o, Py_ssize_t i)
+    *Return value: New reference.*
+
+   Return the *i*th element of *o*, or "NULL" on failure. This is the
+   equivalent of the Python expression "o[i]".
+
+PyObject* PySequence_GetSlice(PyObject *o, Py_ssize_t i1, Py_ssize_t i2)
+    *Return value: New reference.*
+
+   Return the slice of sequence object *o* between *i1* and *i2*, or
+   "NULL" on failure. This is the equivalent of the Python expression
+   "o[i1:i2]".
+
+int PySequence_SetItem(PyObject *o, Py_ssize_t i, PyObject *v)
+
+   将对象 *v* 赋值给 *o* 的第 *i* 号元素。 失败时会引发异常并返回 "-1"
+   ；成功时返回 "0"。 这相当于 Python 语句 "o[i] = v"。 此函数 *不会*
+   改变对 *v* 的引用。
+
+   If *v* is "NULL", the element is deleted, however this feature is
+   deprecated in favour of using "PySequence_DelItem()".
+
+int PySequence_DelItem(PyObject *o, Py_ssize_t i)
+
+   删除对象 *o* 的第 *i* 号元素。 失败时返回 "-1"。 这相当于 Python 语
+   句 "del o[i]"。
+
+int PySequence_SetSlice(PyObject *o, Py_ssize_t i1, Py_ssize_t i2, PyObject *v)
+
+   将序列对象 *v* 赋值给序列对象 *o* 的从 *i1* 到 *i2* 切片。 这相当于
+   Python 语句 "o[i1:i2] = v"。
+
+int PySequence_DelSlice(PyObject *o, Py_ssize_t i1, Py_ssize_t i2)
+
+   删除序列对象 *o* 的从 *i1* 到 *i2* 的切片。 失败时返回 "-1"。 这相
+   当于 Python 语句 "del o[i1:i2]"。
+
+Py_ssize_t PySequence_Count(PyObject *o, PyObject *value)
+
+   返回 *value* 在 *o* 中出现的次数，即返回使得 "o[key] == value" 的键
+   的数量。 失败时返回 "-1"。 这相当于 Python 表达式 "o.count(value)"
+   。
+
+int PySequence_Contains(PyObject *o, PyObject *value)
+
+   确定 *o* 是否包含 *value*。 如果 *o* 中的某一项等于 *value*，则返回
+   "1"，否则返回 "0"。 出错时，返回 "-1"。 这相当于 Python 表达式
+   "value in o"。
+
+Py_ssize_t PySequence_Index(PyObject *o, PyObject *value)
+
+   返回第一个索引*i*,其中 "o[i] == value".出错时,返回“-1”.相当于Python
+   的``o.index(value)``表达式.
+
+PyObject* PySequence_List(PyObject *o)
+    *Return value: New reference.*
+
+   Return a list object with the same contents as the sequence or
+   iterable *o*, or "NULL" on failure.  The returned list is
+   guaranteed to be new.  This is equivalent to the Python expression
+   "list(o)".
+
+PyObject* PySequence_Tuple(PyObject *o)
+    *Return value: New reference.*
+
+   Return a tuple object with the same contents as the sequence or
+   iterable *o*, or "NULL" on failure.  If *o* is a tuple, a new
+   reference will be returned, otherwise a tuple will be constructed
+   with the appropriate contents.  This is equivalent to the Python
+   expression "tuple(o)".
+
+PyObject* PySequence_Fast(PyObject *o, const char *m)
+    *Return value: New reference.*
+
+   Return the sequence or iterable *o* as an object usable by the
+   other "PySequence_Fast*" family of functions. If the object is not
+   a sequence or iterable, raises "TypeError" with *m* as the message
+   text. Returns "NULL" on failure.
+
+   "PySequence_Fast*" 函数之所以这样命名，是因为它们会假定 *o* 是一个
+   "PyTupleObject" 或 "PyListObject" 并直接访问 *o* 的数据字段。
+
+   作为 CPython 的实现细节，如果 *o* 已经是一个序列或列表，它将被直接
+   返回。
+
+Py_ssize_t PySequence_Fast_GET_SIZE(PyObject *o)
+
+   Returns the length of *o*, assuming that *o* was returned by
+   "PySequence_Fast()" and that *o* is not "NULL".  The size can also
+   be gotten by calling "PySequence_Size()" on *o*, but
+   "PySequence_Fast_GET_SIZE()" is faster because it can assume *o* is
+   a list or tuple.
+
+PyObject* PySequence_Fast_GET_ITEM(PyObject *o, Py_ssize_t i)
+    *Return value: Borrowed reference.*
+
+   Return the *i*th element of *o*, assuming that *o* was returned by
+   "PySequence_Fast()", *o* is not "NULL", and that *i* is within
+   bounds.
+
+PyObject** PySequence_Fast_ITEMS(PyObject *o)
+
+   Return the underlying array of PyObject pointers.  Assumes that *o*
+   was returned by "PySequence_Fast()" and *o* is not "NULL".
+
+   请注意,如果列表调整大小,重新分配可能会重新定位items数组.因此,仅在序
+   列无法更改的上下文中使用基础数组指针.
+
+PyObject* PySequence_ITEM(PyObject *o, Py_ssize_t i)
+    *Return value: New reference.*
+
+   Return the *i*th element of *o* or "NULL" on failure. Faster form
+   of "PySequence_GetItem()" but without checking that
+   "PySequence_Check()" on *o* is true and without adjustment for
+   negative indices.

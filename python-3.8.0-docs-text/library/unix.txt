@@ -1,0 +1,57 @@
+Unix 专有服务
+*************
+
+本章描述的模块提供了 Unix 操作系统独有特性的接口，在某些情况下也适用于
+它的某些或许多衍生版。 以下为模块概览：
+
+* "posix" --- The most common POSIX system calls
+
+  * Large File Support
+
+  * Notable Module Contents
+
+* "pwd" --- 用户密码数据库
+
+* "spwd" --- The shadow password database
+
+* "grp" --- The group database
+
+* "crypt" --- Function to check Unix passwords
+
+  * Hashing Methods
+
+  * Module Attributes
+
+  * 模块函数
+
+  * 示例
+
+* "termios" --- POSIX style tty control
+
+  * 示例
+
+* "tty" --- 终端控制功能
+
+* "pty" --- Pseudo-terminal utilities
+
+  * 示例
+
+* "fcntl" --- The "fcntl" and "ioctl" system calls
+
+* "pipes" --- Interface to shell pipelines
+
+  * Template Objects
+
+* "resource" --- Resource usage information
+
+  * Resource Limits
+
+  * Resource Usage
+
+* "nis" --- Interface to Sun's NIS (Yellow Pages)
+
+* Unix syslog 库例程
+
+  * 示例
+
+    * Simple example
