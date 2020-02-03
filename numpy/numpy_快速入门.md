@@ -1,59 +1,3 @@
-NumPy NumPy 中文网
-概述
-文章
-深度学习
-用户指南
-参考手册
-精选资源
-其他文档
-
-  • 防脱发指南
-  • NumPy 基准测试
-  • NumPy 开发者指南
-  • F2Py 指南
-  • 构建和扩展文档
-
-了解更多
-
-  • 社区
-  • 报告错误
-  • 发布日志
-  • NumPy 许可证
-  • Numpy 开发计划
-
-选择语言
-
-  • 简体中文
-  • English
-
-GitHub
-概述
-文章
-深度学习
-用户指南
-参考手册
-精选资源
-其他文档
-
-  • 防脱发指南
-  • NumPy 基准测试
-  • NumPy 开发者指南
-  • F2Py 指南
-  • 构建和扩展文档
-
-了解更多
-
-  • 社区
-  • 报告错误
-  • 发布日志
-  • NumPy 许可证
-  • Numpy 开发计划
-
-选择语言
-
-  • 简体中文
-  • English
-
 GitHub
 
   • NumPy 介绍
@@ -1165,19 +1109,3 @@ quickstart-2_00_00
 >>> (n, bins) = np.histogram(v, bins=50, density=True)  # NumPy version (no plot)
 >>> plt.plot(.5*(bins[1:]+bins[:-1]), n)
 >>> plt.show()
-
-quickstart-2_01_00
-
-# 进一步阅读
-
-  • Python的教程
-  • NumPy参考
-  • SciPy教程
-  • SciPy讲义
-  • MATLAB，R，IDL，NumPy/SciPy 宝典
-
-在 GitHub 上编辑此页
-上次更新: 2019-11-12 11:05:35
-
-← NumPy 介绍目录→
-
