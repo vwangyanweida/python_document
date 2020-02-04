@@ -1,11 +1,11 @@
-事件循环
+## 事件循环
 ********
 
 **Source code:** Lib/asyncio/events.py, Lib/asyncio/base_events.py
 
 ======================================================================
 
--[ 前言 ]-
+### -[ 前言 ]-
 
 事件循环是每个 asyncio 应用的核心。 事件循环会运行异步任务和回调，执行
 网络 IO 操作，以及运行子进程。
@@ -14,11 +14,11 @@
 当很少有必要引用循环对象或调用其方法。 本节所针对的主要是低层级代码、
 库和框架的编写者，他们需要更细致地控制事件循环行为。
 
--[ 获取事件循环 ]-
+### -[ 获取事件循环 ]-
 
 以下低层级函数可被用于获取、设置或创建事件循环:
 
-asyncio.get_running_loop()
+#### asyncio.get_running_loop()
 
    返回当前 OS 线程中正在运行的事件循环。
 
@@ -27,7 +27,7 @@ asyncio.get_running_loop()
 
    3.7 新版功能.
 
-asyncio.get_event_loop()
+#### asyncio.get_event_loop()
 
    获取当前事件循环。 如果当前 OS 线程没有设置当前事件循环并且
    "set_event_loop()" 还没有被调用，asyncio 将创建一个新的事件循环并将
@@ -40,18 +40,18 @@ asyncio.get_event_loop()
    应该考虑使用 "asyncio.run()" 函数而非使用低层级函数来手动创建和关闭
    事件循环。
 
-asyncio.set_event_loop(loop)
+#### asyncio.set_event_loop(loop)
 
    将 *loop* 设置为当前 OS 线程的当前事件循环。
 
-asyncio.new_event_loop()
+#### asyncio.new_event_loop()
 
    创建一个新的事件循环。
 
 请注意 "get_event_loop()", "set_event_loop()" 以及 "new_event_loop()"
 函数的行为可以通过 设置自定义事件循环策略 来改变。
 
--[ 内容 ]-
+### -[ 内容 ]-
 
 本文档包含下列小节:
 
@@ -69,44 +69,44 @@ asyncio.new_event_loop()
 * Examples 章节展示了如何使用某些事件循环API。
 
 
-事件循环方法集
+#### 事件循环方法集
 ==============
 
-事件循环有下列 **低级** APIs：
+1. 事件循环有下列 **低级** APIs：
 
-* 运行和停止循环
+	- 运行和停止循环
 
-* 调度回调
+	- 调度回调
 
-* 调度延迟回调
+	- 调度延迟回调
 
-* 创建 Futures 和 Tasks
+	- 创建 Futures 和 Tasks
 
-* 打开网络连接
+	- 打开网络连接
 
-* 创建网络服务
+	- 创建网络服务
 
-* 传输文件
+	- 传输文件
 
-* TLS 升级
+	- TLS 升级
 
-* 监控文件描述符
+	- 监控文件描述符
 
-* 直接使用 socket 对象
+	- 直接使用 socket 对象
 
-* DNS
+	- DNS
 
-* 使用管道
+	- 使用管道
 
-* Unix 信号
+	- Unix 信号
 
-* 在线程或者进程池中执行代码。
+	- 在线程或者进程池中执行代码。
 
-* 错误处理API
+	- 错误处理API
 
-* 开启调试模式
+	- 开启调试模式
 
-* 运行子进程
+	- 运行子进程
 
 
 运行和停止循环
