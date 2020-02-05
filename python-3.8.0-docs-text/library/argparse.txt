@@ -38,7 +38,7 @@
    print(args.accumulate(args.integers))
 
 假设上面的 Python 代码保存在名为 "prog.py" 的文件中，它可以在命令行运
-行并提供有用的帮助消息：
+行并提供有用的帮助信息：
 
    $ python prog.py -h
    usage: prog.py [-h] [--sum] N [N ...]
@@ -93,7 +93,7 @@
    ...                     const=sum, default=max,
    ...                     help='sum the integers (default: find the max)')
 
-稍后，调用 "parse_args()" 将返回一个具有 "integers" 和 "accumulate" 两
+然后，调用 "parse_args()" 将返回一个具有 "integers" 和 "accumulate" 两
 个属性的对象。"integers" 属性将是一个包含一个或多个整数的列表，而
 "accumulate" 属性当命令行中指定了 "--sum" 参数时将是 "sum()" 函数，否
 则则是 "max()" 函数。
@@ -104,7 +104,7 @@
 
 "ArgumentParser" 通过 "parse_args()" 方法解析参数。它将检查命令行，把
 每个参数转换为适当的类型然后调用相应的操作。在大多数情况下，这意味着一
-个简单的 "Namespace" 对象将从命令行参数中解析出的属性构建：
+个简单的 "Namespace" 对象将从命令行解析出的属性构建：
 
    >>> parser.parse_args(['--sum', '7', '-1', '42'])
    Namespace(accumulate=<built-in function sum>, integers=[7, -1, 42])
@@ -118,10 +118,10 @@ ArgumentParser 对象
 
 class argparse.ArgumentParser(prog=None, usage=None, description=None, epilog=None, parents=[], formatter_class=argparse.HelpFormatter, prefix_chars='-', fromfile_prefix_chars=None, argument_default=None, conflict_handler='error', add_help=True, allow_abbrev=True)
 
-   创建一个新的 "ArgumentParser" 对象。所有的参数都应当作为关键字参数
+   创建一个新的 "ArgumentParser" 对象。所有的参数都应当作为关键字参数
    传入。每个参数在下面都有它更详细的描述，但简而言之，它们是：
 
-   * prog - 程序的名称（默认："sys.argv[0]"）
+   * prog - 程序的名称（默认值："sys.argv[0]"）
 
    * usage - 描述程序用途的字符串（默认值：从添加到解析器的参数生成
      ）
@@ -135,10 +135,10 @@ class argparse.ArgumentParser(prog=None, usage=None, description=None, epilog=No
 
    * formatter_class - 用于自定义帮助文档输出格式的类
 
-   * prefix_chars - 可选参数的前缀字符集合（默认值：'-'）
+   * prefix_chars - 可选参数的前缀字符集合（默认值： '-'）
 
    * fromfile_prefix_chars - 当需要从文件中读取其他参数时，用于标识
-     文 件名的前缀字符集合（默认值："None"）
+     文 件名的前缀字符集合（默认值： "None"）
 
    * argument_default - 参数的全局默认值（默认值： "None"）
 
@@ -149,10 +149,7 @@ class argparse.ArgumentParser(prog=None, usage=None, description=None, epilog=No
    * allow_abbrev - 如果缩写是无歧义的，则允许缩写长选项 （默认值：
      "True"）
 
-   在 3.5 版更改: 添加 *allow_abbrev* 参数。
-
-   在 3.8 版更改: In previous versions, *allow_abbrev* also disabled
-   grouping of short flags such as "-vv" to mean "-v -v".
+   在 3.5 版更改: 增加了 *allow_abbrev* 参数。
 
 以下部分描述这些参数如何使用。
 
@@ -162,10 +159,6 @@ prog
 
 默认情况下，"ArgumentParser" 对象使用 "sys.argv[0]" 来确定如何在帮助消
 息中显示程序名称。这一默认值几乎总是可取的，因为它将使帮助消息与从命令
-行调用此程序的方式相匹配。例如，对于有如下代码的名为 "myprogram.py" 的
-文件：
-
-   import argparse
    parser = argparse.ArgumentParser()
    parser.add_argument('--foo', help='foo help')
    args = parser.parse_args()
@@ -187,7 +180,7 @@ prog
     -h, --help  show this help message and exit
     --foo FOO   foo help
 
-要更改这样的默认行为，可以使用 "prog=" 参数为 "ArgumentParser" 提供另
+要更改这样的默认行为，可以使用 "prog=" 参数为 "ArgumentParser" 指定另
 一个值：
 
    >>> parser = argparse.ArgumentParser(prog='myprogram')
@@ -198,7 +191,7 @@ prog
     -h, --help  show this help message and exit
 
 需要注意的是，无论是从 "sys.argv[0]" 或是从 "prog=" 参数确定的程序名称
-，都可以在帮助消息里通过 "%(prog)s" 格式串来引用。
+，都可以在帮助消息里通过 "%(prog)s" 格式说明符来引用。
 
    >>> parser = argparse.ArgumentParser(prog='myprogram')
    >>> parser.add_argument('--foo', help='foo of the %(prog)s program')
@@ -246,8 +239,8 @@ usage
 在用法消息中可以使用 "%(prog)s" 格式说明符来填入程序名称。
 
 
-description
------------
+描述
+----
 
 大多数对 "ArgumentParser" 构造方法的调用都会使用 "description=" 关键字
 参数。这个参数简要描述这个程度做什么以及怎么做。在帮助消息中，这个描述
@@ -711,16 +704,6 @@ action
      >>> parser.parse_args(['--version'])
      PROG 2.0
 
-* "'extend'" - This stores a list, and extends each argument value
-  to the list. Example usage:
-
-     >>> parser = argparse.ArgumentParser()
-     >>> parser.add_argument("--foo", action="extend", nargs="+", type=str)
-     >>> parser.parse_args(["--foo", "f1", "--foo", "f2", "f3", "f4"])
-     Namespace(foo=['f1', 'f2', 'f3', 'f4'])
-
-  3.8 新版功能.
-
 您还可以通过传递 Action 子类或实现相同接口的其他对象来指定任意操作。建
 议的方法是扩展 "Action"，覆盖 "__call__" 方法和可选的 "__init__" 方法
 。
@@ -848,8 +831,8 @@ const
 。对其他动作，默认为 "None"。
 
 
-default
--------
+默认值
+------
 
 所有选项和一些位置参数可能在命令行中被忽略。"add_argument()" 的命名参
 数 "default"，默认值为 "None"，指定了在命令行参数未出现时应当使用的值
@@ -892,8 +875,8 @@ default
    Namespace(foo='1')
 
 
-type
-----
+type -- 类型
+------------
 
 默认情况下，"ArgumentParser" 对象将命令行参数当作简单字符串读入。然而
 ，命令行字符串经常需要被当作其它的类型，比如 "float" 或者 "int"。
@@ -980,8 +963,9 @@ the *choices* container should match the type specified:
    usage: doors.py [-h] {1,2,3}
    doors.py: error: argument door: invalid choice: 4 (choose from 1, 2, 3)
 
-Any container can be passed as the *choices* value, so "list" objects,
-"set" objects, and custom containers are all supported.
+Any object that supports the "in" operator can be passed as the
+*choices* value, so "dict" objects, "set" objects, custom containers,
+etc. are all supported.
 
 
 required
@@ -1883,14 +1867,7 @@ ArgumentParser.convert_arg_line_to_args(arg_line)
 ArgumentParser.exit(status=0, message=None)
 
    This method terminates the program, exiting with the specified
-   *status* and, if given, it prints a *message* before that. The user
-   can override this method to handle these steps differently:
-
-      class ErrorCatchingArgumentParser(argparse.ArgumentParser):
-          def exit(self, status=0, message=None):
-              if status:
-                  raise Exception(f'Exiting because of an error: {message}')
-              exit(status)
+   *status* and, if given, it prints a *message* before that.
 
 ArgumentParser.error(message)
 
