@@ -1,62 +1,58 @@
-"threading" --- 基于线程的并行
+# threading --- 基于线程的并行
 ******************************
+## 概述
+> **源代码:** Lib/threading.py
 
-**源代码:** Lib/threading.py
+1. 这个模块在较低级的模块 "_thread" 基础上建立较高级的线程接口。参见："queue"  模块。
 
-======================================================================
+2. 在 3.7 版更改: 这个模块曾经为可选项，但现在总是可用。
 
-这个模块在较低级的模块 "_thread" 基础上建立较高级的线程接口。参见：
-"queue"  模块。
-
-在 3.7 版更改: 这个模块曾经为可选项，但现在总是可用。
-
-注解: 虽然他们没有在下面列出，这个模块仍然支持Python 2.x系列的这个模
+3. 注解: 虽然他们没有在下面列出，这个模块仍然支持Python 2.x系列的这个模
   块下以 "camelCase" （驼峰法）命名的方法和函数。
 
-这个模块定义了以下函数：
+## 这个模块定义了以下函数：
 
-threading.active_count()
+1. threading.active_count()
 
    返回当前存活的线程类 "Thread" 对象。返回的计数等于 "enumerate()" 返
    回的列表长度。
 
-threading.current_thread()
+2. 2. threading.current_thread()
 
    返回当前对应调用者的控制线程的 "Thread" 对象。如果调用者的控制线程
    不是利用 "threading" 创建，会返回一个功能受限的虚拟线程对象。
 
-threading.get_ident()
+3. threading.get_ident()
 
    返回当前线程的 “线程标识符”。它是一个非零的整数。它的值没有直接含义
    ，主要是用作 magic cookie，比如作为含有线程相关数据的字典的索引。线
    程标识符可能会在线程退出，新线程创建时被复用。
 
-   3.3 新版功能.
+### 3.3 新版功能.
 
-threading.enumerate()
+1. threading.enumerate()
 
    以列表形式返回当前所有存活的 "Thread" 对象。 该列表包含守护线程，
    "current_thread()" 创建的虚拟线程对象和主线程。它不包含已终结的线程
    和尚未开始的线程。
 
-threading.main_thread()
+2. threading.main_thread()
 
    返回主 "Thread" 对象。一般情况下，主线程是Python解释器开始时创建的
    线程。
 
-   3.4 新版功能.
-
-threading.settrace(func)
+### 3.4 新版功能.
+1. threading.settrace(func)
 
    为所有 "threading" 模块开始的线程设置追踪函数。在每个线程的 "run()"
    方法被调用前，*func* 会被传递给 "sys.settrace()" 。
 
-threading.setprofile(func)
+2. threading.setprofile(func)
 
    为所有 "threading" 模块开始的线程设置性能测试函数。在每个线程的
    "run()" 方法被调用前，*func* 会被传递给 "sys.setprofile()" 。
 
-threading.stack_size([size])
+3. threading.stack_size([size])
 
    返回创建线程时用的堆栈大小。可选参数 *size* 指定之后新建的线程的堆
    栈大小，而且一定要是0（根据平台或者默认配置）或者最小是
