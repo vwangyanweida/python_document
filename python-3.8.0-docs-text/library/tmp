@@ -1,0 +1,2 @@
+This should be used to reliably finalize all scheduled
+   asynchronous generators.

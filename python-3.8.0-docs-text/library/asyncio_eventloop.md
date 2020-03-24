@@ -1,77 +1,79 @@
+
+<!-- vim-markdown-toc GFM -->
+
+	* [事件循环]
+		* [前言]
+		* [获取事件循环]
+			* [`asyncio.get_running_loop()`]
+			* [`asyncio.get_event_loop()`]
+			* [`asyncio.set_event_loop(loop)`]
+			* [`asyncio.new_event_loop()`]
+	* [事件循环方法集]
+		* [运行和停止循环]
+		* [调度回调]
+		* [调度延迟回调]
+		* [创建 Futures 和 Tasks]
+	* [打开网络连接]
+	* [创建网络服务]
+	* [传输文件]
+	* [TLS 升级]
+	* [监控文件描述符]
+	* [直接使用 socket 对象]
+	* [DNS]
+	* [使用管道]
+	* [Unix 信号]
+	* [在线程或者进程池中执行代码。]
+	* [错误处理API]
+	* [开启调试模式]
+	* [运行子进程]
+* [回调处理]
+* [Server Objects]
+* [事件循环实现]
+* [示例]
+	* [call_soon() 的 Hello World 示例。]
+	* [使用 call_later() 来展示当前的日期]
+	* [监控一个文件描述符的读事件]
+	* [为SIGINT和SIGTERM设置信号处理器]
+
+<!-- vim-markdown-toc -->
 ## 事件循环
-********
 
-**Source code:** Lib/asyncio/events.py, Lib/asyncio/base_events.py
+> Source code: Lib/asyncio/events.py, Lib/asyncio/`base_events.py`
 
-======================================================================
+### 前言
+**事件循环是每个 asyncio 应用的核心。 事件循环会运行异步任务和回调，执行网络 IO 操作，以及运行子进程**
 
-### -[ 前言 ]-
+	应用开发者通常应当使用高层级的 asyncio 函数，例如 "asyncio.run()"，应当很少有必要引用循环对象或调用其方法。 
+本节所针对的主要是低层级代码、库和框架的编写者，他们需要更细致地控制事件循环行为。
 
-事件循环是每个 asyncio 应用的核心。 事件循环会运行异步任务和回调，执行
-网络 IO 操作，以及运行子进程。
-
-应用开发者通常应当使用高层级的 asyncio 函数，例如 "asyncio.run()"，应
-当很少有必要引用循环对象或调用其方法。 本节所针对的主要是低层级代码、
-库和框架的编写者，他们需要更细致地控制事件循环行为。
-
-### -[ 获取事件循环 ]-
-
+### 获取事件循环
 以下低层级函数可被用于获取、设置或创建事件循环:
 
-#### asyncio.get_running_loop()
+#### `asyncio.get_running_loop()`
+1. 返回当前 OS 线程中正在运行的事件循环。
 
-   返回当前 OS 线程中正在运行的事件循环。
+   如果没有正在运行的事件循环则会引发 "RuntimeError"。 <font color=red>此函数只能由协程或回调来调用。</font>
 
-   如果没有正在运行的事件循环则会引发 "RuntimeError"。 此函数只能由协
-   程或回调来调用。
+#### `asyncio.get_event_loop()`
+1. 获取当前事件循环。 如果当前 OS 线程没有设置当前事件循环并且`set_event_loop()` 还没有被调用，
+	asyncio 将创建一个新的事件循环并将其设置为当前循环。
 
-   3.7 新版功能.
+2. 由于此函数具有相当复杂的行为（特别是在使用了自定义事件循环策略的时候），更推荐在协程和回调中使用
+	`get_running_loop()` 函数而非`get_event_loop()`。
 
-#### asyncio.get_event_loop()
+3. 应该考虑使用 "asyncio.run()" 函数而非使用低层级函数来手动创建和关闭事件循环。
 
-   获取当前事件循环。 如果当前 OS 线程没有设置当前事件循环并且
-   "set_event_loop()" 还没有被调用，asyncio 将创建一个新的事件循环并将
-   其设置为当前循环。
+#### `asyncio.set_event_loop(loop)`
+将 *loop* 设置为当前 OS 线程的当前事件循环。
 
-   由于此函数具有相当复杂的行为（特别是在使用了自定义事件循环策略的时
-   候），更推荐在协程和回调中使用 "get_running_loop()" 函数而非
-   "get_event_loop()"。
+#### `asyncio.new_event_loop()`
 
-   应该考虑使用 "asyncio.run()" 函数而非使用低层级函数来手动创建和关闭
-   事件循环。
+1. 创建一个新的事件循环。
 
-#### asyncio.set_event_loop(loop)
+2. 请注意 `get_event_loop()`, `set_event_loop()` 以及 `new_event_loop()`
+函数的行为可以通过 **设置自定义事件循环策略 来改变**。
 
-   将 *loop* 设置为当前 OS 线程的当前事件循环。
-
-#### asyncio.new_event_loop()
-
-   创建一个新的事件循环。
-
-请注意 "get_event_loop()", "set_event_loop()" 以及 "new_event_loop()"
-函数的行为可以通过 设置自定义事件循环策略 来改变。
-
-### -[ 内容 ]-
-
-本文档包含下列小节:
-
-* 事件循环方法集 章节是事件循环APIs的参考文档；
-
-* 回调处理 章节是从调度方法 例如 "loop.call_soon()"  和
-  "loop.call_later()" 中返回 "Handle" 和 "TimerHandle" 实例的文档。
-
-* Server Objects 章节记录了从事件循环方法返回的类型，比如
-  "loop.create_server()" ；
-
-* Event Loop Implementations 章节记录了 "SelectorEventLoop" 和
-  "ProactorEventLoop" 类；
-
-* Examples 章节展示了如何使用某些事件循环API。
-
-
-#### 事件循环方法集
-==============
-
+## 事件循环方法集
 1. 事件循环有下列 **低级** APIs：
 
 	- 运行和停止循环
@@ -108,63 +110,59 @@
 
 	- 运行子进程
 
+### 运行和停止循环
+1. `loop.run_until_complete(future)`
 
-运行和停止循环
---------------
+	- 运行直到 *future* (  "Future" 的实例 ) 被完成。
 
-loop.run_until_complete(future)
+	- 如果参数是 coroutine object ，将被隐式调度为 "asyncio.Task" 来运行。
 
-   运行直到 *future* (  "Future" 的实例 ) 被完成。
+	- 返回 Future 的结果 或者引发相关异常。
 
-   如果参数是 coroutine object ，将被隐式调度为 "asyncio.Task" 来运行
-   。
+2. `loop.run_forever()`
 
-   返回 Future 的结果 或者引发相关异常。
+   - 运行事件循环直到 "stop()" 被调用。
 
-loop.run_forever()
-
-   运行事件循环直到 "stop()" 被调用。
-
-   If "stop()" is called before "run_forever()" is called, the loop
+   - If "stop()" is called before `run_forever()` is called, the loop
    will poll the I/O selector once with a timeout of zero, run all
    callbacks scheduled in response to I/O events (and those that were
    already scheduled), and then exit.
 
-   If "stop()" is called while "run_forever()" is running, the loop
+   - If "stop()" is called while `run_forever()` is running, the loop
    will run the current batch of callbacks and then exit. Note that
    new callbacks scheduled by callbacks will not run in this case;
-   instead, they will run the next time "run_forever()" or
-   "run_until_complete()" is called.
+   instead, they will run the next time `run_forever()" or
+   `run_until_complete()` is called.
 
-loop.stop()
+3. `loop.stop()`
 
    停止事件循环。
 
-loop.is_running()
+4. `loop.is_running()`
 
    返回 "True" 如果事件循环当前正在运行。
 
-loop.is_closed()
+5. `loop.is_closed()`
 
    如果事件循环已经被关闭，返回 "True" 。
 
-loop.close()
+6. `loop.close()`
 
    关闭事件循环。
 
-   当这个函数被调用的时候，循环必须处于非运行状态。pending状态的回调将
-   被丢弃。
+   当这个函数被调用的时候，循环必须处于非运行状态。pending状态的回调将被丢弃。
 
    此方法清除所有的队列并立即关闭执行器，不会等待执行器完成。
 
    这个方法是幂等的和不可逆的。事件循环关闭后，不应调用其他方法。
 
-coroutine loop.shutdown_asyncgens()
+7. `coroutine loop.shutdown_asyncgens()`
 
-   Schedule all currently open *asynchronous generator* objects to
-   close with an "aclose()" call.  After calling this method, the
-   event loop will issue a warning if a new asynchronous generator is
-   iterated. This should be used to reliably finalize all scheduled
+   - Schedule all currently open *asynchronous generator* objects to
+	   close with an "aclose()" call.  
+
+   - After calling this method, the event loop will issue a warning if a new asynchronous 
+   generator is iterated. This should be used to reliably finalize all scheduled
    asynchronous generators.
 
    运行请注意，当使用 "asyncio.run()" 时，无需调用此函数。
@@ -177,78 +175,68 @@ coroutine loop.shutdown_asyncgens()
           loop.run_until_complete(loop.shutdown_asyncgens())
           loop.close()
 
-   3.6 新版功能.
+### 调度回调
+1. `loop.call_soon(callback, *args, context=None)`
 
+> ** 安排在下一次事件循环的迭代中使用 args 参数调用callback ** 。
 
-调度回调
---------
+	- 回调按其注册顺序被调用。每个回调仅被调用一次。
 
-loop.call_soon(callback, *args, context=None)
+	- 可选的仅关键字型参数 *context* 允许为要运行的 *callback* 指定一个自
+	   定义 "contextvars.Context" 。如果没有提供 *context* ，则使用当前上下文。
 
-   安排在下一次事件循环的迭代中使用 *args* 参数调用 *callback* 。
+	- 返回一个能用来取消回调的 "asyncio.Handle" 实例。
 
-   回调按其注册顺序被调用。每个回调仅被调用一次。
+	- <font color=red>这个方法不是线程安全的。</font>
 
-   可选的仅关键字型参数 *context* 允许为要运行的 *callback* 指定一个自
-   定义 "contextvars.Context" 。如果没有提供 *context* ，则使用当前上
-   下文。
+2. `loop.call_soon_threadsafe(callback, *args, context=None)`
 
-   返回一个能用来取消回调的 "asyncio.Handle" 实例。
+> `call_soon()` 的线程安全变体。
 
-   这个方法不是线程安全的。
+	- <font color=red>必须被用于安排 *来自其他线程* 的回调。</font>
 
-loop.call_soon_threadsafe(callback, *args, context=None)
+	- 在 3.7 版更改: 仅用于关键字形参的参数  *context*  已经被添加。请参阅：
+		PEP 567 查看更多细节。
 
-   "call_soon()" 的线程安全变体。必须被用于安排 *来自其他线程* 的回调
-   。
+	- 注解: 大多数 "asyncio" 的调度函数不让传递关键字参数。为此，请使用
+	  "functools.partial()" ：
 
-   查看 并发和多线程 章节的文档。
+	```
+	# will schedule "print("Hello", flush=True)"
+	loop.call_soon(
+	functools.partial(print, "Hello", flush=True))
 
-在 3.7 版更改: 仅用于关键字形参的参数  *context*  已经被添加。请参阅：
-**PEP 567** 查看更多细节。
+	```
 
-注解: 大多数 "asyncio" 的调度函数不让传递关键字参数。为此，请使用
-  "functools.partial()" ：
+	- 使用 partial 对象通常比使用lambda更方便，asyncio 在调试和错误消息中
+		能更好的呈现 partial 对象。
 
-     # will schedule "print("Hello", flush=True)"
-     loop.call_soon(
-         functools.partial(print, "Hello", flush=True))
-
-  使用 partial 对象通常比使用lambda更方便，asyncio 在调试和错误消息中
-  能更好的呈现 partial 对象。
-
-
-调度延迟回调
-------------
-
-事件循环提供安排调度函数在将来某个时刻调用的机制。事件循环使用单调时钟
+### 调度延迟回调
+1. 事件循环提供安排调度函数在将来某个时刻调用的机制。事件循环使用单调时钟
 来跟踪时间。
 
-loop.call_later(delay, callback, *args, context=None)
+2. `loop.call_later(delay, callback, *args, context=None)`
 
-   安排 *callback* 在给定的 *delay* 秒（可以是 int 或者 float）后被调
-   用。
+	- 安排 *callback* 在给定的 *delay* 秒（可以是 int 或者 float）后被调用。
 
-   返回一个 "asyncio.TimerHandle" 实例，该实例能用于取消回调。
+	- 返回一个 "asyncio.TimerHandle" 实例，该实例能用于取消回调。
 
-   *callback* 只被调用一次。如果两个回调被安排在同样的时间点，执行顺序
-   未限定。
+	- *callback* 只被调用一次。如果两个回调被安排在同样的时间点，执行顺序未限定。
 
-   可选的位置参数 *args* 在被调用的时候传递给  *callback*  。 如果你想
-   把关键字参数传递给 *callback* ，请使用 "functools.partial()" 。
+	- 可选的位置参数 *args* 在被调用的时候传递给  *callback*  。 如果你想
+	   把关键字参数传递给 *callback* ，请使用 "functools.partial()" 。
 
-   可选的仅关键字型参数 *context* 允许为要运行的 *callback* 指定一个自
-   定义 "contextvars.Context" 。如果没有提供 *context* ，则使用当前上
-   下文。
+	- 可选的仅关键字型参数 *context* 允许为要运行的 *callback* 指定一个自
+	   定义 "contextvars.Context" 。如果没有提供 *context* ，则使用当前上下文。
 
-   在 3.7 版更改: 仅用于关键字形参的参数  *context*  已经被添加。请参
-   阅： **PEP 567** 查看更多细节。
+	- 在 3.7 版更改: 仅用于关键字形参的参数  *context*  已经被添加。请参
+	   阅： **PEP 567** 查看更多细节。
 
-   在 3.8 版更改: In Python 3.7 and earlier with the default event
-   loop implementation, the *delay* could not exceed one day. This has
-   been fixed in Python 3.8.
+	- 在 3.8 版更改: In Python 3.7 and earlier with the default event
+	   loop implementation, the *delay* could not exceed one day. This has
+	   been fixed in Python 3.8.
 
-loop.call_at(when, callback, *args, context=None)
+3. `loop.call_at(when, callback, *args, context=None)`
 
    安排 *callback* 在给定的绝对时间戳的 *时间* （一个 int 或者 float）
    被调用，使用与 "loop.time()" 同样的时间参考。
@@ -264,30 +252,25 @@ loop.call_at(when, callback, *args, context=None)
    loop implementation, the difference between *when* and the current
    time could not exceed one day.  This has been fixed in Python 3.8.
 
-loop.time()
+4. loop.time()
 
-   根据时间循环内部的单调时钟，返回当前时间， "float" 值。
+	- 根据时间循环内部的单调时钟，返回当前时间， "float" 值。
 
-注解: 在 3.8 版更改: In Python 3.7 and earlier timeouts (relative
-  *delay* or absolute *when*) should not exceed one day.  This has
-  been fixed in Python 3.8.
+	- 注解: 在 3.8 版更改: In Python 3.7 and earlier timeouts (relative
+	  *delay* or absolute *when*) should not exceed one day.  This has
+	  been fixed in Python 3.8.
 
-参见: "asyncio.sleep()" 函数
+	- 参见: "asyncio.sleep()" 函数
 
+### 创建 Futures 和 Tasks
+1. `loop.create_future()`
 
-创建 Futures 和 Tasks
----------------------
+	- 创建一个附加到事件循环中的 "asyncio.Future" 对象。
 
-loop.create_future()
+	- 这是在asyncio中创建Futures的首选方式。这让第三方事件循环可以提供
+		Future 对象的替代实现(更好的性能或者功能)。
 
-   创建一个附加到事件循环中的 "asyncio.Future" 对象。
-
-   这是在asyncio中创建Futures的首选方式。这让第三方事件循环可以提供
-   Future 对象的替代实现(更好的性能或者功能)。
-
-   3.5.2 新版功能.
-
-loop.create_task(coro, *, name=None)
+2. loop.create_task(coro, *, name=None)
 
    安排一个 协程 的执行。返回一个  "Task"  对象。
 
