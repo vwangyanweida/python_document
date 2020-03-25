@@ -13,12 +13,26 @@
 		* [调度回调]
 		* [调度延迟回调]
 		* [创建 Futures 和 Tasks]
-	* [打开网络连接]
-	* [创建网络服务]
-	* [传输文件]
-	* [TLS 升级]
-	* [监控文件描述符]
-	* [直接使用 socket 对象]
+		* [打开网络连接]
+			* [create connection]
+			* [create datagram endpoint]
+			* [create unix connection]
+		* [创建网络服务]
+			* [create server]
+			* [create unix server]
+			* [connect aeecpted]
+		* [传输文件]
+			* [sendfile]
+		* [TLS 升级]
+			* [start tls]
+		* [监控文件描述符]
+			* [add reader]
+			* [remove reader]
+			* [add writer]
+			* [remove writer]
+		* [直接使用 socket 对象]
+			* [sock recv]
+			* [sock recv into]
 	* [DNS]
 	* [使用管道]
 	* [Unix 信号]
@@ -203,23 +217,20 @@
 
 	```
 	# will schedule "print("Hello", flush=True)"
-	loop.call_soon(
-	functools.partial(print, "Hello", flush=True))
-
+	loop.call_soon(functools.partial(print, "Hello", flush=True))
 	```
 
 	- 使用 partial 对象通常比使用lambda更方便，asyncio 在调试和错误消息中
 		能更好的呈现 partial 对象。
 
 ### 调度延迟回调
-1. 事件循环提供安排调度函数在将来某个时刻调用的机制。事件循环使用单调时钟
-来跟踪时间。
+1. 事件循环提供安排调度函数在将来某个时刻调用的机制。事件循环使用单调时钟来跟踪时间。
 
 2. `loop.call_later(delay, callback, *args, context=None)`
 
 	- 安排 *callback* 在给定的 *delay* 秒（可以是 int 或者 float）后被调用。
 
-	- 返回一个 "asyncio.TimerHandle" 实例，该实例能用于取消回调。
+	- 返回一个 "asyncio.TimerHandle" 实例，<font color=red>该实例能用于取消回调。</font>
 
 	- *callback* 只被调用一次。如果两个回调被安排在同样的时间点，执行顺序未限定。
 
@@ -238,19 +249,19 @@
 
 3. `loop.call_at(when, callback, *args, context=None)`
 
-   安排 *callback* 在给定的绝对时间戳的 *时间* （一个 int 或者 float）
-   被调用，使用与 "loop.time()" 同样的时间参考。
+	- 安排 *callback* 在给定的绝对时间戳的 *时间* （一个 int 或者 float）
+		被调用，使用与 "loop.time()" 同样的时间参考。
 
-   这个函数的行为与 "call_later()" 相同。
+	- 这个函数的行为与 `call_later()` 相同。
 
-   返回一个 "asyncio.TimerHandle" 实例，该实例能用于取消回调。
+	- 返回一个 "asyncio.TimerHandle" 实例，该实例能用于取消回调。
 
-   在 3.7 版更改: 仅用于关键字形参的参数  *context*  已经被添加。请参
-   阅： **PEP 567** 查看更多细节。
+	- 在 3.7 版更改: 仅用于关键字形参的参数  *context*  已经被添加。请参
+		阅： **PEP 567** 查看更多细节。
 
-   在 3.8 版更改: In Python 3.7 and earlier with the default event
-   loop implementation, the difference between *when* and the current
-   time could not exceed one day.  This has been fixed in Python 3.8.
+	- 在 3.8 版更改: In Python 3.7 and earlier with the default event
+		loop implementation, the difference between *when* and the current
+		time could not exceed one day.  This has been fixed in Python 3.8.
 
 4. loop.time()
 
@@ -270,194 +281,195 @@
 	- 这是在asyncio中创建Futures的首选方式。这让第三方事件循环可以提供
 		Future 对象的替代实现(更好的性能或者功能)。
 
-2. loop.create_task(coro, *, name=None)
+2. `loop.create_task(coro, *, name=None)`
 
-   安排一个 协程 的执行。返回一个  "Task"  对象。
+	- 安排一个 协程 的执行。返回一个  "Task"  对象。
 
-   三方的事件循环可以使用它们自己定义的 "Task" 类的子类来实现互操作性
-   。这个例子里，返回值的类型是 "Task" 的子类。
+	- 三方的事件循环可以使用它们自己定义的 "Task" 类的子类来实现互操作性
+		。这个例子里，返回值的类型是 "Task" 的子类。
 
-   If the *name* argument is provided and not "None", it is set as the
-   name of the task using "Task.set_name()".
+	- If the *name* argument is provided and not "None", it is set as the
+		name of the task using "Task.set_name()".
 
-   在 3.8 版更改: Added the "name" parameter.
+	- 在 3.8 版更改: Added the "name" parameter.
 
-loop.set_task_factory(factory)
+3. `loop.set_task_factory(factory)`
 
-   设置一个 task 工厂 ， 被用于  "loop.create_task()" 。
+	- 设置一个 task 工厂,被用于  `loop.create_task()` 。
 
-   If *factory* is "None" the default task factory will be set.
-   Otherwise, *factory* must be a *callable* with the signature
-   matching "(loop, coro)", where *loop* is a reference to the active
-   event loop, and *coro* is a coroutine object.  The callable must
-   return a "asyncio.Future"-compatible object.
+	- If *factory* is "None" the default task factory will be set.
+		Otherwise, *factory* must be a *callable* with the signature
+		matching "(loop, coro)", where *loop* is a reference to the active
+		event loop, and *coro* is a coroutine object.  The callable must
+		return a "asyncio.Future"-compatible object.
 
-loop.get_task_factory()
+4. `loop.get_task_factory()`
+	Return a task factory or "None" if the default one is in use.
 
-   Return a task factory or "None" if the default one is in use.
+### 打开网络连接
+#### create connection 
+1. coroutine `loop.create_connection(protocol_factory, host=None, port=None, *, ssl=None, 
+		family=0, proto=0, flags=0, sock=None, local_addr=None, server_hostname=None, 
+		ssl_handshake_timeout=None)`
 
+	- Open a streaming transport connection to a given address specified
+	by *host* and *port*.
 
-打开网络连接
-------------
+	- The socket family can be either `AF_INET` or `AF_INET6` depending
+		on *host* (or the *family* argument, if provided).
 
-coroutine loop.create_connection(protocol_factory, host=None, port=None, *, ssl=None, family=0, proto=0, flags=0, sock=None, local_addr=None, server_hostname=None, ssl_handshake_timeout=None)
+	- The socket type will be `SOCK_STREAM`.
 
-   Open a streaming transport connection to a given address specified
-   by *host* and *port*.
+	- *protocol_factory* must be a callable returning an asyncio protocol
+		implementation.
 
-   The socket family can be either "AF_INET" or "AF_INET6" depending
-   on *host* (or the *family* argument, if provided).
+	   这个方法会尝试在后台创建连接。当创建成功，返回 "(transport,protocol)" 组合。
 
-   The socket type will be "SOCK_STREAM".
+2. 基本操作的时间顺序如下：
+	1. The connection is established and a transport is created for it.
 
-   *protocol_factory* must be a callable returning an asyncio protocol
-   implementation.
+	2. *protocol_factory* is called without arguments and is
+	  expected to return a protocol instance.
 
-   这个方法会尝试在后台创建连接。当创建成功，返回 "(transport,
-   protocol)" 组合。
+	3. The protocol instance is coupled with the transport by
+	  calling its "connection_made()" method.
 
-   基本操作的时间顺序如下：
+	4. 成功时返回一个 "(transport, protocol)" 元组。
 
-   1. The connection is established and a transport is created for
-      it.
+	5. 创建的transport是一个实现相关的双向流。
 
-   2. *protocol_factory* is called without arguments and is
-      expected to return a protocol instance.
+3. 其他参数：
 
-   3. The protocol instance is coupled with the transport by
-      calling its "connection_made()" method.
+	- *ssl*: if given and not false, a SSL/TLS transport is created
+	 (by default a plain TCP transport is created).  If *ssl* is a
+	 "ssl.SSLContext" object, this context is used to create the
+	 transport; if *ssl* is "True", a default context returned from
+	 "ssl.create_default_context()" is used.
 
-   4. 成功时返回一个 "(transport, protocol)" 元组。
+	 参见: SSL/TLS安全事项
 
-   创建的transport是一个实现相关的双向流。
+	- *server_hostname* sets or overrides the hostname that the
+	 target server's certificate will be matched against.  Should only
+	 be passed if *ssl* is not "None".  By default the value of the
+	 *host* argument is used.  If *host* is empty, there is no default
+	 and you must pass a value for *server_hostname*.  If
+	 *server_hostname* is an empty string, hostname matching is
+	 disabled (which is a serious security risk, allowing for
+	 potential man-in-the-middle attacks).
 
-   其他参数：
+	- *family*，*proto*，*flags* 是可选的地址族，协议和标志，通过传递
+	 给 getaddrinfo() 来解析 *host*。如果给出，这些应该都是来自
+	 "socket" 模块相应的常量的整数。
 
-   * *ssl*: if given and not false, a SSL/TLS transport is created
-     (by default a plain TCP transport is created).  If *ssl* is a
-     "ssl.SSLContext" object, this context is used to create the
-     transport; if *ssl* is "True", a default context returned from
-     "ssl.create_default_context()" is used.
+	- *happy_eyeballs_delay*, if given, enables Happy Eyeballs for
+	 this connection. It should be a floating-point number
+	 representing the amount of time in seconds to wait for a
+	 connection attempt to complete, before starting the next attempt
+	 in parallel. This is the "Connection Attempt Delay" as defined in
+	 **RFC 8305**. A sensible default value recommended by the RFC is
+	 "0.25" (250 milliseconds).
 
-     参见: SSL/TLS安全事项
+	- *interleave* controls address reordering when a host name
+	 resolves to multiple IP addresses. If "0" or unspecified, no
+	 reordering is done, and addresses are tried in the order returned
+	 by "getaddrinfo()". If a positive integer is specified, the
+	 addresses are interleaved by address family, and the given
+	 integer is interpreted as "First Address Family Count" as defined
+	 in **RFC 8305**. The default is "0" if *happy_eyeballs_delay* is
+	 not specified, and "1" if it is.
 
-   * *server_hostname* sets or overrides the hostname that the
-     target server's certificate will be matched against.  Should only
-     be passed if *ssl* is not "None".  By default the value of the
-     *host* argument is used.  If *host* is empty, there is no default
-     and you must pass a value for *server_hostname*.  If
-     *server_hostname* is an empty string, hostname matching is
-     disabled (which is a serious security risk, allowing for
-     potential man-in-the-middle attacks).
+	- *sock*, if given, should be an existing, already connected
+	 "socket.socket" object to be used by the transport. If *sock* is
+	 given, none of *host*, *port*, *family*, *proto*, *flags*,
+	 *happy_eyeballs_delay*, *interleave* and *local_addr* should be
+	 specified.
 
-   * *family*，*proto*，*flags* 是可选的地址族，协议和标志，通过传递
-     给 getaddrinfo() 来解析 *host*。如果给出，这些应该都是来自
-     "socket" 模块相应的常量的整数。
+	- *local_addr*, if given, is a `(local_host, local_port)` tuple
+	 used to bind the socket to locally.  The *local_host* and
+	 *local_port* are looked up using "getaddrinfo()", similarly to
+	 *host* and *port*.
 
-   * *happy_eyeballs_delay*, if given, enables Happy Eyeballs for
-     this connection. It should be a floating-point number
-     representing the amount of time in seconds to wait for a
-     connection attempt to complete, before starting the next attempt
-     in parallel. This is the "Connection Attempt Delay" as defined in
-     **RFC 8305**. A sensible default value recommended by the RFC is
-     "0.25" (250 milliseconds).
+	- *ssl_handshake_timeout* is (for a TLS connection) the time in
+	 seconds to wait for the TLS handshake to complete before aborting
+	 the connection. "60.0" seconds if "None" (default).
 
-   * *interleave* controls address reordering when a host name
-     resolves to multiple IP addresses. If "0" or unspecified, no
-     reordering is done, and addresses are tried in the order returned
-     by "getaddrinfo()". If a positive integer is specified, the
-     addresses are interleaved by address family, and the given
-     integer is interpreted as "First Address Family Count" as defined
-     in **RFC 8305**. The default is "0" if *happy_eyeballs_delay* is
-     not specified, and "1" if it is.
+	3.8 新版功能: The *happy_eyeballs_delay* and *interleave*
+	parameters.
 
-   * *sock*, if given, should be an existing, already connected
-     "socket.socket" object to be used by the transport. If *sock* is
-     given, none of *host*, *port*, *family*, *proto*, *flags*,
-     *happy_eyeballs_delay*, *interleave* and *local_addr* should be
-     specified.
+	3.7 新版功能: *ssl_handshake_timeout* 形参。
 
-   * *local_addr*, if given, is a "(local_host, local_port)" tuple
-     used to bind the socket to locally.  The *local_host* and
-     *local_port* are looked up using "getaddrinfo()", similarly to
-     *host* and *port*.
+	在 3.6 版更改: The socket option "TCP_NODELAY" is set by default
+	for all TCP connections.
 
-   * *ssl_handshake_timeout* is (for a TLS connection) the time in
-     seconds to wait for the TLS handshake to complete before aborting
-     the connection. "60.0" seconds if "None" (default).
+	在 3.5 版更改: "ProactorEventLoop" 类中添加 SSL/TLS 支持。
 
-   3.8 新版功能: The *happy_eyeballs_delay* and *interleave*
-   parameters.
+	参见: The "open_connection()" function is a high-level
+	 alternative API. It returns a pair of ("StreamReader",
+	 "StreamWriter") that can be used directly in async/await code.
 
-   3.7 新版功能: *ssl_handshake_timeout* 形参。
+#### create datagram endpoint
+1. coroutine loop.`create_datagram_endpoint(protocol_factory, local_addr=None, 
+			remote_addr=None, *, family=0, proto=0, flags=0, reuse_address=None, 
+			reuse_port=None, allow_broadcast=None, sock=None)`
 
-   在 3.6 版更改: The socket option "TCP_NODELAY" is set by default
-   for all TCP connections.
+2. 创建一个数据报连接。
 
-   在 3.5 版更改: "ProactorEventLoop" 类中添加 SSL/TLS 支持。
+	The socket family can be either "AF_INET", "AF_INET6", or
+	"AF_UNIX", depending on *host* (or the *family* argument, if
+	provided).
 
-   参见: The "open_connection()" function is a high-level
-     alternative API. It returns a pair of ("StreamReader",
-     "StreamWriter") that can be used directly in async/await code.
+	socket类型将是 "SOCK_DGRAM" 。
 
-coroutine loop.create_datagram_endpoint(protocol_factory, local_addr=None, remote_addr=None, *, family=0, proto=0, flags=0, reuse_address=None, reuse_port=None, allow_broadcast=None, sock=None)
+	*protocol_factory* must be a callable returning a protocol
+	implementation.
 
-   创建一个数据报连接。
+	A tuple of "(transport, protocol)" is returned on success.
 
-   The socket family can be either "AF_INET", "AF_INET6", or
-   "AF_UNIX", depending on *host* (or the *family* argument, if
-   provided).
+	其他参数：
 
-   socket类型将是 "SOCK_DGRAM" 。
+	* *local_addr*，如果指定的话，就是一个 "(local_host, local_port)"
+	 元组，用于在本地绑定套接字。 *local_host* 和 *local_port* 是使用
+	 "getaddrinfo()" 来查找的。
 
-   *protocol_factory* must be a callable returning a protocol
-   implementation.
+	* *remote_addr*，如果指定的话，就是一个 "(remote_host,
+	 remote_port)" 元组，用于同一个远程地址连接。*remote_host* 和
+	 *remote_port* 是使用 "getaddrinfo()" 来查找的。
 
-   A tuple of "(transport, protocol)" is returned on success.
+	* *family*, *proto*, *flags* 是可选的地址族，协议和标志，其会被传
+	 递 给 "getaddrinfo()" 来完成 *host* 的解析。如果要指定的话，这些
+	 都应 该是来自于 "socket" 模块的对应常量。
 
-   其他参数：
+	* *reuse_address* tells the kernel to reuse a local socket in
+	 "TIME_WAIT" state, without waiting for its natural timeout to
+	 expire. If not specified will automatically be set to "True" on
+	 Unix.
 
-   * *local_addr*，如果指定的话，就是一个 "(local_host, local_port)"
-     元组，用于在本地绑定套接字。 *local_host* 和 *local_port* 是使用
-     "getaddrinfo()" 来查找的。
+	* *reuse_port* tells the kernel to allow this endpoint to be
+	 bound to the same port as other existing endpoints are bound to,
+	 so long as they all set this flag when being created. This option
+	 is not supported on Windows and some Unixes. If the
+	 "SO_REUSEPORT" constant is not defined then this capability is
+	 unsupported.
 
-   * *remote_addr*，如果指定的话，就是一个 "(remote_host,
-     remote_port)" 元组，用于同一个远程地址连接。*remote_host* 和
-     *remote_port* 是使用 "getaddrinfo()" 来查找的。
+	* *allow_broadcast* 告知内核允许此端点向广播地址发送消息。
 
-   * *family*, *proto*, *flags* 是可选的地址族，协议和标志，其会被传
-     递 给 "getaddrinfo()" 来完成 *host* 的解析。如果要指定的话，这些
-     都应 该是来自于 "socket" 模块的对应常量。
+	* *sock* 可选择通过指定此值用于使用一个预先存在的，已经处于连接状
+	 态 的 "socket.socket" 对象，并将其提供给此传输对象使用。如果指定
+	 了这 个值， *local_addr* 和 *remote_addr* 就应该被忽略 (必须为
+	 "None") 。
 
-   * *reuse_address* tells the kernel to reuse a local socket in
-     "TIME_WAIT" state, without waiting for its natural timeout to
-     expire. If not specified will automatically be set to "True" on
-     Unix.
+	参见 UDP echo 客户端协议  和 UDP echo 服务端协议 的例子。
 
-   * *reuse_port* tells the kernel to allow this endpoint to be
-     bound to the same port as other existing endpoints are bound to,
-     so long as they all set this flag when being created. This option
-     is not supported on Windows and some Unixes. If the
-     "SO_REUSEPORT" constant is not defined then this capability is
-     unsupported.
+	在 3.4.4 版更改: 添加了 *family*, *proto*, *flags*,
+	*reuse_address*, *reuse_port*, *allow_broadcast* 和 *sock* 等参数。
 
-   * *allow_broadcast* 告知内核允许此端点向广播地址发送消息。
+	在 3.8 版更改: 添加WIndows的支持。
 
-   * *sock* 可选择通过指定此值用于使用一个预先存在的，已经处于连接状
-     态 的 "socket.socket" 对象，并将其提供给此传输对象使用。如果指定
-     了这 个值， *local_addr* 和 *remote_addr* 就应该被忽略 (必须为
-     "None") 。
+#### create unix connection
+1. coroutine `loop.create_unix_connection(protocol_factory, path=None, *, 
+			ssl=None, sock=None, server_hostname=None, ssl_handshake_timeout=None)`
 
-   参见 UDP echo 客户端协议  和 UDP echo 服务端协议 的例子。
-
-   在 3.4.4 版更改: 添加了 *family*, *proto*, *flags*,
-   *reuse_address*, *reuse_port*, *allow_broadcast* 和 *sock* 等参数。
-
-   在 3.8 版更改: 添加WIndows的支持。
-
-coroutine loop.create_unix_connection(protocol_factory, path=None, *, ssl=None, sock=None, server_hostname=None, ssl_handshake_timeout=None)
-
-   创建Unix 连接
+2. 创建Unix 连接
 
    The socket family will be "AF_UNIX"; socket type will be
    "SOCK_STREAM".
@@ -478,13 +490,14 @@ coroutine loop.create_unix_connection(protocol_factory, path=None, *, ssl=None, 
    在 3.7 版更改: *path* 形参现在可以是 *path-like object* 对象。
 
 
-创建网络服务
-------------
+### 创建网络服务
+#### create server
+1. coroutine `loop.create_server(protocol_factory, host=None, port=None, *, 
+			family=socket.AF_UNSPEC, flags=socket.AI_PASSIVE, sock=None, backlog=100, 
+			ssl=None, reuse_address=None, reuse_port=None, ssl_handshake_timeout=None, 
+			start_serving=True)`
 
-coroutine loop.create_server(protocol_factory, host=None, port=None, *, family=socket.AF_UNSPEC, flags=socket.AI_PASSIVE, sock=None, backlog=100, ssl=None, reuse_address=None, reuse_port=None, ssl_handshake_timeout=None, start_serving=True)
-
-   创建TCP服务 (socket 类型 "SOCK_STREAM" ) 监听 *host* 地址的 *port*
-   端口。
+2. 创建TCP服务 (socket 类型 "SOCK_STREAM" ) 监听 *host* 地址的 *port*端口。
 
    返回一个 "Server" 对象。
 
@@ -554,10 +567,11 @@ coroutine loop.create_server(protocol_factory, host=None, port=None, *, family=s
      API that returns a pair of "StreamReader" and "StreamWriter" that
      can be used in an async/await code.
 
-coroutine loop.create_unix_server(protocol_factory, path=None, *, sock=None, backlog=100, ssl=None, ssl_handshake_timeout=None, start_serving=True)
+#### create unix server
+1. coroutine `loop.create_unix_server(protocol_factory, path=None, *, 
+		sock=None, backlog=100, ssl=None, ssl_handshake_timeout=None, start_serving=True)`
 
-   Similar to "loop.create_server()" but works with the "AF_UNIX"
-   socket family.
+2. Similar to `loop.create_server()` but works with the `AF_UNIX`socket family.
 
    *path* is the name of a Unix domain socket, and is required, unless
    a *sock* argument is provided.  Abstract Unix sockets, "str",
@@ -573,215 +587,210 @@ coroutine loop.create_unix_server(protocol_factory, path=None, *, sock=None, bac
 
    在 3.7 版更改: *path* 形参现在可以是 "Path" 对象。
 
-coroutine loop.connect_accepted_socket(protocol_factory, sock, *, ssl=None, ssl_handshake_timeout=None)
+#### connect aeecpted
+1. coroutine `loop.connect_accepted_socket(protocol_factory, sock, *, 
+		ssl=None, ssl_handshake_timeout=None)`
 
-   Wrap an already accepted connection into a transport/protocol pair.
+2. Wrap an already accepted connection into a transport/protocol pair.
 
    This method can be used by servers that accept connections outside
    of asyncio but that use asyncio to handle them.
 
-   参数：
+3. 参数：
 
-   * *protocol_factory* must be a callable returning a protocol
-     implementation.
+	- *protocol_factory* must be a callable returning a protocol
+	 implementation.
 
-   * *sock* is a preexisting socket object returned from
-     "socket.accept".
+	- *sock* is a preexisting socket object returned from
+	 "socket.accept".
 
-   * *ssl* 可被设置为一个 "SSLContext" 以在接受的连接上启用 SSL。
+	- *ssl* 可被设置为一个 "SSLContext" 以在接受的连接上启用 SSL。
 
-   * *ssl_handshake_timeout* 是(为一个SSL连接)在中止连接前，等待SSL
-     握 手完成的时间【单位秒】。如果为 "None" (缺省) 则是 "60.0" 秒。
+	- *ssl_handshake_timeout* 是(为一个SSL连接)在中止连接前，等待SSL
+	 握 手完成的时间【单位秒】。如果为 "None" (缺省) 则是 "60.0" 秒。
 
-   返回一个 "(transport, protocol)" 对。
+	返回一个 "(transport, protocol)" 对。
 
-   3.7 新版功能: *ssl_handshake_timeout* 形参。
+	3.7 新版功能: *ssl_handshake_timeout* 形参。
 
-   3.5.3 新版功能.
-
-
-传输文件
---------
-
-coroutine loop.sendfile(transport, file, offset=0, count=None, *, fallback=True)
-
-   Send a *file* over a *transport*.  Return the total number of bytes
-   sent.
-
-   如果可用的化，该方法将使用高性能的 "os.sendfile()" 。
-
-   *file* 必须是个二进制模式打开的常规文件对象。
-
-   *offset* tells from where to start reading the file. If specified,
-   *count* is the total number of bytes to transmit as opposed to
-   sending the file until EOF is reached. File position is always
-   updated, even when this method raises an error, and "file.tell()"
-   can be used to obtain the actual number of bytes sent.
-
-   *fallback* set to "True" makes asyncio to manually read and send
-   the file when the platform does not support the sendfile system
-   call (e.g. Windows or SSL socket on Unix).
-
-   Raise "SendfileNotAvailableError" if the system does not support
-   the *sendfile* syscall and *fallback* is "False".
-
-   3.7 新版功能.
+	3.5.3 新版功能.
 
 
-TLS 升级
---------
+### 传输文件
+#### sendfile
+1. coroutine loop.sendfile(transport, file, offset=0, count=None, *, fallback=True)
 
-coroutine loop.start_tls(transport, protocol, sslcontext, *, server_side=False, server_hostname=None, ssl_handshake_timeout=None)
+2. Send a *file* over a *transport*.  Return the total number of bytessent.
 
-   Upgrade an existing transport-based connection to TLS.
+3. 如果可用的化，该方法将使用高性能的 "os.sendfile()" 。
 
-   Return a new transport instance, that the *protocol* must start
-   using immediately after the *await*.  The *transport* instance
-   passed to the *start_tls* method should never be used again.
+*file* 必须是个二进制模式打开的常规文件对象。
 
-   参数：
+*offset* tells from where to start reading the file. If specified,
+*count* is the total number of bytes to transmit as opposed to
+sending the file until EOF is reached. File position is always
+updated, even when this method raises an error, and "file.tell()"
+can be used to obtain the actual number of bytes sent.
 
-   * *transport* and *protocol* instances that methods like
-     "create_server()" and "create_connection()" return.
+*fallback* set to "True" makes asyncio to manually read and send
+the file when the platform does not support the sendfile system
+call (e.g. Windows or SSL socket on Unix).
 
-   * *sslcontext* ：一个已经配置好的 "SSLContext" 实例。
+Raise "SendfileNotAvailableError" if the system does not support
+the *sendfile* syscall and *fallback* is "False".
 
-   * *server_side* pass "True" when a server-side connection is
-     being upgraded (like the one created by "create_server()").
-
-   * *server_hostname* ：设置或者覆盖目标服务器证书中相对应的主机名
-     。
-
-   * *ssl_handshake_timeout* is (for a TLS connection) the time in
-     seconds to wait for the TLS handshake to complete before aborting
-     the connection. "60.0" seconds if "None" (default).
-
-   3.7 新版功能.
+3.7 新版功能.
 
 
-监控文件描述符
---------------
+### TLS 升级
+#### start tls
+1. coroutine `loop.start_tls(transport, protocol, sslcontext, *, 
+	server_side=False, server_hostname=None, ssl_handshake_timeout=None)`
 
-loop.add_reader(fd, callback, *args)
+2. Upgrade an existing transport-based connection to TLS.
 
-   开始监视 *fd* 文件描述符以获取读取的可用性，一旦 *fd* 可用于读取，
-   使用指定的参数调用 *callback* 。
+3. Return a new transport instance, that the *protocol* must start
+	using immediately after the *await*.  The *transport* instance
+	passed to the *start_tls* method should never be used again.
 
-loop.remove_reader(fd)
+4. 参数：
 
-   停止对文件描述符 *fd* 读取可用性的监视。
+	- *transport* and *protocol* instances that methods like
+		"create_server()" and "create_connection()" return.
 
-loop.add_writer(fd, callback, *args)
+	- *sslcontext* ：一个已经配置好的 "SSLContext" 实例。
 
-   开始监视 *fd* 文件描述符的写入可用性，一旦 *fd* 可用于写入，使用指
-   定的参数调用 *callback* 。
+	- *server_side* pass "True" when a server-side connection is
+		being upgraded (like the one created by "create_server()").
 
-   使用 "functools.partial()" 传递关键字参数  给 *callback*.
+	- *server_hostname* ：设置或者覆盖目标服务器证书中相对应的主机名。
 
-loop.remove_writer(fd)
+	- *ssl_handshake_timeout* is (for a TLS connection) the time in
+		seconds to wait for the TLS handshake to complete before aborting
+		the connection. "60.0" seconds if "None" (default).
 
-   停止对文件描述符 *fd* 的写入可用性监视。
+### 监控文件描述符
+#### add reader
+1. `loop.add_reader`(fd, callback, *args)
 
-See also Platform Support section for some limitations of these
-methods.
+	开始监视 *fd* 文件描述符以获取读取的可用性，一旦 *fd* 可用于读取，
+使用指定的参数调用 *callback* 。
 
+#### remove reader
+1. loop.remove_reader(fd)
 
-直接使用 socket 对象
---------------------
+	停止对文件描述符 *fd* 读取可用性的监视。
 
+#### add writer
+1. loop.add_writer(fd, callback, *args)
+
+	开始监视 *fd* 文件描述符的写入可用性，一旦 *fd* 可用于写入，使用指
+定的参数调用 *callback* 。
+
+2. 使用 "functools.partial()" 传递关键字参数  给 *callback*.
+
+#### remove writer
+1. `loop.remove_writer`(fd)
+
+	停止对文件描述符 *fd* 的写入可用性监视。
+
+2. See also Platform Support section for some limitations of these methods.
+
+### 直接使用 socket 对象
 In general, protocol implementations that use transport-based APIs
 such as "loop.create_connection()" and "loop.create_server()" are
 faster than implementations that work with sockets directly. However,
 there are some use cases when performance is not critical, and working
 with "socket" objects directly is more convenient.
 
-coroutine loop.sock_recv(sock, nbytes)
+#### sock recv
+1. coroutine `loop.sock_recv`(sock, nbytes)
 
-   Receive up to *nbytes* from *sock*.  Asynchronous version of
-   "socket.recv()".
+	Receive up to *nbytes* from *sock*.  Asynchronous version of socket.recv().
 
-   返回接收到的数据【bytes对象类型】。
+2. 返回接收到的数据【bytes对象类型】。
 
-   *sock* 必须是个非阻塞socket。
+	- *sock* 必须是个非阻塞socket。
 
-   在 3.7 版更改: Even though this method was always documented as a
-   coroutine method, releases before Python 3.7 returned a "Future".
-   Since Python 3.7 this is an "async def" method.
+	- 在 3.7 版更改: Even though this method was always documented as a
+		coroutine method, releases before Python 3.7 returned a "Future".
+		Since Python 3.7 this is an "async def" method.
 
-coroutine loop.sock_recv_into(sock, buf)
+#### sock recv into
+1. coroutine `loop.sock_recv_into(sock, buf)`
 
-   Receive data from *sock* into the *buf* buffer.  Modeled after the
-   blocking "socket.recv_into()" method.
+Receive data from *sock* into the *buf* buffer.  Modeled after the
+blocking "socket.recv_into()" method.
 
-   返回写入缓冲区的字节数。
+返回写入缓冲区的字节数。
 
-   *sock* 必须是个非阻塞socket。
+*sock* 必须是个非阻塞socket。
 
-   3.7 新版功能.
+3.7 新版功能.
 
 coroutine loop.sock_sendall(sock, data)
 
-   Send *data* to the *sock* socket. Asynchronous version of
-   "socket.sendall()".
+Send *data* to the *sock* socket. Asynchronous version of
+"socket.sendall()".
 
-   This method continues to send to the socket until either all data
-   in *data* has been sent or an error occurs.  "None" is returned on
-   success.  On error, an exception is raised. Additionally, there is
-   no way to determine how much data, if any, was successfully
-   processed by the receiving end of the connection.
+This method continues to send to the socket until either all data
+in *data* has been sent or an error occurs.  "None" is returned on
+success.  On error, an exception is raised. Additionally, there is
+no way to determine how much data, if any, was successfully
+processed by the receiving end of the connection.
 
-   *sock* 必须是个非阻塞socket。
+*sock* 必须是个非阻塞socket。
 
-   在 3.7 版更改: 虽然这个方法一直被标记为协程方法。但是，Python 3.7
-   之前，该方法返回 "Future" ，从Python 3.7 开始，这个方法是 "async
-   def" 方法。
+在 3.7 版更改: 虽然这个方法一直被标记为协程方法。但是，Python 3.7
+之前，该方法返回 "Future" ，从Python 3.7 开始，这个方法是 "async
+def" 方法。
 
 coroutine loop.sock_connect(sock, address)
 
-   Connect *sock* to a remote socket at *address*.
+Connect *sock* to a remote socket at *address*.
 
-   Asynchronous version of "socket.connect()".
+Asynchronous version of "socket.connect()".
 
-   *sock* 必须是个非阻塞socket。
+*sock* 必须是个非阻塞socket。
 
-   在 3.5.2 版更改: "address" no longer needs to be resolved.
-   "sock_connect" will try to check if the *address* is already
-   resolved by calling "socket.inet_pton()".  If not,
-   "loop.getaddrinfo()" will be used to resolve the *address*.
+在 3.5.2 版更改: "address" no longer needs to be resolved.
+"sock_connect" will try to check if the *address* is already
+resolved by calling "socket.inet_pton()".  If not,
+"loop.getaddrinfo()" will be used to resolve the *address*.
 
-   参见: "loop.create_connection()" 和  "asyncio.open_connection()"
-     。
+参见: "loop.create_connection()" 和  "asyncio.open_connection()"
+ 。
 
 coroutine loop.sock_accept(sock)
 
-   Accept a connection.  Modeled after the blocking "socket.accept()"
-   method.
+Accept a connection.  Modeled after the blocking "socket.accept()"
+method.
 
-   此 *scoket* 必须绑定到一个地址上并且监听连接。返回值是一个 "(conn,
-   address)" 对，其中 *conn* 是一个 *新*的套接字对象，用于在此连接上收
-   发数据，*address* 是连接的另一端的套接字所绑定的地址。
+此 *scoket* 必须绑定到一个地址上并且监听连接。返回值是一个 "(conn,
+address)" 对，其中 *conn* 是一个 *新*的套接字对象，用于在此连接上收
+发数据，*address* 是连接的另一端的套接字所绑定的地址。
 
-   *sock* 必须是个非阻塞socket。
+*sock* 必须是个非阻塞socket。
 
-   在 3.7 版更改: 虽然这个方法一直被标记为协程方法。但是，Python 3.7
-   之前，该方法返回 "Future" ，从Python 3.7 开始，这个方法是 "async
-   def" 方法。
+在 3.7 版更改: 虽然这个方法一直被标记为协程方法。但是，Python 3.7
+之前，该方法返回 "Future" ，从Python 3.7 开始，这个方法是 "async
+def" 方法。
 
-   参见: "loop.create_server()" and "start_server()".
+参见: "loop.create_server()" and "start_server()".
 
 coroutine loop.sock_sendfile(sock, file, offset=0, count=None, *, fallback=True)
 
-   Send a file using high-performance "os.sendfile" if possible.
-   Return the total number of bytes sent.
+Send a file using high-performance "os.sendfile" if possible.
+Return the total number of bytes sent.
 
-   Asynchronous version of "socket.sendfile()".
+Asynchronous version of "socket.sendfile()".
 
-   *sock* must be a non-blocking "socket.SOCK_STREAM" "socket".
+*sock* must be a non-blocking "socket.SOCK_STREAM" "socket".
 
-   *file* 必须是个用二进制方式打开的常规文件对象。
+*file* 必须是个用二进制方式打开的常规文件对象。
 
-   *offset* tells from where to start reading the file. If specified,
-   *count* is the total number of bytes to transmit as opposed to
+*offset* tells from where to start reading the file. If specified,
+*count* is the total number of bytes to transmit as opposed to
    sending the file until EOF is reached. File position is always
    updated, even when this method raises an error, and "file.tell()"
    can be used to obtain the actual number of bytes sent.
