@@ -33,6 +33,7 @@
 		* [直接使用 socket 对象]
 			* [sock recv]
 			* [sock recv into]
+			* [sock sendall]
 	* [DNS]
 	* [使用管道]
 	* [Unix 信号]
@@ -719,21 +720,19 @@ with "socket" objects directly is more convenient.
 #### sock recv into
 1. coroutine `loop.sock_recv_into(sock, buf)`
 
-Receive data from *sock* into the *buf* buffer.  Modeled after the
+	- Receive data from *sock* into the *buf* buffer.  Modeled after the 
 blocking "socket.recv_into()" method.
 
-返回写入缓冲区的字节数。
+	- 返回写入缓冲区的字节数。
 
-*sock* 必须是个非阻塞socket。
+	- *sock* 必须是个非阻塞socket。
 
-3.7 新版功能.
+#### sock sendall
+1. coroutine `loop.sock_sendall(sock, data)
 
-coroutine loop.sock_sendall(sock, data)
+	- Send *data* to the *sock* socket. Asynchronous version of "socket.sendall()".
 
-Send *data* to the *sock* socket. Asynchronous version of
-"socket.sendall()".
-
-This method continues to send to the socket until either all data
+	- This method continues to send to the socket until either all data
 in *data* has been sent or an error occurs.  "None" is returned on
 success.  On error, an exception is raised. Additionally, there is
 no way to determine how much data, if any, was successfully
@@ -774,6 +773,7 @@ address)" 对，其中 *conn* 是一个 *新*的套接字对象，用于在此�
 
 在 3.7 版更改: 虽然这个方法一直被标记为协程方法。但是，Python 3.7
 之前，该方法返回 "Future" ，从Python 3.7 开始，这个方法是 "async
+
 def" 方法。
 
 参见: "loop.create_server()" and "start_server()".
