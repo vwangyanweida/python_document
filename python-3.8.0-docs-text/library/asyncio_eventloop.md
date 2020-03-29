@@ -313,6 +313,8 @@
 		family=0, proto=0, flags=0, sock=None, local_addr=None, server_hostname=None, 
 		ssl_handshake_timeout=None)`
 
+> 这个方法会尝试在后台创建连接。当创建成功，返回 "(transport,protocol)" 组合。
+
 	- Open a streaming transport connection to a given address specified
 	by *host* and *port*.
 
@@ -323,8 +325,6 @@
 
 	- *protocol_factory* must be a callable returning an asyncio protocol
 		implementation.
-
-	   这个方法会尝试在后台创建连接。当创建成功，返回 "(transport,protocol)" 组合。
 
 2. 基本操作的时间顺序如下：
 	1. The connection is established and a transport is created for it.
@@ -394,7 +394,7 @@
 	 seconds to wait for the TLS handshake to complete before aborting
 	 the connection. "60.0" seconds if "None" (default).
 
-	3.8 新版功能: The *happy_eyeballs_delay* and *interleave*
+	- 3.8 新版功能: The *happy_eyeballs_delay* and *interleave*
 	parameters.
 
 	3.7 新版功能: *ssl_handshake_timeout* 形参。
@@ -415,81 +415,77 @@
 
 2. 创建一个数据报连接。
 
-	The socket family can be either "AF_INET", "AF_INET6", or
-	"AF_UNIX", depending on *host* (or the *family* argument, if
+	- The socket family can be either `AF_INET`, `AF_INET6`, or
+	`AF_UNIX`, depending on *host* (or the *family* argument, if
 	provided).
 
-	socket类型将是 "SOCK_DGRAM" 。
+	- socket类型将是 `SOCK_DGRAM` 。
 
-	*protocol_factory* must be a callable returning a protocol
+	- `protocol_factory` must be a callable returning a protocol
 	implementation.
 
-	A tuple of "(transport, protocol)" is returned on success.
+	- A tuple of "(transport, protocol)" is returned on success.
 
-	其他参数：
+3. 其他参数：
 
-	* *local_addr*，如果指定的话，就是一个 "(local_host, local_port)"
-	 元组，用于在本地绑定套接字。 *local_host* 和 *local_port* 是使用
+	- *local_addr*，如果指定的话，就是一个 `(local_host, local_port)`
+	 元组，用于在本地绑定套接字。 `local_host` 和 `local_port` 是使用
 	 "getaddrinfo()" 来查找的。
 
-	* *remote_addr*，如果指定的话，就是一个 "(remote_host,
-	 remote_port)" 元组，用于同一个远程地址连接。*remote_host* 和
-	 *remote_port* 是使用 "getaddrinfo()" 来查找的。
+	- *remote_addr*，如果指定的话，就是一个 `(remote_host,
+	 remote_port)` 元组，用于同一个远程地址连接。*remote_host* 和
+	 *remote_port* 是使用 `getaddrinfo()` 来查找的。
 
-	* *family*, *proto*, *flags* 是可选的地址族，协议和标志，其会被传
-	 递 给 "getaddrinfo()" 来完成 *host* 的解析。如果要指定的话，这些
-	 都应 该是来自于 "socket" 模块的对应常量。
+	- *family*, *proto*, *flags* 是可选的地址族，协议和标志，其会被传
+	 递 给 `getaddrinfo()` 来完成 *host* 的解析。如果要指定的话，这些
+	 都应 该是来自于 `socket` 模块的对应常量。
 
-	* *reuse_address* tells the kernel to reuse a local socket in
-	 "TIME_WAIT" state, without waiting for its natural timeout to
-	 expire. If not specified will automatically be set to "True" on
+	- `reuse_address` tells the kernel to reuse a local socket in
+	 `TIME_WAIT` state, without waiting for its natural timeout to
+	 expire. If not specified will automatically be set to `True` on
 	 Unix.
 
-	* *reuse_port* tells the kernel to allow this endpoint to be
+	- `reuse_port` tells the kernel to allow this endpoint to be
 	 bound to the same port as other existing endpoints are bound to,
 	 so long as they all set this flag when being created. This option
 	 is not supported on Windows and some Unixes. If the
-	 "SO_REUSEPORT" constant is not defined then this capability is
+	 `SO_REUSEPORT` constant is not defined then this capability is
 	 unsupported.
 
-	* *allow_broadcast* 告知内核允许此端点向广播地址发送消息。
+	- `allow_broadcast` 告知内核允许此端点向广播地址发送消息。
 
-	* *sock* 可选择通过指定此值用于使用一个预先存在的，已经处于连接状
+	- *sock* 可选择通过指定此值用于使用一个预先存在的，已经处于连接状
 	 态 的 "socket.socket" 对象，并将其提供给此传输对象使用。如果指定
-	 了这 个值， *local_addr* 和 *remote_addr* 就应该被忽略 (必须为
+	 了这 个值， `local_addr` 和 `remote_addr` 就应该被忽略 (必须为
 	 "None") 。
 
-	参见 UDP echo 客户端协议  和 UDP echo 服务端协议 的例子。
+4. 参见 UDP echo 客户端协议  和 UDP echo 服务端协议 的例子。
 
-	在 3.4.4 版更改: 添加了 *family*, *proto*, *flags*,
-	*reuse_address*, *reuse_port*, *allow_broadcast* 和 *sock* 等参数。
+	- 在 3.4.4 版更改: 添加了 *family*, *proto*, *flags*,
+		`reuse_address`, `reuse_port`, `allow_broadcast` 和 *sock* 等参数。
 
-	在 3.8 版更改: 添加WIndows的支持。
+	- 在 3.8 版更改: 添加WIndows的支持。
 
 #### create unix connection
 1. coroutine `loop.create_unix_connection(protocol_factory, path=None, *, 
 			ssl=None, sock=None, server_hostname=None, ssl_handshake_timeout=None)`
 
 2. 创建Unix 连接
+	- The socket family will be `AF_UNIX`; socket type will be
+		`SOCK_STREAM`.
 
-   The socket family will be "AF_UNIX"; socket type will be
-   "SOCK_STREAM".
+	- A tuple of "(transport, protocol)" is returned on success.
 
-   A tuple of "(transport, protocol)" is returned on success.
+	- path is the name of a Unix domain socket and is required, unless
+		a *sock* parameter is specified.  Abstract Unix sockets, "str",
+	   "bytes", and "Path" paths are supported.
 
-   *path* is the name of a Unix domain socket and is required, unless
-   a *sock* parameter is specified.  Abstract Unix sockets, "str",
-   "bytes", and "Path" paths are supported.
+	- See the documentation of the `loop.create_connection()` method for
+	   information about arguments to this method.
 
-   See the documentation of the "loop.create_connection()" method for
-   information about arguments to this method.
-
-   可用性: Unix。
-
-   3.7 新版功能: *ssl_handshake_timeout* 形参。
-
-   在 3.7 版更改: *path* 形参现在可以是 *path-like object* 对象。
-
+3. 可用性: Unix。
+	- 3.7 新版功能: *ssl_handshake_timeout* 形参。
+	- 在 3.7 版更改: *path* 形参现在可以是 *path-like object* 对象。
 
 ### 创建网络服务
 #### create server
@@ -498,75 +494,72 @@
 			ssl=None, reuse_address=None, reuse_port=None, ssl_handshake_timeout=None, 
 			start_serving=True)`
 
-2. 创建TCP服务 (socket 类型 "SOCK_STREAM" ) 监听 *host* 地址的 *port*端口。
+2. 创建TCP服务 (socket 类型 `SOCK_STREAM` ) 监听 *host* 地址的 *port*端口。
+	- 返回一个 "Server" 对象。
 
-   返回一个 "Server" 对象。
+3. 参数：
 
-   参数：
+	- `protocol_factory` must be a callable returning a protocol
+	 implementation.
 
-   * *protocol_factory* must be a callable returning a protocol
-     implementation.
-
-   * The *host* parameter can be set to several types which
+	- The *host* parameter can be set to several types which
      determine where the server would be listening:
 
-     * If *host* is a string, the TCP server is bound to a single
+	- If *host* is a string, the TCP server is bound to a single
        network interface specified by *host*.
 
-     * If *host* is a sequence of strings, the TCP server is bound
+	- If *host* is a sequence of strings, the TCP server is bound
        to all network interfaces specified by the sequence.
 
-     * If *host* is an empty string or "None", all interfaces are
+	- If *host* is an empty string or "None", all interfaces are
        assumed and a list of multiple sockets will be returned (most
        likely one for IPv4 and another one for IPv6).
 
-   * *family* can be set to either "socket.AF_INET" or "AF_INET6" to
-     force the socket to use IPv4 or IPv6. If not set, the *family*
-     will be determined from host name (defaults to "AF_UNSPEC").
+	- *family* can be set to either `socket.AF_INET` or `AF_INET6` to
+	 force the socket to use IPv4 or IPv6. If not set, the *family*
+	 will be determined from host name (defaults to `AF_UNSPEC`).
 
-   * *flags* 是用于 "getaddrinfo()" 的位掩码。
+	- *flags* 是用于 "getaddrinfo()" 的位掩码。
 
-   * *sock* can optionally be specified in order to use a
+	- *sock* can optionally be specified in order to use a
      preexisting socket object. If specified, *host* and *port* must
      not be specified.
 
-   * *backlog* 是传递给 "listen()" 的最大排队连接的数量（默认为100）
-     。
+	- *backlog* 是传递给 "listen()" 的最大排队连接的数量（默认为100）
 
-   * *ssl* can be set to an "SSLContext" instance to enable TLS over
+	- *ssl* can be set to an "SSLContext" instance to enable TLS over
      the accepted connections.
 
-   * *reuse_address* tells the kernel to reuse a local socket in
+	- *reuse_address* tells the kernel to reuse a local socket in
      "TIME_WAIT" state, without waiting for its natural timeout to
-     expire. If not specified will automatically be set to "True" on
-     Unix.
+     expire. If not specified will automatically be set to "True" on Unix.
 
-   * *reuse_port* 告知内核，只要在创建的时候都设置了这个标志，就允许
+	- *reuse_port* 告知内核，只要在创建的时候都设置了这个标志，就允许
      此 端点绑定到其它端点列表所绑定的同样的端口上。这个选项在 Windows
      上 是不支持的。
 
-   * *ssl_handshake_timeout* is (for a TLS server) the time in
+	- *ssl_handshake_timeout* is (for a TLS server) the time in
      seconds to wait for the TLS handshake to complete before aborting
      the connection. "60.0" seconds if "None" (default).
 
-   * *start_serving* 设置成 "True" (默认值) 会导致创建server并立即开
+	- *start_serving* 设置成 "True" (默认值) 会导致创建server并立即开
      始 接受连接。设置成 "False" ，用户需要等待
      "Server.start_serving()" 或者 "Server.serve_forever()" 以使server
      开始接受连接。
 
-   3.7 新版功能: Added *ssl_handshake_timeout* and *start_serving*
-   parameters.
+	- 3.7 新版功能: Added *ssl_handshake_timeout* and *start_serving*
+	   parameters.
 
-   在 3.6 版更改: The socket option "TCP_NODELAY" is set by default
-   for all TCP connections.
+	- 在 3.6 版更改: The socket option `TCP_NODELAY` is set by default
+	   for all TCP connections.
 
-   在 3.5 版更改: "ProactorEventLoop" 类中添加 SSL/TLS 支持。
+	- 在 3.5 版更改: "ProactorEventLoop" 类中添加 SSL/TLS 支持。
 
-   在 3.5.1 版更改: The *host* parameter can be a sequence of strings.
+	- 在 3.5.1 版更改: The *host* parameter can be a sequence of strings.
 
-   参见: The "start_server()" function is a higher-level alternative
-     API that returns a pair of "StreamReader" and "StreamWriter" that
-     can be used in an async/await code.
+	- 参见: The `start_server()` function is a higher-level alternative
+		API that returns a pair of "StreamReader" and "StreamWriter" that
+		can be used in an async/await code.
 
 #### create unix server
 1. coroutine `loop.create_unix_server(protocol_factory, path=None, *, 
@@ -574,9 +567,9 @@
 
 2. Similar to `loop.create_server()` but works with the `AF_UNIX`socket family.
 
-   *path* is the name of a Unix domain socket, and is required, unless
-   a *sock* argument is provided.  Abstract Unix sockets, "str",
-   "bytes", and "Path" paths are supported.
+	- *path* is the name of a Unix domain socket, and is required, unless
+		a *sock* argument is provided.  Abstract Unix sockets, "str",
+		"bytes", and "Path" paths are supported.
 
    See the documentation of the "loop.create_server()" method for
    information about arguments to this method.
