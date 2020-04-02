@@ -1,328 +1,313 @@
-协程与任务
-**********
 
-本节将简述用于协程与任务的高层级 API。
+<!-- vim-markdown-toc GFM -->
 
-* 协程
+* [协程与任务]
+	* [协程]
+	* [可等待对象]
+		* [运行 asyncio 程序]
+		* [创建任务]
+* [屏蔽取消操作]
+* [超时]
+* [简单等待]
+* [来自其他线程的日程安排]
+* [内省]
+* [Task 对象]
+* [基于生成器的协程]
 
-* 可等待对象
+<!-- vim-markdown-toc -->
+# 协程与任务
+> 本节将简述用于协程与任务的高层级 API。
 
-* 运行 asyncio 程序
-
-* 创建任务
-
-* 休眠
-
-* 并发运行任务
-
-* 屏蔽取消操作
-
-* 超时
-
-* 简单等待
-
-* 来自其他线程的日程安排
-
-* 内省
-
-* Task 对象
-
-* 基于生成器的协程
-
-
-协程
-====
-
-*Coroutines* declared with the async/await syntax is the preferred way
+## 协程
+1. *Coroutines* declared with the async/await syntax is the preferred way
 of writing asyncio applications.  For example, the following snippet
 of code (requires Python 3.7+) prints "hello", waits 1 second, and
 then prints "world":
 
-   >>> import asyncio
+```
+	>>> import asyncio
 
-   >>> async def main():
-   ...     print('hello')
-   ...     await asyncio.sleep(1)
-   ...     print('world')
+	>>> async def main():
+	...     print('hello')
+	...     await asyncio.sleep(1)
+	...     print('world')
 
-   >>> asyncio.run(main())
-   hello
-   world
+	>>> asyncio.run(main())
+	hello
+	world
+```
 
-注意：简单地调用一个协程并不会将其加入执行日程:
+2. 注意：简单地调用一个协程并不会将其加入执行日程:
+```
+>>> main()
+<coroutine object main at 0x1053bb7c8>
+```
 
-   >>> main()
-   <coroutine object main at 0x1053bb7c8>
+3. 要真正运行一个协程，asyncio 提供了三种主要机制:
 
-要真正运行一个协程，asyncio 提供了三种主要机制:
+	1.  "asyncio.run()" 函数用来运行最高层级的入口点 "main()" 函数 (参见上面 的示例。)
 
-* "asyncio.run()" 函数用来运行最高层级的入口点 "main()" 函数 (参见上
-  面 的示例。)
+		- 等待一个协程。以下代码段会在等待 1 秒后打印 "hello"，然后 *再次*
+			等待2 秒后打印 "world":
 
-* 等待一个协程。以下代码段会在等待 1 秒后打印 "hello"，然后 *再次*
-  等 待 2 秒后打印 "world":
+			```
+			import asyncio
+			import time
 
-     import asyncio
-     import time
+			async def say_after(delay, what):
+				await asyncio.sleep(delay)
+				print(what)
 
-     async def say_after(delay, what):
-         await asyncio.sleep(delay)
-         print(what)
+			async def main():
+				print(f"started at {time.strftime('%X')}")
 
-     async def main():
-         print(f"started at {time.strftime('%X')}")
+				await say_after(1, 'hello')
+				await say_after(2, 'world')
 
-         await say_after(1, 'hello')
-         await say_after(2, 'world')
+				print(f"finished at {time.strftime('%X')}")
 
-         print(f"finished at {time.strftime('%X')}")
+			asyncio.run(main())
+			```
 
-     asyncio.run(main())
+	  预期的输出:
 
-  预期的输出:
+		 started at 17:13:52
+		 hello
+		 world
+		 finished at 17:13:55
 
-     started at 17:13:52
-     hello
-     world
-     finished at 17:13:55
+	* "asyncio.create_task()" 函数用来并发运行作为 asyncio "任务" 的多个
+	  协 程。
 
-* "asyncio.create_task()" 函数用来并发运行作为 asyncio "任务" 的多个
-  协 程。
+	  让我们修改以上示例，*并发* 运行两个 "say_after" 协程:
 
-  让我们修改以上示例，*并发* 运行两个 "say_after" 协程:
+		 async def main():
+			 task1 = asyncio.create_task(
+				 say_after(1, 'hello'))
 
-     async def main():
-         task1 = asyncio.create_task(
-             say_after(1, 'hello'))
+			 task2 = asyncio.create_task(
+				 say_after(2, 'world'))
 
-         task2 = asyncio.create_task(
-             say_after(2, 'world'))
+			 print(f"started at {time.strftime('%X')}")
 
-         print(f"started at {time.strftime('%X')}")
+			 # Wait until both tasks are completed (should take
+			 # around 2 seconds.)
+			 await task1
+			 await task2
 
-         # Wait until both tasks are completed (should take
-         # around 2 seconds.)
-         await task1
-         await task2
+			 print(f"finished at {time.strftime('%X')}")
 
-         print(f"finished at {time.strftime('%X')}")
+	  注意，预期的输出显示代码段的运行时间比之前快了 1 秒:
 
-  注意，预期的输出显示代码段的运行时间比之前快了 1 秒:
+		 started at 17:14:32
+		 hello
+		 world
+		 finished at 17:14:34
 
-     started at 17:14:32
-     hello
-     world
-     finished at 17:14:34
 
+## 可等待对象
+	1. 如果一个对象可以在 "await"  语句中使用，那么它就是 **可等待** 对象。许
+	多 asyncio API 都被设计为接受可等待对象。
 
-可等待对象
-==========
+	2. *可等待* 对象有三种主要类型: **协程**, **任务** 和 **Future**.
 
-如果一个对象可以在 "await"  语句中使用，那么它就是 **可等待** 对象。许
-多 asyncio API 都被设计为接受可等待对象。
+		1. 协程
+			1. Python 协程属于 *可等待* 对象，因此可以在其他协程中被等待:
 
-*可等待* 对象有三种主要类型: **协程**, **任务** 和 **Future**.
+			2. 实例:
+				```
+				import asyncio
 
--[ 协程 ]-
+				async def nested():
+				   return 42
 
-Python 协程属于 *可等待* 对象，因此可以在其他协程中被等待:
+				async def main():
+				   # Nothing happens if we just call "nested()".
+				   # A coroutine object is created but not awaited,
+				   # so it *won't run at all*.
+				   nested()
 
-   import asyncio
+				   # Let's do it differently now and await it:
+				   print(await nested())  # will print "42".
 
-   async def nested():
-       return 42
+				asyncio.run(main())
+				```
 
-   async def main():
-       # Nothing happens if we just call "nested()".
-       # A coroutine object is created but not awaited,
-       # so it *won't run at all*.
-       nested()
+			3. 重要: 在本文档中 "协程" 可用来表示两个紧密关联的概念:
 
-       # Let's do it differently now and await it:
-       print(await nested())  # will print "42".
+			4. *协程函数*: 定义形式为 "async def" 的函数;
 
-   asyncio.run(main())
+			5. *协程对象*: 调用 *协程函数* 所返回的对象。
 
-重要: 在本文档中 "协程" 可用来表示两个紧密关联的概念:
+			6. asyncio 也支持旧式的 基于生成器的 协程。
 
-  * *协程函数*: 定义形式为 "async def" 的函数;
+		2. 任务
+		> *任务* 被用来设置日程以便 *并发* 执行协程。
 
-  * *协程对象*: 调用 *协程函数* 所返回的对象。
+			1. 当一个协程通过 "asyncio.create_task()" 等函数被打包为一个 *任务*，该协
+			程将自动排入日程准备立即运行:
 
-asyncio 也支持旧式的 基于生成器的 协程。
+			```
+			import asyncio
 
--[ 任务 ]-
+			async def nested():
+			   return 42
 
-*任务* 被用来设置日程以便 *并发* 执行协程。
+			async def main():
+			   # Schedule nested() to run soon concurrently
+			   # with "main()".
+			   task = asyncio.create_task(nested())
 
-当一个协程通过 "asyncio.create_task()" 等函数被打包为一个 *任务*，该协
-程将自动排入日程准备立即运行:
+			   # "task" can now be used to cancel "nested()", or
+			   # can simply be awaited to wait until it is complete:
+			   await task
 
-   import asyncio
+			asyncio.run(main())
+			```
 
-   async def nested():
-       return 42
+		3. Future 对象
+		> "Future" 是一种特殊的 **低层级** 可等待对象，表示一个异步操作的 **最终
+		> 结果**。
 
-   async def main():
-       # Schedule nested() to run soon concurrently
-       # with "main()".
-       task = asyncio.create_task(nested())
+			1. 当一个 Future 对象 *被等待*，这意味着协程将保持等待直到该 Future 对象
+			在其他地方操作完毕。
 
-       # "task" can now be used to cancel "nested()", or
-       # can simply be awaited to wait until it is complete:
-       await task
+			2. 在 asyncio 中需要 Future 对象以便允许通过 async/await 使用基于回调的代码。
 
-   asyncio.run(main())
+			3. 通常情况下 **没有必要** 在应用层级的代码中创建 Future 对象。
 
--[ Future 对象 ]-
+			4. Future 对象有时会由库和某些 asyncio API 暴露给用户，用作可等待对象:
+			```
+			async def main():
+			   await function_that_returns_a_future_object()
 
-"Future" 是一种特殊的 **低层级** 可等待对象，表示一个异步操作的 **最终
-结果**。
+			   # this is also valid:
+			   await asyncio.gather(
+				   function_that_returns_a_future_object(),
+				   some_python_coroutine()
+			   )
+			```
 
-当一个 Future 对象 *被等待*，这意味着协程将保持等待直到该 Future 对象
-在其他地方操作完毕。
+			5. 一个很好的返回对象的低层级函数的示例是 "loop.run_in_executor()"。
 
-在 asyncio 中需要 Future 对象以便允许通过 async/await 使用基于回调的代
-码。
 
-通常情况下 **没有必要** 在应用层级的代码中创建 Future 对象。
+### 运行 asyncio 程序
+	1. asyncio.run(coro, *, debug=False)
 
-Future 对象有时会由库和某些 asyncio API 暴露给用户，用作可等待对象:
+		- 执行 *coroutine* *coro* 并返回结果。
 
-   async def main():
-       await function_that_returns_a_future_object()
+		- 此函数运行传入的协程，负责管理 asyncio 事件循环并 *完结异步生成器*
 
-       # this is also valid:
-       await asyncio.gather(
-           function_that_returns_a_future_object(),
-           some_python_coroutine()
-       )
+		- 当有其他 asyncio 事件循环在同一线程中运行时，此函数不能被调用。
 
-一个很好的返回对象的低层级函数的示例是 "loop.run_in_executor()"。
+		- 如果 *debug* 为 "True"，事件循环将以调试模式运行。
 
+		- 此函数总是会创建一个新的事件循环并在结束时关闭之。它应当被用作
+		asyncio 程序的主入口点，理想情况下应当只被调用一次。
 
-运行 asyncio 程序
-=================
+		- 示例:
+		```
+		async def main():
+			await asyncio.sleep(1)
+			print('hello')
 
-asyncio.run(coro, *, debug=False)
+		asyncio.run(main())
+		```
 
-   执行 *coroutine* *coro* 并返回结果。
+	2. 3.7 新版功能.
 
-   此函数运行传入的协程，负责管理 asyncio 事件循环并 *完结异步生成器*
-   。
+	3. 注解: The source code for "asyncio.run()" can be found in
+		 Lib/asyncio/runners.py.
 
-   当有其他 asyncio 事件循环在同一线程中运行时，此函数不能被调用。
+### 创建任务
+	1. asyncio.create_task(coro, *, name=None)
 
-   如果 *debug* 为 "True"，事件循环将以调试模式运行。
+	   将 *coro* 协程 打包为一个 "Task" 排入日程准备执行。返回 Task 对象。
 
-   此函数总是会创建一个新的事件循环并在结束时关闭之。它应当被用作
-   asyncio 程序的主入口点，理想情况下应当只被调用一次。
+	   If *name* is not "None", it is set as the name of the task using
+	   "Task.set_name()".
 
-   示例:
+	   该任务会在 "get_running_loop()" 返回的循环中执行，如果当前线程没有
+	   在运行的循环则会引发 "RuntimeError"。
 
-      async def main():
-          await asyncio.sleep(1)
-          print('hello')
+	   此函数 **在 Python 3.7 中被加入**。在 Python 3.7 之前，可以改用低层
+	   级的 "asyncio.ensure_future()" 函数。
 
-      asyncio.run(main())
+		  async def coro():
+			  ...
 
-   3.7 新版功能.
+		  # In Python 3.7+
+		  task = asyncio.create_task(coro())
+		  ...
 
-   注解: The source code for "asyncio.run()" can be found in
-     Lib/asyncio/runners.py.
+		  # This works in all Python versions but is less readable
+		  task = asyncio.ensure_future(coro())
+		  ...
 
+	   3.7 新版功能.
 
-创建任务
-========
+	   在 3.8 版更改: Added the "name" parameter.
 
-asyncio.create_task(coro, *, name=None)
 
-   将 *coro* 协程 打包为一个 "Task" 排入日程准备执行。返回 Task 对象。
+	休眠
+	====
 
-   If *name* is not "None", it is set as the name of the task using
-   "Task.set_name()".
+	coroutine asyncio.sleep(delay, result=None, *, loop=None)
 
-   该任务会在 "get_running_loop()" 返回的循环中执行，如果当前线程没有
-   在运行的循环则会引发 "RuntimeError"。
+	   阻塞 *delay* 指定的秒数。
 
-   此函数 **在 Python 3.7 中被加入**。在 Python 3.7 之前，可以改用低层
-   级的 "asyncio.ensure_future()" 函数。
+	   如果指定了 *result*，则当协程完成时将其返回给调用者。
 
-      async def coro():
-          ...
+	   "sleep()" 总是会挂起当前任务，以允许其他任务运行。
 
-      # In Python 3.7+
-      task = asyncio.create_task(coro())
-      ...
+	   Deprecated since version 3.8, will be removed in version 3.10:
+	   *loop* 形参。
 
-      # This works in all Python versions but is less readable
-      task = asyncio.ensure_future(coro())
-      ...
+	   以下协程示例运行 5 秒，每秒显示一次当前日期:
 
-   3.7 新版功能.
+		  import asyncio
+		  import datetime
 
-   在 3.8 版更改: Added the "name" parameter.
+		  async def display_date():
+			  loop = asyncio.get_running_loop()
+			  end_time = loop.time() + 5.0
+			  while True:
+				  print(datetime.datetime.now())
+				  if (loop.time() + 1.0) >= end_time:
+					  break
+				  await asyncio.sleep(1)
 
+		  asyncio.run(display_date())
 
-休眠
-====
 
-coroutine asyncio.sleep(delay, result=None, *, loop=None)
+	并发运行任务
+	============
 
-   阻塞 *delay* 指定的秒数。
+	awaitable asyncio.gather(*aws, loop=None, return_exceptions=False)
 
-   如果指定了 *result*，则当协程完成时将其返回给调用者。
+	   *并发* 运行 *aws* 序列中的 可等待对象。
 
-   "sleep()" 总是会挂起当前任务，以允许其他任务运行。
+	   如果 *aws* 中的某个可等待对象为协程，它将自动作为一个任务加入日程。
 
-   Deprecated since version 3.8, will be removed in version 3.10:
-   *loop* 形参。
+	   如果所有可等待对象都成功完成，结果将是一个由所有返回值聚合而成的列
+	   表。结果值的顺序与 *aws* 中可等待对象的顺序一致。
 
-   以下协程示例运行 5 秒，每秒显示一次当前日期:
+	   如果 *return_exceptions* 为 "False" (默认)，所引发的首个异常会立即
+	   传播给等待 "gather()" 的任务。*aws* 序列中的其他可等待对象 **不会被
+	   取消** 并将继续运行。
 
-      import asyncio
-      import datetime
+	   如果 *return_exceptions* 为 "True"，异常会和成功的结果一样处理，并
+	   聚合至结果列表。
 
-      async def display_date():
-          loop = asyncio.get_running_loop()
-          end_time = loop.time() + 5.0
-          while True:
-              print(datetime.datetime.now())
-              if (loop.time() + 1.0) >= end_time:
-                  break
-              await asyncio.sleep(1)
+	   如果 "gather()" *被取消*，所有被提交 (尚未完成) 的可等待对象也会 *
+	   被取消*。
 
-      asyncio.run(display_date())
+	   如果 *aws* 序列中的任一 Task 或 Future 对象 *被取消*，它将被当作引
+	   发了 "CancelledError" 一样处理 -- 在此情况下 "gather()" 调用 **不会
+	   ** 被取消。这是为了防止一个已提交的 Task/Future 被取消导致其他
+	   Tasks/Future 也被取消。
 
-
-并发运行任务
-============
-
-awaitable asyncio.gather(*aws, loop=None, return_exceptions=False)
-
-   *并发* 运行 *aws* 序列中的 可等待对象。
-
-   如果 *aws* 中的某个可等待对象为协程，它将自动作为一个任务加入日程。
-
-   如果所有可等待对象都成功完成，结果将是一个由所有返回值聚合而成的列
-   表。结果值的顺序与 *aws* 中可等待对象的顺序一致。
-
-   如果 *return_exceptions* 为 "False" (默认)，所引发的首个异常会立即
-   传播给等待 "gather()" 的任务。*aws* 序列中的其他可等待对象 **不会被
-   取消** 并将继续运行。
-
-   如果 *return_exceptions* 为 "True"，异常会和成功的结果一样处理，并
-   聚合至结果列表。
-
-   如果 "gather()" *被取消*，所有被提交 (尚未完成) 的可等待对象也会 *
-   被取消*。
-
-   如果 *aws* 序列中的任一 Task 或 Future 对象 *被取消*，它将被当作引
-   发了 "CancelledError" 一样处理 -- 在此情况下 "gather()" 调用 **不会
-   ** 被取消。这是为了防止一个已提交的 Task/Future 被取消导致其他
-   Tasks/Future 也被取消。
-
-   Deprecated since version 3.8, will be removed in version 3.10:
+	   Deprecated since version 3.8, will be removed in version 3.10:
    *loop* 形参。
 
    示例:

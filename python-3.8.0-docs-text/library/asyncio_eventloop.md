@@ -1,85 +1,97 @@
 
 <!-- vim-markdown-toc GFM -->
 
-* [事件循环]
-	* [前言]
-	* [获取事件循环]
-		* [`asyncio.get_running_loop()`]
-		* [`asyncio.get_event_loop()`]
-		* [`asyncio.set_event_loop(loop)`]
-		* [`asyncio.new_event_loop()`]
-* [事件循环方法集]
-	* [运行和停止循环]
-	* [调度回调]
-	* [调度延迟回调]
-	* [创建 Futures 和 Tasks]
-	* [打开网络连接]
-		* [create connection]
-		* [create datagram endpoint]
-		* [create unix connection]
-	* [创建网络服务]
-		* [create server]
-		* [create unix server]
-		* [connect aeecpted]
-	* [传输文件]
-		* [sendfile]
-	* [TLS 升级]
-		* [start tls]
-	* [监控文件描述符]
-		* [add reader]
-		* [remove reader]
-		* [add writer]
-		* [remove writer]
-	* [直接使用 socket 对象]
-		* [sock recv]
-		* [sock recv into]
-		* [sock sendall]
-		* [sockt connect]
-		* [sock accept]
-		* [sock sendfile]
-	* [DNS]
-		* [getaddrinfo]
-		* [getnameinfo]
-	* [使用管道]
-		* [connect read pipe]
-		* [connect write pipe]
-	* [Unix 信号]
-		* [add signal handler]
-		* [remove signal handler]
-	* [在线程或者进程池中执行代码。]
-		* [run in executor]
-	* [错误处理API]
-	* [开启调试模式]
-	* [运行子进程]
-	* [回调处理]
-	* [Server Objects]
-	* [事件循环实现]
-	* [示例]
-		* [`call_soon()` 的 Hello World 示例。]
-		* [使用 `call_later()` 来展示当前的日期]
-		* [监控一个文件描述符的读事件]
-		* [为SIGINT和SIGTERM设置信号处理器]
+* [事件循环 76]
+	* [前言 80]
+	* [获取事件循环 86]
+		* [`asyncio.get_running_loop()` 89]
+		* [`asyncio.get_event_loop()` 94]
+		* [`asyncio.set_event_loop(loop)` 103]
+		* [`asyncio.new_event_loop()` 106]
+* [事件循环方法集 113]
+	* [运行和停止循环 150]
+	* [调度回调 215]
+	* [调度延迟回调 249]
+	* [创建 Futures 和 Tasks 299]
+	* [打开网络连接 332]
+		* [create connection  333]
+		* [create datagram endpoint 433]
+		* [create unix connection 491]
+	* [创建网络服务 512]
+		* [create server 513]
+		* [create unix server 586]
+		* [connect aeecpted 606]
+	* [传输文件 630]
+		* [sendfile 631]
+	* [TLS 升级 655]
+		* [start tls 656]
+	* [监控文件描述符 682]
+		* [add reader 683]
+		* [remove reader 689]
+		* [add writer 694]
+		* [remove writer 702]
+	* [直接使用 socket 对象 709]
+		* [sock recv 717]
+		* [sock recv into 729]
+		* [sock sendall 739]
+		* [sockt connect 758]
+		* [sock accept 775]
+		* [sock sendfile 793]
+	* [DNS 820]
+		* [getaddrinfo 821]
+		* [getnameinfo 826]
+	* [使用管道 835]
+		* [connect read pipe 836]
+		* [connect write pipe 852]
+	* [Unix 信号 875]
+		* [add signal handler 876]
+		* [remove signal handler 893]
+	* [在线程或者进程池中执行代码。 904]
+		* [run in executor 905]
+		* [set default executor 964]
+	* [错误处理API 976]
+		* [set exception handler 979]
+		* [get exception handler 994]
+		* [default exception handler 999]
+		* [call exception handler 1010]
+	* [开启调试模式 1035]
+		* [get debug 1036]
+		* [set debug 1042]
+	* [运行子进程 1051]
+		* [subprocess exec 1059]
+		* [subprocess shell 1147]
+	* [回调处理 1174]
+		* [asyncio.Handle 1175]
+		* [asyncio.TimerHandle 1191]
+	* [Server Objects 1206]
+		* [asyncio.Server 1213]
+	* [事件循环实现 1302]
+	* [示例 1344]
+		* [`call_soon()` 的 Hello World 示例。 1352]
+		* [使用 `call_later()` 来展示当前的日期 1378]
+		* [监控一个文件描述符的读事件 1409]
+		* [为SIGINT和SIGTERM设置信号处理器 1455]
 
 <!-- vim-markdown-toc -->
-## 事件循环
+## 事件循环 76
 
 > Source code: Lib/asyncio/events.py, Lib/asyncio/`base_events.py`
 
-### 前言
+### 前言 80
 **事件循环是每个 asyncio 应用的核心。 事件循环会运行异步任务和回调，执行网络 IO 操作，以及运行子进程**
 
 	应用开发者通常应当使用高层级的 asyncio 函数，例如 "asyncio.run()"，应当很少有必要引用循环对象或调用其方法。 
 本节所针对的主要是低层级代码、库和框架的编写者，他们需要更细致地控制事件循环行为。
 
-### 获取事件循环
+### 获取事件循环 86
 以下低层级函数可被用于获取、设置或创建事件循环:
 
-#### `asyncio.get_running_loop()`
+#### `asyncio.get_running_loop()` 89
 1. 返回当前 OS 线程中正在运行的事件循环。
 
    如果没有正在运行的事件循环则会引发 "RuntimeError"。 <font color=red>此函数只能由协程或回调来调用。</font>
 
-#### `asyncio.get_event_loop()`
+#### `asyncio.get_event_loop()` 94
 1. 获取当前事件循环。 如果当前 OS 线程没有设置当前事件循环并且`set_event_loop()` 还没有被调用，
 	asyncio 将创建一个新的事件循环并将其设置为当前循环。
 
@@ -88,17 +100,17 @@
 
 3. 应该考虑使用 "asyncio.run()" 函数而非使用低层级函数来手动创建和关闭事件循环。
 
-#### `asyncio.set_event_loop(loop)`
+#### `asyncio.set_event_loop(loop)` 103
 将 *loop* 设置为当前 OS 线程的当前事件循环。
 
-#### `asyncio.new_event_loop()`
+#### `asyncio.new_event_loop()` 106
 
 1. 创建一个新的事件循环。
 
 2. 请注意 `get_event_loop()`, `set_event_loop()` 以及 `new_event_loop()`
 函数的行为可以通过 **设置自定义事件循环策略 来改变**。
 
-## 事件循环方法集
+## 事件循环方法集 113
 1. 事件循环有下列 **低级** APIs：
 
 	- 运行和停止循环
@@ -135,7 +147,7 @@
 
 	- 运行子进程
 
-### 运行和停止循环
+### 运行和停止循环 150
 1. `loop.run_until_complete(future)`
 
 	- 运行直到 *future* (  "Future" 的实例 ) 被完成。
@@ -200,7 +212,7 @@
           loop.run_until_complete(loop.shutdown_asyncgens())
           loop.close()
 
-### 调度回调
+### 调度回调 215
 1. `loop.call_soon(callback, *args, context=None)`
 
 > ** 安排在下一次事件循环的迭代中使用 args 参数调用callback ** 。
@@ -234,7 +246,7 @@
 	- 使用 partial 对象通常比使用lambda更方便，asyncio 在调试和错误消息中
 		能更好的呈现 partial 对象。
 
-### 调度延迟回调
+### 调度延迟回调 249
 1. 事件循环提供安排调度函数在将来某个时刻调用的机制。事件循环使用单调时钟来跟踪时间。
 
 2. `loop.call_later(delay, callback, *args, context=None)`
@@ -284,7 +296,7 @@
 
 	- 参见: "asyncio.sleep()" 函数
 
-### 创建 Futures 和 Tasks
+### 创建 Futures 和 Tasks 299
 1. `loop.create_future()`
 
 	- 创建一个附加到事件循环中的 "asyncio.Future" 对象。
@@ -317,8 +329,8 @@
 4. `loop.get_task_factory()`
 	Return a task factory or "None" if the default one is in use.
 
-### 打开网络连接
-#### create connection 
+### 打开网络连接 332
+#### create connection  333
 1. coroutine `loop.create_connection(protocol_factory, host=None, port=None, *, ssl=None, 
 		family=0, proto=0, flags=0, sock=None, local_addr=None, server_hostname=None, 
 		ssl_handshake_timeout=None)`
@@ -418,7 +430,7 @@
 	 alternative API. It returns a pair of ("StreamReader",
 	 "StreamWriter") that can be used directly in async/await code.
 
-#### create datagram endpoint
+#### create datagram endpoint 433
 1. coroutine loop.`create_datagram_endpoint(protocol_factory, local_addr=None, 
 			remote_addr=None, *, family=0, proto=0, flags=0, reuse_address=None, 
 			reuse_port=None, allow_broadcast=None, sock=None)`
@@ -476,7 +488,7 @@
 
 	- 在 3.8 版更改: 添加WIndows的支持。
 
-#### create unix connection
+#### create unix connection 491
 1. coroutine `loop.create_unix_connection(protocol_factory, path=None, *, 
 			ssl=None, sock=None, server_hostname=None, ssl_handshake_timeout=None)`
 
@@ -497,8 +509,8 @@
 	- 3.7 新版功能: *ssl_handshake_timeout* 形参。
 	- 在 3.7 版更改: *path* 形参现在可以是 *path-like object* 对象。
 
-### 创建网络服务
-#### create server
+### 创建网络服务 512
+#### create server 513
 1. coroutine `loop.create_server(protocol_factory, host=None, port=None, *, 
 			family=socket.AF_UNSPEC, flags=socket.AI_PASSIVE, sock=None, backlog=100, 
 			ssl=None, reuse_address=None, reuse_port=None, ssl_handshake_timeout=None, 
@@ -571,7 +583,7 @@
 		API that returns a pair of "StreamReader" and "StreamWriter" that
 		can be used in an async/await code.
 
-#### create unix server
+#### create unix server 586
 1. coroutine `loop.create_unix_server(protocol_factory, path=None, *, 
 		sock=None, backlog=100, ssl=None, ssl_handshake_timeout=None, start_serving=True)`
 
@@ -591,7 +603,7 @@
 
 	- 在 3.7 版更改: *path* 形参现在可以是 "Path" 对象。
 
-#### connect aeecpted
+#### connect aeecpted 606
 1. coroutine `loop.connect_accepted_socket(protocol_factory, sock, *, 
 		ssl=None, ssl_handshake_timeout=None)`
 
@@ -615,8 +627,8 @@
 
 	- 3.7 新版功能: *ssl_handshake_timeout* 形参。
 
-### 传输文件
-#### sendfile
+### 传输文件 630
+#### sendfile 631
 1. coroutine loop.sendfile(transport, file, offset=0, count=None, *, fallback=True)
 
 2. Send a *file* over a *transport*.  Return the total number of bytessent.
@@ -640,8 +652,8 @@ call (e.g. Windows or SSL socket on Unix).
 	Raise "SendfileNotAvailableError" if the system does not support
 the *sendfile* syscall and *fallback* is "False".
 
-### TLS 升级
-#### start tls
+### TLS 升级 655
+#### start tls 656
 1. coroutine `loop.start_tls(transport, protocol, sslcontext, *, 
 	server_side=False, server_hostname=None, ssl_handshake_timeout=None)`
 
@@ -667,19 +679,19 @@ the *sendfile* syscall and *fallback* is "False".
 		seconds to wait for the TLS handshake to complete before aborting
 		the connection. "60.0" seconds if "None" (default).
 
-### 监控文件描述符
-#### add reader
+### 监控文件描述符 682
+#### add reader 683
 1. `loop.add_reader`(fd, callback, *args)
 
 	开始监视 *fd* 文件描述符以获取读取的可用性，一旦 *fd* 可用于读取，
 使用指定的参数调用 *callback* 。
 
-#### remove reader
+#### remove reader 689
 1. loop.remove_reader(fd)
 
 	停止对文件描述符 *fd* 读取可用性的监视。
 
-#### add writer
+#### add writer 694
 1. loop.add_writer(fd, callback, *args)
 
 	开始监视 *fd* 文件描述符的写入可用性，一旦 *fd* 可用于写入，使用指
@@ -687,14 +699,14 @@ the *sendfile* syscall and *fallback* is "False".
 
 2. 使用 "functools.partial()" 传递关键字参数给 *callback*.
 
-#### remove writer
+#### remove writer 702
 1. `loop.remove_writer`(fd)
 
 	停止对文件描述符 *fd* 的写入可用性监视。
 
 2. See also Platform Support section for some limitations of these methods.
 
-### 直接使用 socket 对象
+### 直接使用 socket 对象 709
 1. In general, protocol implementations that use transport-based APIs
 such as `loop.create_connection()` and `loop.create_server()` are
 faster than implementations that work with sockets directly. 
@@ -702,7 +714,7 @@ faster than implementations that work with sockets directly.
 	However,there are some use cases when performance is not critical, and working
 with "socket" objects directly is more convenient.
 
-#### sock recv
+#### sock recv 717
 1. coroutine `loop.sock_recv`(sock, nbytes)
 	Receive up to *nbytes* from *sock*.  **Asynchronous version of socket.recv().**
 
@@ -714,7 +726,7 @@ with "socket" objects directly is more convenient.
 		coroutine method, releases before Python 3.7 returned a "Future".
 		Since Python 3.7 this is an "async def" method.
 
-#### sock recv into
+#### sock recv into 729
 1. coroutine `loop.sock_recv_into(sock, buf)`
 
 	- Receive data from *sock* into the *buf* buffer.  Modeled after the 
@@ -724,7 +736,7 @@ blocking `socket.recv_into()` method.
 
 	- *sock* 必须是个非阻塞socket。
 
-#### sock sendall
+#### sock sendall 739
 1. coroutine `loop.sock_sendall(sock, data)
 
 	- Send *data* to the *sock* socket. Asynchronous version of "socket.sendall()".
@@ -743,7 +755,7 @@ blocking `socket.recv_into()` method.
 		之前，该方法返回 "Future" ，从Python 3.7 开始，这个方法是 "async
 		def" 方法。
 
-#### sockt connect
+#### sockt connect 758
 1. coroutine loop.sock_connect(sock, address)
 
 2. Connect *sock* to a remote socket at *address*.
@@ -760,7 +772,7 @@ resolved by calling `socket.inet_pton()`.  If not,
 参见: `loop.create_connection()` 和  `asyncio.open_connection()`
  。
 
-#### sock accept
+#### sock accept 775
 1. coroutine loop.sock_accept(sock)
 
 2. Accept a connection.  Modeled after the blocking "socket.accept()"
@@ -778,7 +790,7 @@ def" 方法。
 
 参见: `loop.create_server()` and `start_server()`.
 
-#### sock sendfile
+#### sock sendfile 793
 1. coroutine `loop.sock_sendfile(sock, file, offset=0, count=None, *, fallback=True)`
 
 2. Send a file using high-performance "os.sendfile" if possible.
@@ -805,13 +817,13 @@ Return the total number of bytes sent.
 
    *sock* 必须是个非阻塞socket。
 
-### DNS
-#### getaddrinfo
+### DNS 820
+#### getaddrinfo 821
 1. coroutine loop.getaddrinfo(host, port, *, family=0, type=0, proto=0, flags=0)
 
 2. 异步版的 "socket.getaddrinfo()" 。
 
-#### getnameinfo
+#### getnameinfo 826
 1. coroutine loop.getnameinfo(sockaddr, flags=0)
 
 2. 异步版的 "socket.getnameinfo()" 。
@@ -820,8 +832,8 @@ Return the total number of bytes sent.
 程，但是Python 3.7之前，实际返回的是 "asyncio.Future" 对象。从Python
 3.7 开始，这两个方法是协程。
 
-### 使用管道
-#### connect read pipe
+### 使用管道 835
+#### connect read pipe 836
 1. `coroutine loop.connect_read_pipe(protocol_factory, pipe)`
 
 2. Register the read end of *pipe* in the event loop.
@@ -837,7 +849,7 @@ Return the total number of bytes sent.
 
 	- 使用 "SelectorEventLoop" 事件循环， *pipe* 被设置为非阻塞模式。
 
-#### connect write pipe
+#### connect write pipe 852
 1. `coroutine loop.connect_write_pipe(protocol_factory, pipe)`
 
 2. Register the write end of *pipe* in the event loop.
@@ -860,8 +872,8 @@ Return the total number of bytes sent.
   methods.
 
 
-### Unix 信号
-#### add signal handler
+### Unix 信号 875
+#### add signal handler 876
 1. `loop.add_signal_handler(signum, callback, *args)`
 
 2. 设置 *callback* 作为 *signum* 信号的处理程序。
@@ -878,7 +890,7 @@ Return the total number of bytes sent.
 
 4. 和 "signal.signal()" 一样，这个函数只能在主线程中调用。
 
-#### remove signal handler
+#### remove signal handler 893
 1. loop.remove_signal_handler(sig)
 
 2. 移除 *sig* 信号的处理程序。
@@ -889,8 +901,8 @@ Return the total number of bytes sent.
 4. 可用性: Unix。
 	参见: "signal" 模块。
 
-### 在线程或者进程池中执行代码。
-#### run in executor
+### 在线程或者进程池中执行代码。 904
+#### run in executor 905
 1. awaitable `loop.run_in_executor(executor, func, *args)`
 
 2. 安排在指定的执行器中调用 *func* 。
@@ -942,360 +954,356 @@ asyncio.run(main())
 
 5. 这个方法返回一个 "asyncio.Future" 对象。
 
-   使用 "functools.partial()" 传递关键字参数  给 *func* 。
+	- 使用 "functools.partial()" 传递关键字参数  给 *func* 。
 
-   在 3.5.3 版更改: `loop.run_in_executor()` no longer configures the
-   `max_workers` of the thread pool executor it creates, instead
-   leaving it up to the thread pool executor ("ThreadPoolExecutor") to
-   set the default.
+	- 在 3.5.3 版更改: `loop.run_in_executor()` no longer configures the
+	`max_workers` of the thread pool executor it creates, instead
+	leaving it up to the thread pool executor ("ThreadPoolExecutor") to
+	set the default.
 
-loop.set_default_executor(executor)
+#### set default executor 964
+1. loop.set_default_executor(executor)
 
-   Set *executor* as the default executor used by `run_in_executor()`.
-   *executor* should be an instance of "ThreadPoolExecutor".
+	- Set *executor* as the default executor used by `run_in_executor()`.
+		*executor* should be an instance of "ThreadPoolExecutor".
 
-   3.8 版后已移除: Using an executor that is not an instance of
-   "ThreadPoolExecutor" is deprecated and will trigger an error in
-   Python 3.9.
+	- 3.8 版后已移除: Using an executor that is not an instance of
+		"ThreadPoolExecutor" is deprecated and will trigger an error in
 
-   *executor* 必须是个 "concurrent.futures.ThreadPoolExecutor" 的实例
-   。
+		Python 3.9.
+	   *executor* 必须是个 "concurrent.futures.ThreadPoolExecutor" 的实例
 
+### 错误处理API 976
+> 允许自定义事件循环中如何去处理异常。
 
-### 错误处理API
+#### set exception handler 979
+1. loop.set_exception_handler(handler)
 
-允许自定义事件循环中如何去处理异常。
+	- 将 *handler* 设置为新的事件循环异常处理器。
 
-loop.set_exception_handler(handler)
+	- If *handler* is "None", the default exception handler will be set.
 
-   将 *handler* 设置为新的事件循环异常处理器。
+	- Otherwise, *handler* must be a callable with the signature matching
+		"(loop, context)", where "loop" is a reference to the active event
+		loop, and "context" is a "dict" object containing the details of
+		the exception 
+		
+	- (see `call_exception_handler()` documentation for
+		details about context).
 
-   If *handler* is "None", the default exception handler will be set.
-   Otherwise, *handler* must be a callable with the signature matching
-   "(loop, context)", where "loop" is a reference to the active event
-   loop, and "context" is a "dict" object containing the details of
-   the exception (see `call_exception_handler()` documentation for
-   details about context).
+#### get exception handler 994
+1. loop.get_exception_handler()
 
-loop.get_exception_handler()
+	1. 返回当前的异常处理器，如果没有设置异常处理器，则返回 "None" 。
 
-   返回当前的异常处理器，如果没有设置异常处理器，则返回 "None" 。
+#### default exception handler 999
+1. loop.default_exception_handler(context)
 
-   3.5.2 新版功能.
+	1. 默认的异常处理器。
 
-loop.default_exception_handler(context)
+	2. This is called when an exception occurs and no exception handler is
+	set. This can be called by a custom exception handler that wants to
+	defer to the default handler behavior.
 
-   默认的异常处理器。
+	3. *context* 参数和 `call_exception_handler()` 中的同名参数完全相同。
 
-   This is called when an exception occurs and no exception handler is
-   set. This can be called by a custom exception handler that wants to
-   defer to the default handler behavior.
+#### call exception handler 1010
+1. loop.call_exception_handler(context)
 
-   *context* 参数和 `call_exception_handler()` 中的同名参数完全相同。
+> 调用当前事件循环异常处理器。
 
-loop.call_exception_handler(context)
+2. *context* 是个包含下列键的 "dict" 对象(未来版本的Python可能会引入新键)：
 
-   调用当前事件循环异常处理器。
+	- 'message': 错误消息；
 
-   *context* 是个包含下列键的 "dict" 对象(未来版本的Python可能会引入新
-   键)：
+	- 'exception' （可选）: 异常对象；
 
-   * 'message': 错误消息；
+	- 'future' （可选）:  "asyncio.Future" 实例。
 
-   * 'exception' （可选）: 异常对象；
+	- 'handle' （可选）: "asyncio.Handle" 实例；
 
-   * 'future' （可选）:  "asyncio.Future" 实例。
+	- 'protocol' （可选）: Protocol 实例；
 
-   * 'handle' （可选）: "asyncio.Handle" 实例；
+	- 'transport' （可选）: Transport 实例；
 
-   * 'protocol' （可选）: Protocol 实例；
+	- 'socket' （可选）： "socket.socket" 实例。
 
-   * 'transport' （可选）: Transport 实例；
-
-   * 'socket' （可选）： "socket.socket" 实例。
-
-   注解: This method should not be overloaded in subclassed event
+3. 注解: This method should not be overloaded in subclassed event
      loops. For custom exception handling, use the
      `set_exception_handler()` method.
 
+### 开启调试模式 1035
+#### get debug 1036
+1. loop.get_debug()
+> 获取事件循环调试模式状态（"bool"）。
 
-### 开启调试模式
+2. 如果环境变量 "PYTHONASYNCIODEBUG" 是一个非空字符串，就返回 "True"，否则就返回 "False" 。
 
-loop.get_debug()
+#### set debug 1042
+1. loop.set_debug(enabled: bool)
+> 设置事件循环的调试模式。
 
-   获取事件循环调试模式状态（"bool"）。
+2. 在 3.7 版更改: The new "-X dev" command line option can now also be
+	used to enable the debug mode.
 
-   如果环境变量 "PYTHONASYNCIODEBUG" 是一个非空字符串，就返回 "True"
-   ，否则就返回 "False" 。
+3. 参见: debug mode of asyncio.
 
-loop.set_debug(enabled: bool)
+### 运行子进程 1051
+1. <font color=red>Methods described in this subsections are low-level.  In regular
+async/await code consider using the high-level `asyncio.create_subprocess_shell()` and
+`asyncio.create_subprocess_exec()` convenience functions instead.</font>
 
-   设置事件循环的调试模式。
-
-   在 3.7 版更改: The new "-X dev" command line option can now also be
-   used to enable the debug mode.
-
-参见: debug mode of asyncio.
-
-
-### 运行子进程
-
-Methods described in this subsections are low-level.  In regular
-async/await code consider using the high-level
-`asyncio.create_subprocess_shell()` and
-`asyncio.create_subprocess_exec()` convenience functions instead.
-
-注解: The default asyncio event loop on **Windows** does not support
+2. 注解: The default asyncio event loop on **Windows** does not support
   subprocesses. See Subprocess Support on Windows for details.
 
-coroutine loop.subprocess_exec(protocol_factory, *args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
+#### subprocess exec 1059
+1. coroutine loop.subprocess_exec(protocol_factory, *args, stdin=subprocess.PIPE, 
+			stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
 
-   用 *args* 指定的一个或者多个字符串型参数创建一个子进程。
+2. 用 *args* 指定的一个或者多个字符串型参数创建一个子进程。
 
-   *args* 必须是个由下列形式的字符串组成的列表：
+3. *args* 必须是个由下列形式的字符串组成的列表：
 
-   * "str";
+	- "str";
 
-   * 或者由 文件熊编码 编码的 "bytes" 。
+	- 或者由 文件编码的 "bytes" 。
 
-   The first string specifies the program executable, and the
-   remaining strings specify the arguments.  Together, string
-   arguments form the "argv" of the program.
+	1. The first string specifies the program executable, and the
+	remaining strings specify the arguments.  Together, string
+	arguments form the "argv" of the program.
 
-   This is similar to the standard library "subprocess.Popen" class
-   called with "shell=False" and the list of strings passed as the
-   first argument; however, where "Popen" takes a single argument
-   which is list of strings, *subprocess_exec* takes multiple string
-   arguments.
+	2. This is similar to the standard library "subprocess.Popen" class
+	called with "shell=False" and the list of strings passed as the
+	first argument; however, where "Popen" takes a single argument
+	which is list of strings, *subprocess_exec* takes multiple string
+	arguments.
 
-   The *protocol_factory* must be a callable returning a subclass of
-   the "asyncio.SubprocessProtocol" class.
+	3. The *protocol_factory* must be a callable returning a subclass of
+	the "asyncio.SubprocessProtocol" class.
 
-   其他参数：
+4. 其他参数：
 
-   * *stdin* can be any of these:
+	1. *stdin* can be any of these:
 
-     * a file-like object representing a pipe to be connected to the
-       subprocess's standard input stream using `connect_write_pipe()`
+		- a file-like object representing a pipe to be connected to the
+		subprocess's standard input stream using `connect_write_pipe()`
 
-     * the "subprocess.PIPE" constant (default) which will create a
-       new pipe and connect it,
+		- the "subprocess.PIPE" constant (default) which will create a
+		new pipe and connect it,
 
-     * the value "None" which will make the subprocess inherit the
-       file descriptor from this process
+		- the value "None" which will make the subprocess inherit the
+		file descriptor from this process
 
-     * the "subprocess.DEVNULL" constant which indicates that the
-       special "os.devnull" file will be used
+		- the "subprocess.DEVNULL" constant which indicates that the
+		special "os.devnull" file will be used
 
-   * *stdout* can be any of these:
+	2. *stdout* can be any of these:
 
-     * a file-like object representing a pipe to be connected to the
-       subprocess's standard output stream using
-       `connect_write_pipe()`
+		- a file-like object representing a pipe to be connected to the
+		subprocess's standard output stream using
+		`connect_write_pipe()`
 
-     * the "subprocess.PIPE" constant (default) which will create a
-       new pipe and connect it,
+		- the "subprocess.PIPE" constant (default) which will create a
+		new pipe and connect it,
 
-     * the value "None" which will make the subprocess inherit the
-       file descriptor from this process
+		- the value "None" which will make the subprocess inherit the
+		file descriptor from this process
 
-     * the "subprocess.DEVNULL" constant which indicates that the
-       special "os.devnull" file will be used
+		- the "subprocess.DEVNULL" constant which indicates that the
+		special "os.devnull" file will be used
 
-   * *stderr* can be any of these:
+	3. *stderr* can be any of these:
 
-     * a file-like object representing a pipe to be connected to the
-       subprocess's standard error stream using `connect_write_pipe()`
+		- a file-like object representing a pipe to be connected to the
+		subprocess's standard error stream using `connect_write_pipe()`
 
-     * the "subprocess.PIPE" constant (default) which will create a
-       new pipe and connect it,
+		- the "subprocess.PIPE" constant (default) which will create a
+		new pipe and connect it,
 
-     * the value "None" which will make the subprocess inherit the
-       file descriptor from this process
+		- the value "None" which will make the subprocess inherit the
+		file descriptor from this process
 
-     * the "subprocess.DEVNULL" constant which indicates that the
-       special "os.devnull" file will be used
+		- the "subprocess.DEVNULL" constant which indicates that the
+		special "os.devnull" file will be used
 
-     * the "subprocess.STDOUT" constant which will connect the
-       standard error stream to the process' standard output stream
+		- the "subprocess.STDOUT" constant which will connect the
+		standard error stream to the process' standard output stream
 
-   * All other keyword arguments are passed to "subprocess.Popen"
-     without interpretation, except for *bufsize*,
-     *universal_newlines*, *shell*, *text*, *encoding* and *errors*,
-     which should not be specified at all.
+	4. All other keyword arguments are passed to "subprocess.Popen"
+		without interpretation, except for *bufsize*,
+		*universal_newlines*, *shell*, *text*, *encoding* and *errors*,
+		which should not be specified at all.
 
-     The "asyncio" subprocess API does not support decoding the
-     streams as text. "bytes.decode()" can be used to convert the
-     bytes returned from the stream to text.
+	5. The "asyncio" subprocess API does not support decoding the
+		streams as text. "bytes.decode()" can be used to convert the
+		bytes returned from the stream to text.
 
-   其他参数的文档，请参阅 "subprocess.Popen" 类的构造函数。
+5. 其他参数的文档，请参阅 "subprocess.Popen" 类的构造函数。
 
-   Returns a pair of "(transport, protocol)", where *transport*
-   conforms to the "asyncio.SubprocessTransport" base class and
-   *protocol* is an object instantiated by the *protocol_factory*.
+	1. Returns a pair of "(transport, protocol)", where *transport*
+	conforms to the "asyncio.SubprocessTransport" base class and
+	*protocol* is an object instantiated by the *protocol_factory*.
 
-coroutine loop.subprocess_shell(protocol_factory, cmd, *, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
+#### subprocess shell 1147
+1. coroutine `loop.subprocess_shell(protocol_factory, cmd, *, stdin=subprocess.PIPE, 
+			stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)`
 
-   Create a subprocess from *cmd*, which can be a "str" or a "bytes"
-   string encoded to the filesystem encoding, using the platform's
-   "shell" syntax.
+	1. Create a subprocess from *cmd*, which can be a "str" or a "bytes"
+	string encoded to the filesystem encoding, using the platform's
+	"shell" syntax.
 
-   这类似与用 "shell=True" 调用标准库的 "subprocess.Popen" 类。
+	2. 这类似与用 "shell=True" 调用标准库的 "subprocess.Popen" 类。
 
-   The *protocol_factory* must be a callable returning a subclass of
-   the "SubprocessProtocol" class.
+	3. The *protocol_factory* must be a callable returning a subclass of
+	the "SubprocessProtocol" class.
 
-   See `subprocess_exec()` for more details about the remaining
-   arguments.
+	4. See `subprocess_exec()` for more details about the remaining
+	arguments.
 
-   Returns a pair of "(transport, protocol)", where *transport*
-   conforms to the "SubprocessTransport" base class and *protocol* is
-   an object instantiated by the *protocol_factory*.
+	5. Returns a pair of "(transport, protocol)", where *transport*
+	conforms to the "SubprocessTransport" base class and *protocol* is
+	an object instantiated by the *protocol_factory*.
 
-注解: It is the application's responsibility to ensure that all
-  whitespace and special characters are quoted appropriately to avoid
-  shell injection vulnerabilities. The "shlex.quote()" function can be
-  used to properly escape whitespace and special characters in strings
-  that are going to be used to construct shell commands.
-
-
-### 回调处理
-
-class asyncio.Handle
-
-   A callback wrapper object returned by `loop.call_soon()`,
-   `loop.call_soon_threadsafe()`.
-
-   cancel()
-
-      Cancel the callback.  If the callback has already been canceled
-      or executed, this method has no effect.
-
-   cancelled()
-
-      Return "True" if the callback was cancelled.
-
-      3.7 新版功能.
-
-class asyncio.TimerHandle
-
-   A callback wrapper object returned by `loop.call_later()`, and
-   `loop.call_at()`.
-
-   This class is a subclass of "Handle".
-
-   when()
-
-      Return a scheduled callback time as "float" seconds.
-
-      The time is an absolute timestamp, using the same time reference
-      as "loop.time()".
-
-      3.7 新版功能.
+2. 注解: It is the application's responsibility to ensure that all
+	whitespace and special characters are quoted appropriately to avoid
+	shell injection vulnerabilities. The "shlex.quote()" function can be
+	used to properly escape whitespace and special characters in strings
+	that are going to be used to construct shell commands.
 
 
-### Server Objects
+### 回调处理 1174
+#### asyncio.Handle 1175
+1. class asyncio.Handle
 
-Server objects are created by `loop.create_server()`,
+	1. A callback wrapper object returned by `loop.call_soon()`,
+	`loop.call_soon_threadsafe()`.
+
+2. cancel()
+
+	1. Cancel the callback.  If the callback has already been canceled
+	or executed, this method has no effect.
+
+3. cancelled()
+
+	1. Return "True" if the callback was cancelled.
+	3.7 新版功能.
+
+#### asyncio.TimerHandle 1191
+1. class asyncio.TimerHandle
+
+	1. A callback wrapper object returned by `loop.call_later()`, and
+	`loop.call_at()`.
+
+	2. This class is a subclass of "Handle".
+
+2. when()
+	  - Return a scheduled callback time as "float" seconds.
+
+	  - The time is an absolute timestamp, using the same time reference
+		as "loop.time()".
+		3.7 新版功能.
+
+### Server Objects 1206
+1. Server objects are created by `loop.create_server()`,
 `loop.create_unix_server()`, `start_server()`, and
 `start_unix_server()` functions.
 
-Do not instantiate the class directly.
+2. Do not instantiate the class directly.
 
-class asyncio.Server
+#### asyncio.Server 1213
+1. class asyncio.Server
 
-   *Server* 对象是异步上下文管理器。当用于 "async with" 语句时，异步上
-   下文管理器可以确保 Server 对象被关闭，并且在 "async with" 语句完成
-   后，不接受新的连接。
+	- *Server* 对象是异步上下文管理器。当用于 "async with" 语句时，异步上
+		下文管理器可以确保 Server 对象被关闭，并且在 "async with" 语句完成
+		后，不接受新的连接。
 
-      srv = await loop.create_server(...)
+		```
+		srv = await loop.create_server(...)
 
-      async with srv:
-          # some code
+		async with srv:
+		  # some code
 
-      # At this point, srv is closed and no longer accepts new connections.
+		# At this point, srv is closed and no longer accepts new connections.
+		```
 
-   在 3.7 版更改: Python3.7 开始，Server 对象是一个异步上下文管理器。
+	- 在 3.7 版更改: Python3.7 开始，Server 对象是一个异步上下文管理器。
 
-   close()
+2. close()
 
-      停止服务：关闭监听的套接字并且设置 "sockets" 属性为 "None" 。
+	- 停止服务：关闭监听的套接字并且设置 "sockets" 属性为 "None" 。
 
-      用于表示已经连进来的客户端连接会保持打开的状态。
+	- 用于表示已经连进来的客户端连接会保持打开的状态。
 
-      服务器是被异步关闭的，使用 `wait_closed()` 协程来等待服务器关闭
-      。
+	- 服务器是被异步关闭的，使用 `wait_closed()` 协程来等待服务器关闭
 
-   get_loop()
+3. `get_loop()`
 
-      Return the event loop associated with the server object.
+	- Return the event loop associated with the server object.
+	3.7 新版功能.
 
-      3.7 新版功能.
+4. `coroutine start_serving()`
 
-   coroutine start_serving()
+	- 开始接受连接。
+	3.7 新版功能.
 
-      开始接受连接。
+	- 这个方法是幂等的【相同参数重复执行，能获得相同的结果】，所以此方
+	法能在服务已经运行的时候调用。
 
-      这个方法是幂等的【相同参数重复执行，能获得相同的结果】，所以此方
-      法能在服务已经运行的时候调用。
+	- The `start_serving` keyword-only parameter to
+	`loop.create_server()` and `asyncio.start_server()` allows
+	creating a Server object that is not accepting connections
+	initially.  In this case `Server.start_serving()`, or
+	`Server.serve_forever()` can be used to make the Server start
+	accepting connections.
 
-      The *start_serving* keyword-only parameter to
-      `loop.create_server()` and `asyncio.start_server()` allows
-      creating a Server object that is not accepting connections
-      initially.  In this case `Server.start_serving()`, or
-      `Server.serve_forever()` can be used to make the Server start
-      accepting connections.
+5. `coroutine serve_forever()`
 
-      3.7 新版功能.
+	- 开始接受连接，直到协程被取消。 `serve_forever` 任务的取消将导致
+	服务器被关闭。
+	3.7 新版功能.
 
-   coroutine serve_forever()
+	- 如果服务器已经在接受连接了，这个方法可以被调用。每个 *Server* 对
+	象，仅能有一个 `serve_forever` 任务。
 
-      开始接受连接，直到协程被取消。 `serve_forever` 任务的取消将导致
-      服务器被关闭。
+	- 示例:
 
-      如果服务器已经在接受连接了，这个方法可以被调用。每个 *Server* 对
-      象，仅能有一个 `serve_forever` 任务。
+	```
+	async def client_connected(reader, writer):
+		# Communicate with the client with
+		# reader/writer streams.  For example:
+		await reader.readline()
 
-      示例:
+	async def main(host, port):
+		srv = await asyncio.start_server(
+		client_connected, host, port)
+		await srv.serve_forever()
 
-         async def client_connected(reader, writer):
-             # Communicate with the client with
-             # reader/writer streams.  For example:
-             await reader.readline()
+	asyncio.run(main('127.0.0.1', 0))
+	```
 
-         async def main(host, port):
-             srv = await asyncio.start_server(
-                 client_connected, host, port)
-             await srv.serve_forever()
+6. `is_serving()`
 
-         asyncio.run(main('127.0.0.1', 0))
+	- 如果服务器正在接受新连接的状态，返回 "True" 。
+	3.7 新版功能.
 
-      3.7 新版功能.
+7. coroutine `wait_closed()`
 
-   is_serving()
+	- 等待 "close()" 方法执行完毕。
 
-      如果服务器正在接受新连接的状态，返回 "True" 。
+8. sockets
 
-      3.7 新版功能.
+	- List of "socket.socket" objects the server is listening on.
 
-   coroutine wait_closed()
-
-      等待 "close()" 方法执行完毕。
-
-   sockets
-
-      List of "socket.socket" objects the server is listening on.
-
-      在 3.7 版更改: Prior to Python 3.7 "Server.sockets" used to
-      return an internal list of server sockets directly.  In 3.7 a
-      copy of that list is returned.
+	- 在 3.7 版更改: Prior to Python 3.7 "Server.sockets" used to
+	return an internal list of server sockets directly.  In 3.7 a
+	copy of that list is returned.
 
 
-### 事件循环实现
+### 事件循环实现 1302
 1. asyncio ships with two different event loop implementations:
 "SelectorEventLoop" and "ProactorEventLoop".
 
-	By default asyncio is configured to use "SelectorEventLoop" on Unix
+By default asyncio is configured to use "SelectorEventLoop" on Unix
 and "ProactorEventLoop" on Windows.
 
 2. 可用性: Unix, Windows。
@@ -1303,22 +1311,22 @@ and "ProactorEventLoop" on Windows.
 ```
 class asyncio.SelectorEventLoop
 
-   An event loop based on the "selectors" module.
+An event loop based on the "selectors" module.
 
-   Uses the most efficient *selector* available for the given
-   platform.  It is also possible to manually configure the exact
-   selector implementation to be used:
+Uses the most efficient *selector* available for the given
+platform.  It is also possible to manually configure the exact
+selector implementation to be used:
 
-      import asyncio
-      import selectors
+  import asyncio
+  import selectors
 
-      selector = selectors.SelectSelector()
-      loop = asyncio.SelectorEventLoop(selector)
-      asyncio.set_event_loop(loop)
+  selector = selectors.SelectSelector()
+  loop = asyncio.SelectorEventLoop(selector)
+  asyncio.set_event_loop(loop)
 ```
 
 3. 可用性: Windows。
-	- class asyncio.ProactorEventLoop
+- class asyncio.ProactorEventLoop
 
 	- 用 "I/O Completion Ports" (IOCP) 构建的专为Windows 的事件循环。
 
@@ -1333,7 +1341,7 @@ class asyncio.SelectorEventLoop
 	defined.
 
 
-### 示例
+### 示例 1344
 	Note that all examples in this section **purposefully** show how to
 use the low-level event loop APIs, such as `loop.run_forever()` and
 `loop.call_soon()`.  
@@ -1341,7 +1349,7 @@ use the low-level event loop APIs, such as `loop.run_forever()` and
 	Modern asyncio applications rarely need to bewritten this way; 
 consider using the high-level functions like "asyncio.run()".
 
-#### `call_soon()` 的 Hello World 示例。
+#### `call_soon()` 的 Hello World 示例。 1352
 1. An example using the `loop.call_soon()` method to schedule a callback.
 The callback displays ""Hello World"" and then stops the event loop:
 ```
@@ -1367,7 +1375,7 @@ The callback displays ""Hello World"" and then stops the event loop:
 2. 参见: A similar Hello World example created with a coroutine and the
   "run()" function.
 
-#### 使用 `call_later()` 来展示当前的日期
+#### 使用 `call_later()` 来展示当前的日期 1378
 1. An example of a callback displaying the current date every second. The
 callback uses the `loop.call_later()` method to reschedule itself
 after 5 seconds, and then stops the event loop:
@@ -1398,7 +1406,7 @@ after 5 seconds, and then stops the event loop:
 
 2. 参见: A similar current date example created with a coroutine and the "run()" function.
 
-#### 监控一个文件描述符的读事件
+#### 监控一个文件描述符的读事件 1409
 1. 使用 `loop.add_reader()` 方法，等到文件描述符收到一些数据，然后关闭事件循环：
 ```
    import asyncio
@@ -1444,7 +1452,7 @@ after 5 seconds, and then stops the event loop:
 		`asyncio.open_connection()` function and streams.
 
 
-#### 为SIGINT和SIGTERM设置信号处理器
+#### 为SIGINT和SIGTERM设置信号处理器 1455
 1. (This "signals" example only works on Unix.)
 
 2. Register handlers for signals "SIGINT" and "SIGTERM" using the
