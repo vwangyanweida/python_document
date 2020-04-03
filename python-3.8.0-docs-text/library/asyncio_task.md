@@ -1,35 +1,38 @@
 
 <!-- vim-markdown-toc GFM -->
 
-* [协程与任务]
-	* [协程]
-	* [可等待对象]
-		* [运行 asyncio 程序]
-		* [创建任务]
-			* [create task]
-	* [休眠]
-			* [sleep]
-		* [并发运行任务]
-			* [gather]
-		* [屏蔽取消操作]
-			* [shield]
-		* [超时]
-			* [wait for]
-		* [简单等待]
-			* [wait]
-			* [as completed]
-		* [来自其他线程的日程安排]
-			* [run coroutine threadsfe]
-* [内省]
-		* [Task 对象]
-			* [Task]
-* [基于生成器的协程]
+* [协程与任务 29]
+	* [协程 32]
+		* [可等待对象 121]
+		* [运行 asyncio 程序 206]
+			* [run]
+		* [创建任务 232]
+			* [create task 233]
+	* [休眠 262]
+			* [sleep 263]
+		* [并发运行任务 291]
+			* [gather 292]
+		* [屏蔽取消操作 358]
+			* [shield 359]
+		* [超时 393]
+			* [wait for 394]
+		* [简单等待 439]
+			* [wait 440]
+			* [as completed 510]
+		* [来自其他线程的日程安排 528]
+			* [run coroutine threadsfe 529]
+		* [内省]
+			* [current task]
+			* [all tasks]
+		* [Task 对象 589]
+			* [Task 590]
+		* [基于生成器的协程]
 
 <!-- vim-markdown-toc -->
-# 协程与任务
+# 协程与任务 29
 > 本节将简述用于协程与任务的高层级 API。
 
-## 协程
+## 协程 32
 1. *Coroutines* declared with the async/await syntax is the preferred way
 of writing asyncio applications.  For example, the following snippet
 of code (requires Python 3.7+) prints "hello", waits 1 second, and
@@ -58,37 +61,37 @@ then prints "world":
 
 	1.  "asyncio.run()" 函数用来运行最高层级的入口点 "main()" 函数 (参见上面 的示例。)
 
-		- 等待一个协程。以下代码段会在等待 1 秒后打印 "hello"，然后 *再次*
-			等待2 秒后打印 "world":
+	2. 等待一个协程。以下代码段会在等待 1 秒后打印 "hello"，然后 *再次*
+		等待2 秒后打印 "world":
 
-			```
-			import asyncio
-			import time
+		```
+		import asyncio
+		import time
 
-			async def say_after(delay, what):
-				await asyncio.sleep(delay)
-				print(what)
+		async def say_after(delay, what):
+			await asyncio.sleep(delay)
+			print(what)
 
-			async def main():
-				print(f"started at {time.strftime('%X')}")
+		async def main():
+			print(f"started at {time.strftime('%X')}")
 
-				await say_after(1, 'hello')
-				await say_after(2, 'world')
+			await say_after(1, 'hello')
+			await say_after(2, 'world')
 
-				print(f"finished at {time.strftime('%X')}")
+			print(f"finished at {time.strftime('%X')}")
 
-			asyncio.run(main())
-			```
+		asyncio.run(main())
+		```
 
 		- 预期的输出:
-			```
-			started at 17:13:52
-			hello
-			world
-			finished at 17:13:55
-			```
+		```
+		started at 17:13:52
+		hello
+		world
+		finished at 17:13:55
+		```
 
-	2. "asyncio.create_task()" 函数用来并发运行作为 asyncio "任务" 的多个协程。
+	3. `asyncio.create_task()` 函数用来并发运行作为 asyncio "任务" 的多个协程。
 
 		- 让我们修改以上示例，*并发* 运行两个 "say_after" 协程:
 		```
@@ -118,7 +121,7 @@ then prints "world":
 		finished at 17:14:34
 		```
 
-## 可等待对象
+### 可等待对象 121
 1. 如果一个对象可以在 "await"  语句中使用，那么它就是 **可等待** 对象。许
 	多 asyncio API 都被设计为接受可等待对象。
 
@@ -203,7 +206,8 @@ then prints "world":
 
 		5. 一个很好的返回对象的低层级函数的示例是 "loop.run_in_executor()"。
 
-### 运行 asyncio 程序
+### 运行 asyncio 程序 206
+#### run
 1. asyncio.run(coro, *, debug=False)
 
 	- 执行 *coroutine* *coro* 并返回结果。
@@ -229,8 +233,8 @@ then prints "world":
 3. 注解: The source code for "asyncio.run()" can be found in
 	 Lib/asyncio/runners.py.
 
-### 创建任务
-#### create task
+### 创建任务 232
+#### create task 233
 1. asyncio.create_task(coro, *, name=None)
 > 将 *coro* 协程 打包为一个 "Task" 排入日程准备执行。返回 Task 对象。
 
@@ -259,8 +263,8 @@ then prints "world":
 
 	- 在 3.8 版更改: Added the "name" parameter.
 
-## 休眠
-#### sleep
+## 休眠 262
+#### sleep 263
 1. coroutine asyncio.sleep(delay, result=None, *, loop=None)
 > 阻塞 *delay* 指定的秒数。
 
@@ -288,8 +292,8 @@ then prints "world":
 	asyncio.run(display_date())
 	```
 
-### 并发运行任务
-#### gather
+### 并发运行任务 291
+#### gather 292
 1. awaitable asyncio.gather(*aws, loop=None, `return_exceptions`=False)
 > *并发* 运行 *aws* 序列中的 可等待对象。
 
@@ -338,25 +342,25 @@ async def main():
 
 asyncio.run(main())
 
-# Expected output:
-#
-#     Task A: Compute factorial(2)...
-#     Task B: Compute factorial(2)...
-#     Task C: Compute factorial(2)...
-#     Task A: factorial(2) = 2
-#     Task B: Compute factorial(3)...
-#     Task C: Compute factorial(3)...
-#     Task B: factorial(3) = 6
-#     Task C: Compute factorial(4)...
-#     Task C: factorial(4) = 24
+# Expected output: 341
+# 342
+#     Task A: Compute factorial(2)... 343
+#     Task B: Compute factorial(2)... 344
+#     Task C: Compute factorial(2)... 345
+#     Task A: factorial(2) = 2 346
+#     Task B: Compute factorial(3)... 347
+#     Task C: Compute factorial(3)... 348
+#     Task B: factorial(3) = 6 349
+#     Task C: Compute factorial(4)... 350
+#     Task C: factorial(4) = 24 351
 
 ```
 
 3. 在 3.7 版更改: 如果 *gather* 本身被取消，则无论 *return_exceptions*
 取值为何，消息都会被传播。
 
-### 屏蔽取消操作
-#### shield
+### 屏蔽取消操作 358
+#### shield 359
 1. awaitable asyncio.shield(aw, *, loop=None)
 > 保护一个 可等待对象 防止其被 "取消"。
 
@@ -390,8 +394,8 @@ asyncio.run(main())
 	- Deprecated since version 3.8, will be removed in version 3.10:
 	*loop* 形参。
 
-### 超时
-#### wait for
+### 超时 393
+#### wait for 394
 1. coroutine asyncio.wait_for(aw, timeout, *, loop=None)
 > 等待 *aw* 可等待对象 完成，指定 timeout 秒数后超时。
 
@@ -428,16 +432,16 @@ async def main():
 
 asyncio.run(main())
 
-# Expected output:
-#
-#     timeout!
+# Expected output: 431
+# 432
+#     timeout! 433
 ```
 
 3. 在 3.7 版更改: 当 *aw* 因超时被取消，`wait_for` 会等待 *aw* 被取消
 。之前版本则将立即引发 "asyncio.TimeoutError"。
 
-### 简单等待
-#### wait
+### 简单等待 439
+#### wait 440
 1. coroutine asyncio.wait(aws, *, loop=None, timeout=None, `return_when`=`ALL_COMPLETED`)
 
 	- 并发运行 *aws* 指定的 可等待对象 并阻塞线程直到满足 `return_when`
@@ -507,7 +511,7 @@ asyncio.run(main())
 
 	- 3.8 版后已移除: 直接向 "wait()" 传入协程对象的方式已弃用。
 
-#### as completed
+#### as completed 510
 1. asyncio.as_completed(aws, *, loop=None, timeout=None)
 
 	- 并发地运行 *aws* 集合中的 可等待对象。返回一个 "Future" 对象的迭代
@@ -525,8 +529,8 @@ asyncio.run(main())
 		# ...
 	```
 
-### 来自其他线程的日程安排
-#### run coroutine threadsfe
+### 来自其他线程的日程安排 528
+#### run coroutine threadsfe 529
 1. asyncio.run_coroutine_threadsafe(coro, loop)
 > 向指定事件循环提交一个协程。线程安全。
 
@@ -546,7 +550,7 @@ asyncio.run(main())
 
 	- 如果在协程内产生了异常，将会通知返回的 Future 对象。它也可被用来取
 	消事件循环中的任务:
-
+	```
       try:
           result = future.result(timeout)
       except asyncio.TimeoutError:
@@ -556,296 +560,270 @@ asyncio.run(main())
           print(f'The coroutine raised an exception: {exc!r}')
       else:
           print(f'The coroutine returned: {result!r}')
+	```
 
-   查看 并发和多线程 章节的文档。
+	- 查看 并发和多线程 章节的文档。
 
-   不同与其他 asyncio 函数，此函数要求显式地传入 *loop* 参数。
+	- 不同与其他 asyncio 函数，此函数要求显式地传入 *loop* 参数。
 
-   3.5.1 新版功能.
+### 内省
+#### current task
+1. `asyncio.current_task`(loop=None)
 
+   - 返回当前运行的 "Task" 实例，如果没有正在运行的任务则返回 "None"。
+   - 如果 *loop* 为 "None" 则会使用 `get_running_loop()` 获取当前事件循环。
 
-内省
-====
+#### all tasks
+1. asyncio.`all_tasks`(loop=None)
 
-asyncio.current_task(loop=None)
+	- 返回事件循环所运行的未完成的 "Task" 对象的集合。
+	- 如果 *loop* 为 "None"，则会使用 `get_running_loop()` 获取当前事件循环。
 
-   返回当前运行的 "Task" 实例，如果没有正在运行的任务则返回 "None"。
+### Task 对象 589
+#### Task 590
+1. class asyncio.Task(coro, `*`, loop=None, name=None)
 
-   如果 *loop* 为 "None" 则会使用 "get_running_loop()" 获取当前事件循
-   环。
+	- 一个与 "Future 类似" 的对象，可运行 Python 协程。非线程安全。
 
-   3.7 新版功能.
+	- Task 对象被用来在事件循环中运行协程。如果一个协程在等待一个 Future
+	对象，Task 对象会挂起该协程的执行并等待该 Future 对象完成。当该
+	Future 对象 *完成*，被打包的协程将恢复执行。
 
-asyncio.all_tasks(loop=None)
+	- 事件循环使用协同日程调度: 一个事件循环每次运行一个 Task 对象。而一
+	个 Task 对象会等待一个 Future 对象完成，该事件循环会运行其他 Task、
+	回调或执行 IO 操作。
 
-   返回事件循环所运行的未完成的 "Task" 对象的集合。
+	- 使用高层级的 `asyncio.create_task()` 函数来创建 Task 对象，也可用低
+	层级的 `loop.create_task()` 或 `ensure_future()` 函数。不建议手动实
+	例化 Task 对象。
 
-   如果 *loop* 为 "None"，则会使用 "get_running_loop()" 获取当前事件循
-   环。
+	- 要取消一个正在运行的 Task 对象可使用 "cancel()" 方法。调用此方法将
+	使该 Task 对象抛出一个 "CancelledError" 异常给打包的协程。如果取消
+	期间一个协程正在等待一个 Future 对象，该 Future 对象也将被取消。
 
-   3.7 新版功能.
+	- "cancelled()" 可被用来检测 Task 对象是否被取消。如果打包的协程没有
+	抑制 "CancelledError" 异常并且确实被取消，该方法将返回 "True"。
 
+	- "asyncio.Task" 从 "Future" 继承了其除 `Future.set_result()` 和
+	`Future.set_exception()` 以外的所有 API。
 
-### Task 对象
-#### Task
-1. class asyncio.Task(coro, *, loop=None, name=None)
+	- Task 对象支持 "contextvars" 模块。当一个 Task 对象被创建，它将复制
+	当前上下文，然后在复制的上下文中运行其协程。
 
-   一个与 "Future 类似" 的对象，可运行 Python 协程。非线程安全。
+	- 在 3.7 版更改: 加入对 "contextvars" 模块的支持。
 
-   Task 对象被用来在事件循环中运行协程。如果一个协程在等待一个 Future
-   对象，Task 对象会挂起该协程的执行并等待该 Future 对象完成。当该
-   Future 对象 *完成*，被打包的协程将恢复执行。
+	- 在 3.8 版更改: Added the "name" parameter.
 
-   事件循环使用协同日程调度: 一个事件循环每次运行一个 Task 对象。而一
-   个 Task 对象会等待一个 Future 对象完成，该事件循环会运行其他 Task、
-   回调或执行 IO 操作。
+	- Deprecated since version 3.8, will be removed in version 3.10:
+	*loop* 形参。
 
-   使用高层级的 "asyncio.create_task()" 函数来创建 Task 对象，也可用低
-   层级的 "loop.create_task()" 或 "ensure_future()" 函数。不建议手动实
-   例化 Task 对象。
+2. cancel()
+> 请求取消 Task 对象。
 
-   要取消一个正在运行的 Task 对象可使用 "cancel()" 方法。调用此方法将
-   使该 Task 对象抛出一个 "CancelledError" 异常给打包的协程。如果取消
-   期间一个协程正在等待一个 Future 对象，该 Future 对象也将被取消。
+	- 这将安排在下一轮事件循环中抛出一个 "CancelledError" 异常给被封包的协程。
 
-   "cancelled()" 可被用来检测 Task 对象是否被取消。如果打包的协程没有
-   抑制 "CancelledError" 异常并且确实被取消，该方法将返回 "True"。
-
-   "asyncio.Task" 从 "Future" 继承了其除 "Future.set_result()" 和
-   "Future.set_exception()" 以外的所有 API。
-
-   Task 对象支持 "contextvars" 模块。当一个 Task 对象被创建，它将复制
-   当前上下文，然后在复制的上下文中运行其协程。
-
-   在 3.7 版更改: 加入对 "contextvars" 模块的支持。
-
-   在 3.8 版更改: Added the "name" parameter.
-
-   Deprecated since version 3.8, will be removed in version 3.10:
-   *loop* 形参。
-
-   cancel()
-
-      请求取消 Task 对象。
-
-      这将安排在下一轮事件循环中抛出一个 "CancelledError" 异常给被封包
-      的协程。
-
-      协程在之后有机会进行清理甚至使用 "try" ... ... "except
-      CancelledError" ... "finally" 代码块抑制异常来拒绝请求。不同于
-      "Future.cancel()"，"Task.cancel()" 不保证 Task 会被取消，虽然抑
+	- 协程在之后有机会进行清理甚至使用 "try" ... ... "except
+      CancelledError" ... "finally" 代码块抑制异常来拒绝请求。
+	  
+	- 不同于"Future.cancel()"，"Task.cancel()" 不保证 Task 会被取消，虽然抑
       制完全取消并不常见，也很不鼓励这样做。
 
-      以下示例演示了协程是如何侦听取消请求的:
+	- 以下示例演示了协程是如何侦听取消请求的:
+	```
+	async def cancel_me():
+		print('cancel_me(): before sleep')
+	
+		try:
+			# Wait for 1 hour
+			await asyncio.sleep(3600)
+		except asyncio.CancelledError:
+			print('cancel_me(): cancel sleep')
+			raise
+		finally:
+			print('cancel_me(): after sleep')
+	
+	async def main():
+		# Create a "cancel_me" Task
+		task = asyncio.create_task(cancel_me())
+	
+		# Wait for 1 second
+		await asyncio.sleep(1)
+	
+		task.cancel()
+		try:
+			await task
+		except asyncio.CancelledError:
+			print("main(): cancel_me is cancelled now")
+	
+	asyncio.run(main())
+	
+	# Expected output:
+	#
+	#     cancel_me(): before sleep
+	#     cancel_me(): cancel sleep
+	#     cancel_me(): after sleep
+	#     main(): cancel_me is cancelled now
+	```
+	
+3. cancelled()
 
-         async def cancel_me():
-             print('cancel_me(): before sleep')
+	- 如果 Task 对象 *被取消* 则返回 "True"。
 
-             try:
-                 # Wait for 1 hour
-                 await asyncio.sleep(3600)
-             except asyncio.CancelledError:
-                 print('cancel_me(): cancel sleep')
-                 raise
-             finally:
-                 print('cancel_me(): after sleep')
+	- 当使用 "cancel()" 发出取消请求时 Task 会被 *取消*，其封包的协程
+	将传播被抛入的 "CancelledError" 异常。
 
-         async def main():
-             # Create a "cancel_me" Task
-             task = asyncio.create_task(cancel_me())
+4. done()
+	- 如果 Task 对象 *已完成* 则返回 "True"。
 
-             # Wait for 1 second
-             await asyncio.sleep(1)
+	- 当 Task 所封包的协程返回一个值、引发一个异常或 Task 本身被取消时，则会被认为 *已完成*。
 
-             task.cancel()
-             try:
-                 await task
-             except asyncio.CancelledError:
-                 print("main(): cancel_me is cancelled now")
+5. result()
 
-         asyncio.run(main())
+	- 返回 Task 的结果。
 
-         # Expected output:
-         #
-         #     cancel_me(): before sleep
-         #     cancel_me(): cancel sleep
-         #     cancel_me(): after sleep
-         #     main(): cancel_me is cancelled now
+	- 如果 Task 对象 *已完成*，其封包的协程的结果会被返回 (或者当协程
+	引发异常时，该异常会被重新引发。)
 
-   cancelled()
+	- 如果 Task 对象 *被取消*，此方法会引发一个 "CancelledError" 异常
 
-      如果 Task 对象 *被取消* 则返回 "True"。
+	- 如果 Task 对象的结果还不可用，此方法会引发一个
+	"InvalidStateError" 异常。
 
-      当使用 "cancel()" 发出取消请求时 Task 会被 *取消*，其封包的协程
-      将传播被抛入的 "CancelledError" 异常。
+6. exception()
 
-   done()
+	- 返回 Task 对象的异常。
 
-      如果 Task 对象 *已完成* 则返回 "True"。
+	- 如果所封包的协程引发了一个异常，该异常将被返回。如果所封包的协程
+	正常返回则该方法将返回 "None"。
 
-      当 Task 所封包的协程返回一个值、引发一个异常或 Task 本身被取消时
-      ，则会被认为 *已完成*。
+	- 如果 Task 对象 *被取消*，此方法会引发一个 "CancelledError" 异常
 
-   result()
+	- 如果 Task 对象尚未 *完成*，此方法将引发一个 "InvalidStateError"
+	异常。
 
-      返回 Task 的结果。
+7. `add_done_callback(callback, *, context=None)`
 
-      如果 Task 对象 *已完成*，其封包的协程的结果会被返回 (或者当协程
-      引发异常时，该异常会被重新引发。)
+	- 添加一个回调，将在 Task 对象 *完成* 时被运行。
 
-      如果 Task 对象 *被取消*，此方法会引发一个 "CancelledError" 异常
-      。
+	- 此方法应该仅在低层级的基于回调的代码中使用。
 
-      如果 Task 对象的结果还不可用，此方法会引发一个
-      "InvalidStateError" 异常。
+	- 要了解更多细节请查看 `Future.add_done_callback()` 的文档。
 
-   exception()
+8. `remove_done_callback(callback)`
 
-      返回 Task 对象的异常。
+	- 从回调列表中移除 *callback* 指定的回调。
 
-      如果所封包的协程引发了一个异常，该异常将被返回。如果所封包的协程
-      正常返回则该方法将返回 "None"。
+	- 此方法应该仅在低层级的基于回调的代码中使用。
 
-      如果 Task 对象 *被取消*，此方法会引发一个 "CancelledError" 异常
-      。
+	- 要了解更多细节请查看 `Future.remove_done_callback()` 的文档。
 
-      如果 Task 对象尚未 *完成*，此方法将引发一个 "InvalidStateError"
-      异常。
+9. `get_stack(*, limit=None)`
 
-   add_done_callback(callback, *, context=None)
+	- 返回此 Task 对象的栈框架列表。
 
-      添加一个回调，将在 Task 对象 *完成* 时被运行。
+	- 如果所封包的协程未完成，这将返回其挂起所在的栈。如果协程已成功完
+	成或被取消，这将返回一个空列表。如果协程被一个异常终止，这将返回
+	回溯框架列表。
 
-      此方法应该仅在低层级的基于回调的代码中使用。
+	- 框架总是从按从旧到新排序。
 
-      要了解更多细节请查看 "Future.add_done_callback()" 的文档。
+	- 每个被挂起的协程只返回一个栈框架。
 
-   remove_done_callback(callback)
+	- 可选的 *limit* 参数指定返回框架的数量上限；默认返回所有框架。返
+	回列表的顺序要看是返回一个栈还是一个回溯：栈返回最新的框架，回溯
+	返回最旧的框架。(这与 traceback 模块的行为保持一致。)
 
-      从回调列表中移除 *callback* 指定的回调。
+10. `print_stack(*, limit=None, file=None)`
 
-      此方法应该仅在低层级的基于回调的代码中使用。
+	- 打印此 Task 对象的栈或回溯。
 
-      要了解更多细节请查看 "Future.remove_done_callback()" 的文档。
+	- 此方法产生的输出类似于 traceback 模块通过 `get_stack()` 所获取的
+	框架。
 
-   get_stack(*, limit=None)
+	- *limit* 参数会直接传递给 `get_stack()`。
 
-      返回此 Task 对象的栈框架列表。
+	- *file* 参数是输出所写入的 I/O 流；默认情况下输出会写入
+	"sys.stderr"。
 
-      如果所封包的协程未完成，这将返回其挂起所在的栈。如果协程已成功完
-      成或被取消，这将返回一个空列表。如果协程被一个异常终止，这将返回
-      回溯框架列表。
+11. `get_coro()`
 
-      框架总是从按从旧到新排序。
+	- Return the coroutine object wrapped by the "Task".
 
-      每个被挂起的协程只返回一个栈框架。
+12. `get_name()`
 
-      可选的 *limit* 参数指定返回框架的数量上限；默认返回所有框架。返
-      回列表的顺序要看是返回一个栈还是一个回溯：栈返回最新的框架，回溯
-      返回最旧的框架。(这与 traceback 模块的行为保持一致。)
+	- Return the name of the Task.
 
-   print_stack(*, limit=None, file=None)
+	- If no name has been explicitly assigned to the Task, the default
+	asyncio Task implementation generates a default name during
+	instantiation.
 
-      打印此 Task 对象的栈或回溯。
+13. `set_name(value)`
 
-      此方法产生的输出类似于 traceback 模块通过 "get_stack()" 所获取的
-      框架。
+	- Set the name of the Task.
 
-      *limit* 参数会直接传递给 "get_stack()"。
+	- The *value* argument can be any object, which is then converted
+	to a string.
 
-      *file* 参数是输出所写入的 I/O 流；默认情况下输出会写入
-      "sys.stderr"。
+	- In the default Task implementation, the name will be visible in
+	the "repr()" output of a task object.
 
-   get_coro()
+14. classmethod `all_tasks(loop=None)`
 
-      Return the coroutine object wrapped by the "Task".
+	- 返回一个事件循环中所有任务的集合。
 
-      3.8 新版功能.
+	- 默认情况下将返回当前事件循环中所有任务。如果 *loop* 为 "None"，
+	则会使用 `get_event_loop()` 函数来获取当前事件循环。
 
-   get_name()
+	- Deprecated since version 3.7, will be removed in version 3.9: Do
+	not call this as a task method. Use the `asyncio.all_tasks()`
+	function instead.
 
-      Return the name of the Task.
+	15. classmethod `current_task(loop=None)`
 
-      If no name has been explicitly assigned to the Task, the default
-      asyncio Task implementation generates a default name during
-      instantiation.
+	- 返回当前运行任务或 "None"。
 
-      3.8 新版功能.
+	- 如果 *loop* 为 "None"，则会使用 `get_event_loop()` 函数来获取当
+	前事件循环。
 
-   set_name(value)
+	- Deprecated since version 3.7, will be removed in version 3.9: Do
+	not call this as a task method.  Use the `asyncio.current_task()` function instead.
 
-      Set the name of the Task.
+### 基于生成器的协程
+1. 注解: 对基于生成器的协程的支持 **已弃用** 并计划在 Python 3.10 中移除。
 
-      The *value* argument can be any object, which is then converted
-      to a string.
-
-      In the default Task implementation, the name will be visible in
-      the "repr()" output of a task object.
-
-      3.8 新版功能.
-
-   classmethod all_tasks(loop=None)
-
-      返回一个事件循环中所有任务的集合。
-
-      默认情况下将返回当前事件循环中所有任务。如果 *loop* 为 "None"，
-      则会使用 "get_event_loop()" 函数来获取当前事件循环。
-
-      Deprecated since version 3.7, will be removed in version 3.9: Do
-      not call this as a task method. Use the "asyncio.all_tasks()"
-      function instead.
-
-   classmethod current_task(loop=None)
-
-      返回当前运行任务或 "None"。
-
-      如果 *loop* 为 "None"，则会使用 "get_event_loop()" 函数来获取当
-      前事件循环。
-
-      Deprecated since version 3.7, will be removed in version 3.9: Do
-      not call this as a task method.  Use the
-      "asyncio.current_task()" function instead.
-
-
-基于生成器的协程
-================
-
-注解: 对基于生成器的协程的支持 **已弃用** 并计划在 Python 3.10 中移
-  除。
-
-基于生成器的协程是 async/await 语法的前身。它们是使用 "yield from" 语
+2. 基于生成器的协程是 async/await 语法的前身。它们是使用 "yield from" 语
 句创建的 Python 生成器，可以等待 Future 和其他协程。
 
-基于生成器的协程应该使用 "@asyncio.coroutine" 装饰，虽然这并非强制。
+3. 基于生成器的协程应该使用 "@asyncio.coroutine" 装饰，虽然这并非强制。
 
-@asyncio.coroutine
+4. @asyncio.coroutine
 
-   用来标记基于生成器的协程的装饰器。
+	- 用来标记基于生成器的协程的装饰器。
 
-   此装饰器使得旧式的基于生成器的协程能与 async/await 代码相兼容:
+	- 此装饰器使得旧式的基于生成器的协程能与 async/await 代码相兼容:
+	```
+	@asyncio.coroutine
+	def old_style_coroutine():
+		yield from asyncio.sleep(1)
 
-      @asyncio.coroutine
-      def old_style_coroutine():
-          yield from asyncio.sleep(1)
+	async def main():
+		await old_style_coroutine()
+	```
 
-      async def main():
-          await old_style_coroutine()
+	- 此装饰器不应该被用于 "async def" 协程。
 
-   此装饰器不应该被用于 "async def" 协程。
+	- Deprecated since version 3.8, will be removed in version 3.10: Use
+	"async def" instead.
 
-   Deprecated since version 3.8, will be removed in version 3.10: Use
-   "async def" instead.
+5. asyncio.iscoroutine(obj)
 
-asyncio.iscoroutine(obj)
+	- 如果 *obj* 是一个 协程对象 则返回 "True"。
 
-   如果 *obj* 是一个 协程对象 则返回 "True"。
+	- 此方法不同于 "inspect.iscoroutine()" 因为它对基于生成器的协程返回"True"。
 
-   此方法不同于 "inspect.iscoroutine()" 因为它对基于生成器的协程返回
-   "True"。
+6. asyncio.iscoroutinefunction(func)
 
-asyncio.iscoroutinefunction(func)
+	- 如果 *func* 是一个 协程函数 则返回 "True"。
 
-   如果 *func* 是一个 协程函数 则返回 "True"。
-
-   此方法不同于 "inspect.iscoroutinefunction()" 因为它对以
-   "@coroutine" 装饰的基于生成器的协程函数返回 "True"。
+	- 此方法不同于 "inspect.iscoroutinefunction()" 因为它对以
+	"@coroutine" 装饰的基于生成器的协程函数返回 "True"。
