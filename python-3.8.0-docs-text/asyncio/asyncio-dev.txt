@@ -72,38 +72,30 @@ result = future.result()
 
 8. 为了能够处理信号和执行子进程，事件循环必须运行于主线程中。
 
-方法 "loop.run_in_executor()" 可以和
+9. 方法 "loop.run_in_executor()" 可以和
 "concurrent.futures.ThreadPoolExecutor" 一起使用，用于在一个不同的操作
 系统线程中执行阻塞代码，并避免阻塞运行事件循环的那个操作系统线程。
 
-
 ### 运行阻塞的代码
-
-不应该直接调用阻塞( CPU 绑定)代码。例如，如果一个函数执行1秒的 CPU 密
+1. 不应该直接调用阻塞( CPU 绑定)代码。例如，如果一个函数执行1秒的 CPU 密
 集型计算，那么所有并发异步任务和 IO 操作都将延迟1秒。
 
-可以用执行器在不同的线程甚至不同的进程中运行任务，以避免使用事件循环阻
+2. 可以用执行器在不同的线程甚至不同的进程中运行任务，以避免使用事件循环阻
 塞 OS 线程。 请参阅 "loop.run_in_executor()" 方法了解详情。
 
-
-日志
-====
-
-asyncio使用 "logging" 模块，所有日志记录都是通过 ""asyncio"" logger执
+### 日志
+1. asyncio使用 "logging" 模块，所有日志记录都是通过 ""asyncio"" logger执
 行的。
 
-默认日志级别是 "logging.INFO" 。可以很容易地调整:
+2. 默认日志级别是 "logging.INFO" 。可以很容易地调整:
 
-   logging.getLogger("asyncio").setLevel(logging.WARNING)
+  ```logging.getLogger("asyncio").setLevel(logging.WARNING)``` 
 
-
-检测 never-awaited 协同程序
-===========================
-
-当协程函数被调用而不是被等待时 (即执行 "coro()" 而不是 "await coro()")
+### 检测 never-awaited 协同程序
+1. 当协程函数被调用而不是被等待时 (即执行 "coro()" 而不是 "await coro()")
 或者协程没有通过 "asyncio.create_task()" 被排入计划日程，asyncio 将会
 发出一条 "RuntimeWarning":
-
+```
    import asyncio
 
    async def test():
@@ -132,21 +124,23 @@ asyncio使用 "logging" 模块，所有日志记录都是通过 ""asyncio"" logg
        test()
      test()
 
-通常的修复方法是等待协程或者调用 "asyncio.create_task()" 函数:
+```
 
+2. 通常的修复方法是等待协程或者调用 "asyncio.create_task()" 函数:
+(!只有这样事件循环才会把任务放入调度行列)
+```
    async def main():
        await test()
 
+```
 
-检测就再也没异常
-================
-
-如果调用 "Future.set_exception()" ，但不等待 Future 对象，将异常传播到
+### 检测就再也没异常
+1. 如果调用 "Future.set_exception()" ，但不等待 Future 对象，将异常传播到
 用户代码。在这种情况下，当 Future 对象被垃圾收集时，asyncio将发出一条
 日志消息。
 
-未处理异常的例子:
-
+2. 未处理异常的例子:
+```
    import asyncio
 
    async def bug():
@@ -167,6 +161,7 @@ asyncio使用 "logging" 模块，所有日志记录都是通过 ""asyncio"" logg
      File "test.py", line 4, in bug
        raise Exception("not consumed")
    Exception: not consumed
+```
 
 激活调试模式 以获取任务创建处的跟踪信息:
 

@@ -1,11 +1,7 @@
-异常
-****
+## 异常
+> 源代码: Lib/asyncio/exceptions.py
 
-**源代码:** Lib/asyncio/exceptions.py
-
-======================================================================
-
-exception asyncio.TimeoutError
+### exception asyncio.TimeoutError
 
    该操作已超过规定的截止日期。
 
