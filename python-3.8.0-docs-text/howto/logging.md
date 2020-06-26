@@ -1,23 +1,42 @@
-日志 HOWTO
-**********
+<!-- vim-markdown-toc GFM -->
 
-作者:
-   Vinay Sajip <vinay_sajip at red-dove dot com>
+* [日志基础教程]
+	* [什么时候使用日志]
+	* [一个简单的例子]
+	* [记录日志到文件]
+	* [从多个模块记录日志]
+	* [记录变量数据]
+	* [更改显示消息的格式]
+	* [在消息中显示日期/时间]
+	* [后续步骤]
+* [进阶日志教程]
+	* [记录流程]
+	* [记录器]
+	* [处理程序]
+	* [格式化程序]
+	* [配置日志记录]
+	* [如果没有提供配置会发生什么]
+	* [配置库的日志记录]
+* [日志级别]
+	* [自定义级别]
+* [有用的处理程序]
+* [记录日志中引发的异常]
+* [使用任意对象作为消息]
+* [优化]
 
+<!-- vim-markdown-toc -->
 
-日志基础教程
-============
+# 日志基础教程
+> 作者:Vinay Sajip <vinay_sajip at red-dove dot com>
 
-日志是对软件执行时所发生事件的一种追踪方式。软件开发人员对他们的代码添
+1. 日志是对软件执行时所发生事件的一种追踪方式。软件开发人员对他们的代码添
 加日志调用，借此来指示某事件的发生。一个事件通过一些包含变量数据的描述
 信息来描述（比如：每个事件发生时的数据都是不同的）。开发者还会区分事件
 的重要性，重要性也被称为 *等级* 或 *严重性*
 
 
-什么时候使用日志
-----------------
-
-对于简单的日志使用来说日志功能提供了一系列便利的函数。它们是 "debug()"
+## 什么时候使用日志
+1. 对于简单的日志使用来说日志功能提供了一系列便利的函数。它们是 "debug()"
 ，"info()"，"warning()"，"error()" 和 "critical()"。想要决定何时使用日
 志，请看下表，其中显示了对于每个通用任务集合来说最好的工具。
 
@@ -44,8 +63,7 @@
 |                                       | 错误及应用领域                         |
 +---------------------------------------+----------------------------------------+
 
-日志功能应以所追踪事件级别或严重性而定。各级别适用性如下（以严重性递增
-）：
+2. 日志功能应以所追踪事件级别或严重性而定。各级别适用性如下（以严重性递增）：
 
 +----------------+-----------------------------------------------+
 | 级别           | 何时使用                                      |
@@ -63,51 +81,48 @@
 | "CRITICAL"     | 严重的错误，表明程序已不能继续执行            |
 +----------------+-----------------------------------------------+
 
-默认的级别是``WARNING``，意味着只会追踪该级别及以上的事件，除非更改日
-志配置。
+3. 默认的级别是``WARNING``，意味着只会追踪该级别及以上的事件，除非更改日志配置。
 
-所追踪事件可以以不同形式处理。最简单的方式是输出到控制台。另一种常用的
+4. 所追踪事件可以以不同形式处理。最简单的方式是输出到控制台。另一种常用的
 方式是写入磁盘文件。
 
+## 一个简单的例子
+1. 一个非常简单的例子：
+```
+import logging
+logging.warning('Watch out!')  # will print a message to the console
+logging.info('I told you so')  # will not print anything
+```
 
-一个简单的例子
---------------
+2. 如果你在命令行中输入这些代码并运行，你将会看到：
+```
+WARNING:root:Watch out!
+```
 
-一个非常简单的例子：
-
-   import logging
-   logging.warning('Watch out!')  # will print a message to the console
-   logging.info('I told you so')  # will not print anything
-
-如果你在命令行中输入这些代码并运行，你将会看到：
-
-   WARNING:root:Watch out!
-
-输出到命令行。"INFO" 消息并没有出现，因为默认级别是 "WARNING" 。打印的
+3. 输出到命令行。"INFO" 消息并没有出现，因为默认级别是 "WARNING" 。打印的
 信息包含事件的级别以及在日志调用中的对于事件的描述，例如“Watch out!”。
 暂时不用担心“root”部分：之后会作出解释。输出格式可按需要进行调整，格式
 化选项同样会在之后作出解释。
 
-
-记录日志到文件
---------------
-
-一种非常常见的情况是将日志事件记录到文件，让我们继续往下看。请确认启动
+## 记录日志到文件
+1. 一种非常常见的情况是将日志事件记录到文件，让我们继续往下看。请确认启动
 新的Python 解释器，不要在上一个环境中继续操作:
+```
+import logging
+logging.basicConfig(filename='example.log',level=logging.DEBUG)
+logging.debug('This message should go to the log file')
+logging.info('So should this')
+logging.warning('And this, too')
+```
 
-   import logging
-   logging.basicConfig(filename='example.log',level=logging.DEBUG)
-   logging.debug('This message should go to the log file')
-   logging.info('So should this')
-   logging.warning('And this, too')
+2. 现在，如果我们打开日志文件，我们应当能看到日志信息：
+```
+DEBUG:root:This message should go to the log file
+INFO:root:So should this
+WARNING:root:And this, too
+```
 
-现在，如果我们打开日志文件，我们应当能看到日志信息：
-
-   DEBUG:root:This message should go to the log file
-   INFO:root:So should this
-   WARNING:root:And this, too
-
-该示例同样展示了如何设置日志追踪级别的阈值。该示例中，由于我们设置的阈
+3. 该示例同样展示了如何设置日志追踪级别的阈值。该示例中，由于我们设置的阈
 值是 "DEBUG"，所有信息全部打印
 
 如果你想从命令行设置日志级别，例如：
@@ -887,16 +902,3 @@ The "NullHandler" 、 "StreamHandler" 和 "FileHandler" 类在核心日志包中
 
 另请注意，核心日志记录模块仅包含基本处理程序。如果你不导入
 "logging.handlers" 和 "logging.config" ，它们将不会占用任何内存。
-
-参见:
-
-  模块 "logging"
-     日志记录模块的 API 参考。
-
-  模块 "logging.config"
-     日志记录模块的配置 API 。
-
-  模块 "logging.handlers"
-     日志记录模块附带的有用处理程序。
-
-  日志操作手册

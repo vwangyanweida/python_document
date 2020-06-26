@@ -1,45 +1,58 @@
-"logging" --- Python 的日志记录工具
-***********************************
 
-**源代码：** Lib/logging/__init__.py
+<!-- vim-markdown-toc GFM -->
 
+	* [logging]
+* [Logger 对象]
+* [日志级别]
+* [处理器对象]
+* [Formatter Objects]
+* [Filter Objects]
+* [LogRecord Objects]
+* [LogRecord 属性]
+* [LoggerAdapter 对象]
+* [线程安全]
+* [模块级别函数]
+* [模块级属性]
+* [Integration with the warnings module]
 
-Important
-^^^^^^^^^
+<!-- vim-markdown-toc -->
 
-此页面仅包含 API 参考信息。教程信息和更多高级用法的讨论，请参阅
+## logging
+> "logging" --- Python 的日志记录工具
 
-* 基础教程
+1. 	- *源代码：** Lib/logging/__init__.py
 
-* 进阶教程
+2. 此页面仅包含 API 参考信息。教程信息和更多高级用法的讨论，请参阅
 
-* 日志操作手册
+	- 基础教程
 
-======================================================================
+	- 进阶教程
 
-这个模块为应用与库定义了实现灵活的事件日志系统的函数与类.
+	- 日志操作手册
 
-使用标准库提提供的 logging API 最主要的好处是，所有的 Python 模块都可
-能参与日志输出，包括你的日志消息和第三方模块的日志消息。
+3. 这个模块为**应用与库定义了实现灵活的事件日志系统的函数与类**.
 
-这个模块提供许多强大而灵活的功能。如果你对 logging 不太熟悉的话， 掌握
+4. **使用标准库提提供的 logging API 最主要的好处是，所有的 Python 模块都可
+能参与日志输出，包括你的日志消息和第三方模块的日志消息**。
+
+5. 这个模块提供许多强大而灵活的功能。如果你对 logging 不太熟悉的话， 掌握
 它最好的方式就是查看它对应的教程（详见右侧的链接）。
 
-该模块定义的基础类和函数都列在下面。
+6. 该模块定义的基础类和函数都列在下面。
 
-* 记录器暴露了应用程序代码直接使用的接口。
+	- 记录器暴露了应用程序代码直接使用的接口。
 
-* 处理程序将日志记录（由记录器创建）发送到适当的目标。
+	- 处理程序将日志记录（由记录器创建）发送到适当的目标。
 
-* 过滤器提供了更精细的设施，用于确定要输出的日志记录。
+	- 过滤器提供了更精细的设施，用于确定要输出的日志记录。
 
-* 格式化程序指定最终输出中日志记录的样式。
+	- 格式化程序指定最终输出中日志记录的样式。
 
 
 Logger 对象
 ===========
 
-Loggers 有以下的属性和方法。注意 *永远* 不要直接实例化 Loggers，应当通
+Loggers 有以下的属性和方法。注意 	- 永远* 不要直接实例化 Loggers，应当通
 过模块级别的函数 "logging.getLogger(name)" 。多次使用相同的名字调用
 "getLogger()" 会一直返回相同的 Logger 对象的引用。
 
@@ -64,7 +77,7 @@ class logging.Logger
 
       构造器将这个属性初始化为 "True"。
 
-      注解: 如果你关联了一个处理器*并且*到它自己的一个或多个记录器，
+      注解: 如果你关联了一个处理器	- 并且*到它自己的一个或多个记录器，
         它可能 发出多次相同的记录。总体来说，你不需要关联处理器到一个
         或多个记 录器 - 如果你只是关联它到一个合适的记录器等级中的最高
         级别记录 器，它将会看到子记录器所有记录的事件，他们的传播剩下
@@ -73,9 +86,9 @@ class logging.Logger
 
    setLevel(level)
 
-      给 logger 设置阈值为 *level* 。日志等级小于 *level* 会被忽略。严
-      重性为 *level* 或更高的日志消息将由该 logger 的任何一个或多个
-      handler 发出，除非将处理程序的级别设置为比 *level* 更高的级别。
+      给 logger 设置阈值为 	- level* 。日志等级小于 *level* 会被忽略。严
+      重性为 	- level* 或更高的日志消息将由该 logger 的任何一个或多个
+      handler 发出，除非将处理程序的级别设置为比 	- level* 更高的级别。
 
       创建一个 logger 时，设置级别为 "NOTSET"  （当 logger 是根 logger
       时，将处理所有消息；当 logger 是非根 logger 时，所有消息会委派给
@@ -96,7 +109,7 @@ class logging.Logger
 
       参见 日志级别 级别列表。
 
-      在 3.2 版更改: The *level* parameter now accepts a string
+      在 3.2 版更改: The 	- level* parameter now accepts a string
       representation of the level such as 'INFO' as an alternative to
       the integer constants such as "INFO". Note, however, that levels
       are internally stored as integers, and methods such as e.g.
@@ -105,7 +118,7 @@ class logging.Logger
 
    isEnabledFor(level)
 
-      Indicates if a message of severity *level* would be processed by
+      Indicates if a message of severity 	- level* would be processed by
       this logger. This method checks first the module-level level set
       by "logging.disable(level)" and then the logger's effective
       level as determined by "getEffectiveLevel()".
@@ -131,34 +144,34 @@ class logging.Logger
 
       3.2 新版功能.
 
-   debug(msg, *args, **kwargs)
+   debug(msg, 	- args, **kwargs)
 
-      Logs a message with level "DEBUG" on this logger. The *msg* is
-      the message format string, and the *args* are the arguments
-      which are merged into *msg* using the string formatting
+      Logs a message with level "DEBUG" on this logger. The 	- msg* is
+      the message format string, and the 	- args* are the arguments
+      which are merged into 	- msg* using the string formatting
       operator. (Note that this means that you can use keywords in the
       format string, together with a single dictionary argument.)
 
-      There are four keyword arguments in *kwargs* which are
-      inspected: *exc_info*, *stack_info*, *stacklevel* and *extra*.
+      There are four keyword arguments in 	- kwargs* which are
+      inspected: 	- exc_info*, *stack_info*, *stacklevel* and *extra*.
 
-      If *exc_info* does not evaluate as false, it causes exception
+      If 	- exc_info* does not evaluate as false, it causes exception
       information to be added to the logging message. If an exception
       tuple (in the format returned by "sys.exc_info()") or an
       exception instance is provided, it is used; otherwise,
       "sys.exc_info()" is called to get the exception information.
 
-      The second optional keyword argument is *stack_info*, which
+      The second optional keyword argument is 	- stack_info*, which
       defaults to "False". If true, stack information is added to the
       logging message, including the actual logging call. Note that
       this is not the same stack information as that displayed through
-      specifying *exc_info*: The former is stack frames from the
+      specifying 	- exc_info*: The former is stack frames from the
       bottom of the stack up to the logging call in the current
       thread, whereas the latter is information about stack frames
       which have been unwound, following an exception, while searching
       for exception handlers.
 
-      You can specify *stack_info* independently of *exc_info*, e.g.
+      You can specify 	- stack_info* independently of *exc_info*, e.g.
       to just show how you got to a certain point in your code, even
       when no exceptions were raised. The stack frames are printed
       following a header line which says:
@@ -168,7 +181,7 @@ class logging.Logger
       This mimics the "Traceback (most recent call last):" which is
       used when displaying exception frames.
 
-      The third optional keyword argument is *stacklevel*, which
+      The third optional keyword argument is 	- stacklevel*, which
       defaults to "1". If greater than 1, the corresponding number of
       stack frames are skipped when computing the line number and
       function name set in the "LogRecord" created for the logging
@@ -178,7 +191,7 @@ class logging.Logger
       of this parameter mirrors the equivalent one in the "warnings"
       module.
 
-      The fourth keyword argument is *extra* which can be used to pass
+      The fourth keyword argument is 	- extra* which can be used to pass
       a dictionary which is used to populate the __dict__ of the
       "LogRecord" created for the logging event with user-defined
       attributes. These custom attributes can then be used as you
@@ -195,7 +208,7 @@ class logging.Logger
 
          2006-02-08 22:20:02,165 192.168.0.1 fbloggs  Protocol problem: connection reset
 
-      The keys in the dictionary passed in *extra* should not clash
+      The keys in the dictionary passed in 	- extra* should not clash
       with the keys used by the logging system. (See the "Formatter"
       documentation for more information on which keys are used by the
       logging system.)
@@ -206,7 +219,7 @@ class logging.Logger
       expects 'clientip' and 'user' in the attribute dictionary of the
       "LogRecord". If these are missing, the message will not be
       logged because a string formatting exception will occur. So in
-      this case, you always need to pass the *extra* dictionary with
+      this case, you always need to pass the 	- extra* dictionary with
       these keys.
 
       While this might be annoying, this feature is intended for use
@@ -218,19 +231,19 @@ class logging.Logger
       specialized "Formatter"s would be used with particular
       "Handler"s.
 
-      在 3.2 版更改: 增加了 *stack_info* 参数。
+      在 3.2 版更改: 增加了 	- stack_info* 参数。
 
-      在 3.5 版更改: The *exc_info* parameter can now accept exception
+      在 3.5 版更改: The 	- exc_info* parameter can now accept exception
       instances.
 
-      在 3.8 版更改: 增加了 *stacklevel* 参数。
+      在 3.8 版更改: 增加了 	- stacklevel* 参数。
 
-   info(msg, *args, **kwargs)
+   info(msg, 	- args, **kwargs)
 
       Logs a message with level "INFO" on this logger. The arguments
       are interpreted as for "debug()".
 
-   warning(msg, *args, **kwargs)
+   warning(msg, 	- args, **kwargs)
 
       Logs a message with level "WARNING" on this logger. The
       arguments are interpreted as for "debug()".
@@ -239,22 +252,22 @@ class logging.Logger
         identical to "warning". As "warn" is deprecated, please do not
         use it - use "warning" instead.
 
-   error(msg, *args, **kwargs)
+   error(msg, 	- args, **kwargs)
 
       Logs a message with level "ERROR" on this logger. The arguments
       are interpreted as for "debug()".
 
-   critical(msg, *args, **kwargs)
+   critical(msg, 	- args, **kwargs)
 
       Logs a message with level "CRITICAL" on this logger. The
       arguments are interpreted as for "debug()".
 
-   log(level, msg, *args, **kwargs)
+   log(level, msg, 	- args, **kwargs)
 
-      Logs a message with integer level *level* on this logger. The
+      Logs a message with integer level 	- level* on this logger. The
       other arguments are interpreted as for "debug()".
 
-   exception(msg, *args, **kwargs)
+   exception(msg, 	- args, **kwargs)
 
       Logs a message with level "ERROR" on this logger. The arguments
       are interpreted as for "debug()". Exception info is added to the
@@ -263,11 +276,11 @@ class logging.Logger
 
    addFilter(filter)
 
-      Adds the specified filter *filter* to this logger.
+      Adds the specified filter 	- filter* to this logger.
 
    removeFilter(filter)
 
-      Removes the specified filter *filter* from this logger.
+      Removes the specified filter 	- filter* from this logger.
 
    filter(record)
 
@@ -280,20 +293,20 @@ class logging.Logger
 
    addHandler(hdlr)
 
-      Adds the specified handler *hdlr* to this logger.
+      Adds the specified handler 	- hdlr* to this logger.
 
    removeHandler(hdlr)
 
-      Removes the specified handler *hdlr* from this logger.
+      Removes the specified handler 	- hdlr* from this logger.
 
    findCaller(stack_info=False, stacklevel=1)
 
       Finds the caller's source filename and line number. Returns the
       filename, line number, function name and stack information as a
       4-element tuple. The stack information is returned as "None"
-      unless *stack_info* is "True".
+      unless 	- stack_info* is "True".
 
-      The *stacklevel* parameter is passed from code calling the
+      The 	- stacklevel* parameter is passed from code calling the
       "debug()" and other APIs. If greater than 1, the excess is used
       to skip stack frames before determining the values to be
       returned. This will generally be useful when calling logging
@@ -305,7 +318,7 @@ class logging.Logger
 
       Handles a record by passing it to all handlers associated with
       this logger and its ancestors (until a false value of
-      *propagate* is found). This method is used for unpickled records
+      	- propagate* is found). This method is used for unpickled records
       received from a socket, as well as those created locally.
       Logger-level filtering is applied using "filter()".
 
@@ -382,25 +395,25 @@ class logging.Handler
 
    setLevel(level)
 
-      给处理器设置阈值为 *level* 。日志级别小于 *level* 将被忽略。创建
+      给处理器设置阈值为 	- level* 。日志级别小于 *level* 将被忽略。创建
       处理器时，日志级别被设置为 "NOTSET" （所有的消息都会被处理）。
 
       参见 日志级别 级别列表。
 
-      在 3.2 版更改: *level* 形参现在接受像 'INFO' 这样的字符串形式的
+      在 3.2 版更改: 	- level* 形参现在接受像 'INFO' 这样的字符串形式的
       级别表达方式，也可以使用像 "INFO" 这样的整数常量。
 
    setFormatter(fmt)
 
-      Sets the "Formatter" for this handler to *fmt*.
+      Sets the "Formatter" for this handler to 	- fmt*.
 
    addFilter(filter)
 
-      Adds the specified filter *filter* to this handler.
+      Adds the specified filter 	- filter* to this handler.
 
    removeFilter(filter)
 
-      Removes the specified filter *filter* from this handler.
+      Removes the specified filter 	- filter* from this handler.
 
    filter(record)
 
@@ -471,7 +484,7 @@ reading.
 A Formatter can be initialized with a format string which makes use of
 knowledge of the "LogRecord" attributes - such as the default value
 mentioned above making use of the fact that the user's message and
-arguments are pre-formatted into a "LogRecord"'s *message* attribute.
+arguments are pre-formatted into a "LogRecord"'s 	- message* attribute.
 This format string contains standard Python %-style mapping keys. See
 section printf 风格的字符串格式化 for more information on string
 formatting.
@@ -484,19 +497,19 @@ class logging.Formatter(fmt=None, datefmt=None, style='%')
    Returns a new instance of the "Formatter" class.  The instance is
    initialized with a format string for the message as a whole, as
    well as a format string for the date/time portion of a message.  If
-   no *fmt* is specified, "'%(message)s'" is used.  If no *datefmt* is
+   no 	- fmt* is specified, "'%(message)s'" is used.  If no *datefmt* is
    specified, a format is used which is described in the
    "formatTime()" documentation.
 
-   The *style* parameter can be one of '%', '{' or '$' and determines
+   The 	- style* parameter can be one of '%', '{' or '$' and determines
    how the format string will be merged with its data: using one of
    %-formatting, "str.format()" or "string.Template". See Using
    particular formatting styles throughout your application for more
    information on using {- and $-formatting for log messages.
 
-   在 3.2 版更改: The *style* parameter was added.
+   在 3.2 版更改: The 	- style* parameter was added.
 
-   在 3.8 版更改: The *validate* parameter was added. Incorrect or
+   在 3.8 版更改: The 	- validate* parameter was added. Incorrect or
    mismatched style and fmt will raise a "ValueError". For example:
    "logging.Formatter('%(asctime)s - %(message)s', style='{')".
 
@@ -505,13 +518,13 @@ class logging.Formatter(fmt=None, datefmt=None, style='%')
       The record's attribute dictionary is used as the operand to a
       string formatting operation. Returns the resulting string.
       Before formatting the dictionary, a couple of preparatory steps
-      are carried out. The *message* attribute of the record is
-      computed using *msg* % *args*. If the formatting string contains
+      are carried out. The 	- message* attribute of the record is
+      computed using 	- msg* % *args*. If the formatting string contains
       "'(asctime)'", "formatTime()" is called to format the event
       time. If there is exception information, it is formatted using
       "formatException()" and appended to the message. Note that the
       formatted exception information is cached in attribute
-      *exc_text*. This is useful because the exception information can
+      	- exc_text*. This is useful because the exception information can
       be pickled and sent across the wire, but you should be careful
       if you have more than one "Formatter" subclass which customizes
       the formatting of exception information. In this case, you will
@@ -528,7 +541,7 @@ class logging.Formatter(fmt=None, datefmt=None, style='%')
       This method should be called from "format()" by a formatter
       which wants to make use of a formatted time. This method can be
       overridden in formatters to provide for any specific
-      requirement, but the basic behavior is as follows: if *datefmt*
+      requirement, but the basic behavior is as follows: if 	- datefmt*
       (a string) is specified, it is used with "time.strftime()" to
       format the creation time of the record. Otherwise, the format
       '%Y-%m-%d %H:%M:%S,uuu' is used, where the uuu part is a
@@ -587,9 +600,9 @@ events are passed.
 
 class logging.Filter(name='')
 
-   Returns an instance of the "Filter" class. If *name* is specified,
+   Returns an instance of the "Filter" class. If 	- name* is specified,
    it names a logger which, together with its children, will have its
-   events allowed through the filter. If *name* is the empty string,
+   events allowed through the filter. If 	- name* is the empty string,
    allows every event.
 
    filter(record)
@@ -646,36 +659,36 @@ class logging.LogRecord(name, level, pathname, lineno, msg, args, exc_info, func
    record.
 
    参数:
-      * **name** -- The name of the logger used to log the event
+      	- **name** -- The name of the logger used to log the event
         represented by this LogRecord. Note that this name will always
         have this value, even though it may be emitted by a handler
         attached to a different (ancestor) logger.
 
-      * **level** -- The numeric level of the logging event (one of
-        DEBUG, INFO etc.) Note that this is converted to *two*
+      	- **level** -- The numeric level of the logging event (one of
+        DEBUG, INFO etc.) Note that this is converted to 	- two*
         attributes of the LogRecord: "levelno" for the numeric value
         and "levelname" for the corresponding level name.
 
-      * **pathname** -- The full pathname of the source file where
+      	- **pathname** -- The full pathname of the source file where
         the logging call was made.
 
-      * **lineno** -- The line number in the source file where the
+      	- **lineno** -- The line number in the source file where the
         logging call was made.
 
-      * **msg** -- The event description message, possibly a format
+      	- **msg** -- The event description message, possibly a format
         string with placeholders for variable data.
 
-      * **args** -- Variable data to merge into the *msg* argument
+      	- **args** -- Variable data to merge into the *msg* argument
         to obtain the event description.
 
-      * **exc_info** -- An exception tuple with the current
+      	- **exc_info** -- An exception tuple with the current
         exception information, or "None" if no exception information
         is available.
 
-      * **func** -- The name of the function or method from which
+      	- **func** -- The name of the function or method from which
         the logging call was invoked.
 
-      * **sinfo** -- A text string representing stack information
+      	- **sinfo** -- A text string representing stack information
         from the base of the stack in the current thread, up to the
         logging call.
 
@@ -698,8 +711,8 @@ class logging.LogRecord(name, level, pathname, lineno, msg, args, exc_info, func
 
       old_factory = logging.getLogRecordFactory()
 
-      def record_factory(*args, **kwargs):
-          record = old_factory(*args, **kwargs)
+      def record_factory(	- args, **kwargs):
+          record = old_factory(	- args, **kwargs)
           record.custom_attribute = 0xdecafbad
           return record
 
@@ -805,7 +818,7 @@ full details on the options available to you.
 | threadName       | "%(threadName)s"          | 线程名（如果可用）                              |
 +------------------+---------------------------+-------------------------------------------------+
 
-在 3.1 版更改: 添加了 *processName*
+在 3.1 版更改: 添加了 	- processName*
 
 
 LoggerAdapter 对象
@@ -824,9 +837,9 @@ class logging.LoggerAdapter(logger, extra)
 
       Modifies the message and/or keyword arguments passed to a
       logging call in order to insert contextual information. This
-      implementation takes the object passed as *extra* to the
-      constructor and adds it to *kwargs* using key 'extra'. The
-      return value is a (*msg*, *kwargs*) tuple which has the
+      implementation takes the object passed as 	- extra* to the
+      constructor and adds it to 	- kwargs* using key 'extra'. The
+      return value is a (	- msg*, *kwargs*) tuple which has the
       (possibly modified) versions of the arguments passed in.
 
 In addition to the above, "LoggerAdapter" supports the following
@@ -868,7 +881,7 @@ logging.getLogger(name=None)
    Return a logger with the specified name or, if name is "None",
    return a logger which is the root logger of the hierarchy. If
    specified, the name is typically a dot-separated hierarchical name
-   like *'a'*, *'a.b'* or *'a.b.c.d'*. Choice of these names is
+   like 	- 'a'*, *'a.b'* or *'a.b.c.d'*. Choice of these names is
    entirely up to the developer who is using logging.
 
    All calls to this function with a given name return the same logger
@@ -897,32 +910,32 @@ logging.getLogRecordFactory()
    See "setLogRecordFactory()" for more information about the how the
    factory is called.
 
-logging.debug(msg, *args, **kwargs)
+logging.debug(msg, 	- args, **kwargs)
 
-   Logs a message with level "DEBUG" on the root logger. The *msg* is
-   the message format string, and the *args* are the arguments which
-   are merged into *msg* using the string formatting operator. (Note
+   Logs a message with level "DEBUG" on the root logger. The 	- msg* is
+   the message format string, and the 	- args* are the arguments which
+   are merged into 	- msg* using the string formatting operator. (Note
    that this means that you can use keywords in the format string,
    together with a single dictionary argument.)
 
-   There are three keyword arguments in *kwargs* which are inspected:
-   *exc_info* which, if it does not evaluate as false, causes
+   There are three keyword arguments in 	- kwargs* which are inspected:
+   	- exc_info* which, if it does not evaluate as false, causes
    exception information to be added to the logging message. If an
    exception tuple (in the format returned by "sys.exc_info()") or an
    exception instance is provided, it is used; otherwise,
    "sys.exc_info()" is called to get the exception information.
 
-   The second optional keyword argument is *stack_info*, which
+   The second optional keyword argument is 	- stack_info*, which
    defaults to "False". If true, stack information is added to the
    logging message, including the actual logging call. Note that this
    is not the same stack information as that displayed through
-   specifying *exc_info*: The former is stack frames from the bottom
+   specifying 	- exc_info*: The former is stack frames from the bottom
    of the stack up to the logging call in the current thread, whereas
    the latter is information about stack frames which have been
    unwound, following an exception, while searching for exception
    handlers.
 
-   You can specify *stack_info* independently of *exc_info*, e.g. to
+   You can specify 	- stack_info* independently of *exc_info*, e.g. to
    just show how you got to a certain point in your code, even when no
    exceptions were raised. The stack frames are printed following a
    header line which says:
@@ -932,7 +945,7 @@ logging.debug(msg, *args, **kwargs)
    This mimics the "Traceback (most recent call last):" which is used
    when displaying exception frames.
 
-   The third optional keyword argument is *extra* which can be used to
+   The third optional keyword argument is 	- extra* which can be used to
    pass a dictionary which is used to populate the __dict__ of the
    LogRecord created for the logging event with user-defined
    attributes. These custom attributes can then be used as you like.
@@ -948,7 +961,7 @@ logging.debug(msg, *args, **kwargs)
 
       2006-02-08 22:20:02,165 192.168.0.1 fbloggs  Protocol problem: connection reset
 
-   The keys in the dictionary passed in *extra* should not clash with
+   The keys in the dictionary passed in 	- extra* should not clash with
    the keys used by the logging system. (See the "Formatter"
    documentation for more information on which keys are used by the
    logging system.)
@@ -959,7 +972,7 @@ logging.debug(msg, *args, **kwargs)
    'clientip' and 'user' in the attribute dictionary of the LogRecord.
    If these are missing, the message will not be logged because a
    string formatting exception will occur. So in this case, you always
-   need to pass the *extra* dictionary with these keys.
+   need to pass the 	- extra* dictionary with these keys.
 
    While this might be annoying, this feature is intended for use in
    specialized circumstances, such as multi-threaded servers where the
@@ -969,14 +982,14 @@ logging.debug(msg, *args, **kwargs)
    circumstances, it is likely that specialized "Formatter"s would be
    used with particular "Handler"s.
 
-   在 3.2 版更改: 增加了 *stack_info* 参数。
+   在 3.2 版更改: 增加了 	- stack_info* 参数。
 
-logging.info(msg, *args, **kwargs)
+logging.info(msg, 	- args, **kwargs)
 
    Logs a message with level "INFO" on the root logger. The arguments
    are interpreted as for "debug()".
 
-logging.warning(msg, *args, **kwargs)
+logging.warning(msg, 	- args, **kwargs)
 
    Logs a message with level "WARNING" on the root logger. The
    arguments are interpreted as for "debug()".
@@ -985,34 +998,34 @@ logging.warning(msg, *args, **kwargs)
      identical to "warning". As "warn" is deprecated, please do not
      use it - use "warning" instead.
 
-logging.error(msg, *args, **kwargs)
+logging.error(msg, 	- args, **kwargs)
 
    Logs a message with level "ERROR" on the root logger. The arguments
    are interpreted as for "debug()".
 
-logging.critical(msg, *args, **kwargs)
+logging.critical(msg, 	- args, **kwargs)
 
    Logs a message with level "CRITICAL" on the root logger. The
    arguments are interpreted as for "debug()".
 
-logging.exception(msg, *args, **kwargs)
+logging.exception(msg, 	- args, **kwargs)
 
    Logs a message with level "ERROR" on the root logger. The arguments
    are interpreted as for "debug()". Exception info is added to the
    logging message. This function should only be called from an
    exception handler.
 
-logging.log(level, msg, *args, **kwargs)
+logging.log(level, msg, 	- args, **kwargs)
 
-   Logs a message with level *level* on the root logger. The other
+   Logs a message with level 	- level* on the root logger. The other
    arguments are interpreted as for "debug()".
 
    注解: The above module-level convenience functions, which
      delegate to the root logger, call "basicConfig()" to ensure that
      at least one handler is available. Because of this, they should
-     *not* be used in threads, in versions of Python earlier than
+     	- not* be used in threads, in versions of Python earlier than
      2.7.1 and 3.2, unless at least one handler has been added to the
-     root logger *before* the threads are started. In earlier versions
+     root logger 	- before* the threads are started. In earlier versions
      of Python, due to a thread safety shortcoming in "basicConfig()",
      this can (under rare circumstances) lead to handlers being added
      multiple times to the root logger, which can in turn lead to
@@ -1020,11 +1033,11 @@ logging.log(level, msg, *args, **kwargs)
 
 logging.disable(level=CRITICAL)
 
-   Provides an overriding level *level* for all loggers which takes
+   Provides an overriding level 	- level* for all loggers which takes
    precedence over the logger's own level. When the need arises to
    temporarily throttle logging output down across the whole
    application, this function can be useful. Its effect is to disable
-   all logging calls of severity *level* and below, so that if you
+   all logging calls of severity 	- level* and below, so that if you
    call it with a value of INFO, then all INFO and DEBUG events would
    be discarded, whereas those of severity WARNING and above would be
    processed according to the logger's effective level. If
@@ -1034,16 +1047,16 @@ logging.disable(level=CRITICAL)
 
    Note that if you have defined any custom logging level higher than
    "CRITICAL" (this is not recommended), you won't be able to rely on
-   the default value for the *level* parameter, but will have to
+   the default value for the 	- level* parameter, but will have to
    explicitly supply a suitable value.
 
-   在 3.7 版更改: The *level* parameter was defaulted to level
+   在 3.7 版更改: The 	- level* parameter was defaulted to level
    "CRITICAL". See Issue #28524 for more information about this
    change.
 
 logging.addLevelName(level, levelName)
 
-   Associates level *level* with text *levelName* in an internal
+   Associates level 	- level* with text *levelName* in an internal
    dictionary, which is used to map numeric levels to a textual
    representation, for example when a "Formatter" formats a message.
    This function can also be used to define your own levels. The only
@@ -1056,11 +1069,11 @@ logging.addLevelName(level, levelName)
 
 logging.getLevelName(level)
 
-   Returns the textual representation of logging level *level*. If the
+   Returns the textual representation of logging level 	- level*. If the
    level is one of the predefined levels "CRITICAL", "ERROR",
    "WARNING", "INFO" or "DEBUG" then you get the corresponding string.
    If you have associated levels with names using "addLevelName()"
-   then the name you have associated with *level* is returned. If a
+   then the name you have associated with 	- level* is returned. If a
    numeric value corresponding to one of the defined levels is passed
    in, the corresponding string representation is returned. Otherwise,
    the string 'Level %s' % level is returned.
@@ -1080,11 +1093,11 @@ logging.getLevelName(level)
 logging.makeLogRecord(attrdict)
 
    Creates and returns a new "LogRecord" instance whose attributes are
-   defined by *attrdict*. This function is useful for taking a pickled
+   defined by 	- attrdict*. This function is useful for taking a pickled
    "LogRecord" attribute dictionary, sent over a socket, and
    reconstituting it as a "LogRecord" instance at the receiving end.
 
-logging.basicConfig(**kwargs)
+logging.basicConfig(	- *kwargs)
 
    Does basic configuration for the logging system by creating a
    "StreamHandler" with a default "Formatter" and adding it to the
@@ -1093,7 +1106,7 @@ logging.basicConfig(**kwargs)
    if no handlers are defined for the root logger.
 
    This function does nothing if the root logger already has handlers
-   configured, unless the keyword argument *force* is set to "True".
+   configured, unless the keyword argument 	- force* is set to "True".
 
    注解: This function should be called from the main thread before
      other threads are started. In versions of Python prior to 2.7.1
@@ -1107,57 +1120,57 @@ logging.basicConfig(**kwargs)
    +----------------+-----------------------------------------------+
    | 格式           | 描述                                          |
    |================|===============================================|
-   | *filename*     | Specifies that a FileHandler be created,      |
+   | 	- filename*     | Specifies that a FileHandler be created,      |
    |                | using the specified filename, rather than a   |
    |                | StreamHandler.                                |
    +----------------+-----------------------------------------------+
-   | *filemode*     | If *filename* is specified, open the file in  |
+   | 	- filemode*     | If *filename* is specified, open the file in  |
    |                | this mode. Defaults to "'a'".                 |
    +----------------+-----------------------------------------------+
-   | *format*       | Use the specified format string for the       |
+   | 	- format*       | Use the specified format string for the       |
    |                | handler.                                      |
    +----------------+-----------------------------------------------+
-   | *datefmt*      | Use the specified date/time format, as        |
+   | 	- datefmt*      | Use the specified date/time format, as        |
    |                | accepted by "time.strftime()".                |
    +----------------+-----------------------------------------------+
-   | *style*        | If *format* is specified, use this style for  |
+   | 	- style*        | If *format* is specified, use this style for  |
    |                | the format string. One of "'%'", "'{'" or     |
    |                | "'$'" for printf-style, "str.format()" or     |
    |                | "string.Template" respectively. Defaults to   |
    |                | "'%'".                                        |
    +----------------+-----------------------------------------------+
-   | *level*        | Set the root logger level to the specified    |
+   | 	- level*        | Set the root logger level to the specified    |
    |                | level.                                        |
    +----------------+-----------------------------------------------+
-   | *stream*       | Use the specified stream to initialize the    |
+   | 	- stream*       | Use the specified stream to initialize the    |
    |                | StreamHandler. Note that this argument is     |
-   |                | incompatible with *filename* - if both are    |
+   |                | incompatible with 	- filename* - if both are    |
    |                | present, a "ValueError" is raised.            |
    +----------------+-----------------------------------------------+
-   | *handlers*     | If specified, this should be an iterable of   |
+   | 	- handlers*     | If specified, this should be an iterable of   |
    |                | already created handlers to add to the root   |
    |                | logger. Any handlers which don't already have |
    |                | a formatter set will be assigned the default  |
    |                | formatter created in this function. Note that |
-   |                | this argument is incompatible with *filename* |
-   |                | or *stream* - if both are present, a          |
+   |                | this argument is incompatible with 	- filename* |
+   |                | or 	- stream* - if both are present, a          |
    |                | "ValueError" is raised.                       |
    +----------------+-----------------------------------------------+
-   | *force*        | If this keyword argument is specified as      |
+   | 	- force*        | If this keyword argument is specified as      |
    |                | true, any existing handlers attached to the   |
    |                | root logger are removed and closed, before    |
    |                | carrying out the configuration as specified   |
    |                | by the other arguments.                       |
    +----------------+-----------------------------------------------+
 
-   在 3.2 版更改: 增加了 *style* 参数。
+   在 3.2 版更改: 增加了 	- style* 参数。
 
-   在 3.3 版更改: The *handlers* argument was added. Additional checks
+   在 3.3 版更改: The 	- handlers* argument was added. Additional checks
    were added to catch situations where incompatible arguments are
-   specified (e.g. *handlers* together with *stream* or *filename*, or
-   *stream* together with *filename*).
+   specified (e.g. 	- handlers* together with *stream* or *filename*, or
+   	- stream* together with *filename*).
 
-   在 3.8 版更改: 增加了 *force* 参数。
+   在 3.8 版更改: 增加了 	- force* 参数。
 
 logging.shutdown()
 
@@ -1172,7 +1185,7 @@ logging.shutdown()
 
 logging.setLoggerClass(klass)
 
-   Tells the logging system to use the class *klass* when
+   Tells the logging system to use the class 	- klass* when
    instantiating a logger. The class should define "__init__()" such
    that only a name argument is required, and the "__init__()" should
    call "Logger.__init__()". This function is typically called before
@@ -1186,7 +1199,7 @@ logging.setLogRecordFactory(factory)
    Set a callable which is used to create a "LogRecord".
 
    参数:
-      **factory** -- The factory callable to be used to instantiate a
+      	- *factory** -- The factory callable to be used to instantiate a
       log record.
 
    3.2 新版功能: This function has been provided, along with
@@ -1196,7 +1209,7 @@ logging.setLogRecordFactory(factory)
    The factory has the following signature:
 
    "factory(name, level, fn, lno, msg, args, exc_info, func=None,
-   sinfo=None, **kwargs)"
+   sinfo=None, 	- *kwargs)"
 
       name:
          日志记录器名称
@@ -1258,13 +1271,13 @@ logging.captureWarnings(capture)
    This function is used to turn the capture of warnings by logging on
    and off.
 
-   If *capture* is "True", warnings issued by the "warnings" module
+   If 	- capture* is "True", warnings issued by the "warnings" module
    will be redirected to the logging system. Specifically, a warning
    will be formatted using "warnings.formatwarning()" and the
    resulting string logged to a logger named "'py.warnings'" with a
    severity of "WARNING".
 
-   If *capture* is "False", the redirection of warnings to the logging
+   If 	- capture* is "False", the redirection of warnings to the logging
    system will stop, and warnings will be redirected to their original
    destinations (i.e. those in effect before "captureWarnings(True)"
    was called).
@@ -1277,7 +1290,7 @@ logging.captureWarnings(capture)
   模块 "logging.handlers"
      日志记录模块附带的有用处理程序。
 
-  **PEP 282** - A Logging System
+  	- *PEP 282** - A Logging System
      该提案描述了Python标准库中包含的这个特性。
 
   Original Python logging package
