@@ -1,3 +1,4 @@
+
 <!-- vim-markdown-toc GFM -->
 
 * [日志基础教程]
@@ -25,14 +26,13 @@
 * [优化]
 
 <!-- vim-markdown-toc -->
-
 # 日志基础教程
 > 作者:Vinay Sajip <vinay_sajip at red-dove dot com>
 
 1. 日志是对软件执行时所发生事件的一种追踪方式。软件开发人员对他们的代码添
 加日志调用，借此来指示某事件的发生。一个事件通过一些包含变量数据的描述
 信息来描述（比如：每个事件发生时的数据都是不同的）。开发者还会区分事件
-的重要性，重要性也被称为 *等级* 或 *严重性*
+的重要性，重要性也被称为 	-等级* 或 *严重性*
 
 
 ## 什么时候使用日志
@@ -125,16 +125,19 @@ WARNING:root:And this, too
 3. 该示例同样展示了如何设置日志追踪级别的阈值。该示例中，由于我们设置的阈
 值是 "DEBUG"，所有信息全部打印
 
-如果你想从命令行设置日志级别，例如：
+4. 如果你想从命令行设置日志级别，
+	1. 例如：
+	```
+	--log=INFO
+	```
 
-   --log=INFO
+	2. 并且在一些 	-loglevel* 变量中你可以获得 "--log" 命令的参数，你可以使用
+	```
+	getattr(logging, loglevel.upper())
+	```
+	3. 注释: 这里返回值是一个数字,代表着日志级别.loglevel本身就是log的参数.
 
-并且在一些 *loglevel* 变量中你可以获得 "--log" 命令的参数，你可以使用
-：
-
-   getattr(logging, loglevel.upper())
-
-通过 *level* 参数获得你将传递给 "basicConfig()" 的值。你需要对用户输入
+5. 通过 	-level* 参数获得你将传递给 "basicConfig()" 的值。你需要对用户输入
 数据进行错误排查，可如下例：
 
    # assuming loglevel is bound to the string value obtained from the
@@ -145,59 +148,57 @@ WARNING:root:And this, too
        raise ValueError('Invalid log level: %s' % loglevel)
    logging.basicConfig(level=numeric_level, ...)
 
-对 "basicConfig()" 的调用应该在  "debug()" ， "info()" 等的前面。因为
+6. 对 "basicConfig()" 的调用应该在  "debug()" ， "info()" 等的前面。	-*因为
 它被设计为一次性的配置，只有第一次调用会进行操作，随后的调用不会产生有
-效操作。
+效操作	-*。
 
-如果多次运行上述脚本，则连续运行的消息将追加到文件 *example.log* 。 如
+7. 如果多次运行上述脚本，则连续运行的消息将追加到文件 	-example.log* 。 如
 果你希望每次运行重新开始，而不是记住先前运行的消息，则可以通过将上例中
-的调用更改为来指定 *filemode* 参数:
+的调用更改为来指定 	-filemode* 参数:
 
    logging.basicConfig(filename='example.log', filemode='w', level=logging.DEBUG)
 
 输出将与之前相同，但不再追加进日志文件，因此早期运行的消息将丢失。
 
 
-从多个模块记录日志
-------------------
+## 从多个模块记录日志
+1. 如果你的程序包含多个模块，这里有一个如何组织日志记录的示例:
+```
+# myapp.py
+import logging
+import mylib
 
-如果你的程序包含多个模块，这里有一个如何组织日志记录的示例:
+def main():
+   logging.basicConfig(filename='myapp.log', level=logging.INFO)
+   logging.info('Started')
+   mylib.do_something()
+   logging.info('Finished')
 
-   # myapp.py
-   import logging
-   import mylib
+if __name__ == '__main__':
+   main()
 
-   def main():
-       logging.basicConfig(filename='myapp.log', level=logging.INFO)
-       logging.info('Started')
-       mylib.do_something()
-       logging.info('Finished')
+# mylib.py
+import logging
 
-   if __name__ == '__main__':
-       main()
+def do_something():
+   logging.info('Doing something')
+```
 
-   # mylib.py
-   import logging
+2. 如果你运行 	-myapp.py* ，你应该在 *myapp.log* 中看到：
+```
+INFO:root:Started
+INFO:root:Doing something
+INFO:root:Finished
+```
 
-   def do_something():
-       logging.info('Doing something')
-
-如果你运行 *myapp.py* ，你应该在 *myapp.log* 中看到：
-
-   INFO:root:Started
-   INFO:root:Doing something
-   INFO:root:Finished
-
-这是你期待看到的。 你可以使用 *mylib.py* 中的模式将此概括为多个模块。
-请注意，对于这种简单的使用模式，除了查看事件描述之外，你不能通过查看日
-志文件来了解应用程序中消息的 *来源* 。 如果要跟踪消息的位置，则需要参
-考教程级别以外的文档 - 请参阅 进阶日志教程 。
+3. 这是你期待看到的。 你可以使用 mylib.py 中的模式将此概括为多个模块。
+请注意，对于这种简单的使用模式，	-*除了查看事件描述之外，你不能通过查看日
+志文件来了解应用程序中消息的 来源	-* 。 
+如果要跟踪消息的位置，则需要参考教程级别以外的文档 - 请参阅 进阶日志教程 。
 
 
-记录变量数据
-------------
-
-要记录变量数据，请使用格式字符串作为事件描述消息，并将变量数据作为参数
+## 记录变量数据
+1. 要记录变量数据，请使用格式字符串作为事件描述消息，并将变量数据作为参数
 附加。 例如:
 
    import logging
@@ -209,97 +210,93 @@ WARNING:root:And this, too
 
 如你所见，将可变数据合并到事件描述消息中使用旧的 %-s形式的字符串格式化
 。 这是为了向后兼容：logging 包的出现时间早于较新的格式化选项例如
-"str.format()" 和 "string.Template"。 这些较新格式化选项 *是* 受支持的
+"str.format()" 和 "string.Template"。 这些较新格式化选项 	-是* 受支持的
 ，但探索它们超出了本教程的范围：有关详细信息，请参阅 Using particular
 formatting styles throughout your application。
 
-
-更改显示消息的格式
-------------------
-
-要更改用于显示消息的格式，你需要指定要使用的格式:
-
-   import logging
-   logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
-   logging.debug('This message should appear on the console')
-   logging.info('So should this')
-   logging.warning('And this, too')
+## 更改显示消息的格式
+1. 要更改用于显示消息的格式，你需要指定要使用的格式:
+```
+import logging
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.debug('This message should appear on the console')
+logging.info('So should this')
+logging.warning('And this, too')
+```
 
 这将输出：
 
-   DEBUG:This message should appear on the console
-   INFO:So should this
-   WARNING:And this, too
+```
+DEBUG:This message should appear on the console
+INFO:So should this
+WARNING:And this, too
+```
 
-请注意，前面示例中出现的“root”已消失。 对于可以出现在格式字符串中的全
+2. 请注意，前面示例中出现的“root”已消失。 对于可以出现在格式字符串中的全
 部内容，你可以参考以下文档 LogRecord 属性 ，但为了简单使用，你只需要
-*levelname* （严重性）， *message* （事件描述，包括可变数据），也许在
+	-levelname* （严重性）， *message* （事件描述，包括可变数据），也许在
 事件发生时显示。 这将在下一节中介绍。
 
-
-在消息中显示日期/时间
----------------------
-
-要显示事件的日期和时间，你可以在格式字符串中放置 '%(asctime)s'
-
-   import logging
-   logging.basicConfig(format='%(asctime)s %(message)s')
-   logging.warning('is when this event was logged.')
+## 在消息中显示日期/时间
+1. 要显示事件的日期和时间，你可以在格式字符串中放置 '%(asctime)s'
+```
+import logging
+logging.basicConfig(format='%(asctime)s %(message)s')
+logging.warning('is when this event was logged.')
+```
 
 应该打印这样的东西：
 
-   2010-12-12 11:41:42,612 is when this event was logged.
+```
+2010-12-12 11:41:42,612 is when this event was logged.
+```
 
-日期/时间显示的默认格式（如上所示）类似于 ISO8601 或 **RFC 3339** 。
-如果你需要更多地控制日期/时间的格式，请为 "basicConfig" 提供 *datefmt*
+3. 日期/时间显示的默认格式（如上所示）类似于 ISO8601 或 	-*RFC 3339** 。
+如果你需要更多地控制日期/时间的格式，请为 "basicConfig" 提供 	-datefmt*
 参数，如下例所示:
 
-   import logging
-   logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-   logging.warning('is when this event was logged.')
+```
+import logging
+logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+logging.warning('is when this event was logged.')
+```
 
 这会显示如下内容：
 
-   12/12/2010 11:46:36 AM is when this event was logged.
+```
+12/12/2010 11:46:36 AM is when this event was logged.
+```
 
-*datefmt* 参数的格式与 "time.strftime()" 支持的格式相同。
+3. 	-datefmt* 参数的格式与 "time.strftime()" 支持的格式相同。
 
-
-后续步骤
---------
-
-基本教程到此结束。 它应该足以让你启动并运行日志记录。 日志包提供了更多
+## 后续步骤
+1. 基本教程到此结束。 它应该足以让你启动并运行日志记录。 日志包提供了更多
 功能，但为了充分利用它，你需要花更多的时间来阅读以下部分。 如果你准备
 好了，可以拿一些你最喜欢的饮料然后继续。
 
-如果你的日志记录需求很简单，那么使用上面的示例将日志记录合并到你自己的
+2. 如果你的日志记录需求很简单，那么使用上面的示例将日志记录合并到你自己的
 脚本中，如果你遇到问题或者不理解某些内容，请在 comp.lang.python Usenet
-组上发布一个问题（在
-https://groups.google.com/forum/#!forum/comp.lang.python ） ，你应该在
-短时间内得到帮助。
+组上发布一个问题(在https://groups.google.com/forum/#!forum/comp.lang.python ),
+你应该在短时间内得到帮助。
 
-还不够？ 你可以继续阅读接下来的几个部分，这些部分提供了比上面基本部分
+	还不够？ 你可以继续阅读接下来的几个部分，这些部分提供了比上面基本部分
 更高级或深入的教程。 之后，你可以看一下 日志操作手册 。
 
+# 进阶日志教程
+1. 日志库采用模块化方法，并提供几类组件：记录器、处理程序、过滤器和格式化程序。
 
-进阶日志教程
-============
+	- 记录器暴露了应用程序代码直接使用的接口。
 
-日志库采用模块化方法，并提供几类组件：记录器、处理程序、过滤器和格式化
-程序。
+	- 处理程序将日志记录（由记录器创建）发送到适当的目标。
 
-* 记录器暴露了应用程序代码直接使用的接口。
+	- 过滤器提供了更精细的附加功能，用于确定要输出的日志记录。
 
-* 处理程序将日志记录（由记录器创建）发送到适当的目标。
-
-* 过滤器提供了更精细的附加功能，用于确定要输出的日志记录。
-
-* 格式化程序指定最终输出中日志记录的样式。
+	- 格式化程序指定最终输出中日志记录的样式。
 
 日志事件信息在 "LogRecord" 实例中的记录器、处理程序、过滤器和格式化程
 序之间传递。
 
-通过调用 "Logger" 类（以下称为 *loggers*  ， 记录器）的实例来执行日志
+通过调用 "Logger" 类（以下称为 	-loggers*  ， 记录器）的实例来执行日志
 记录。 每个实例都有一个名称，它们在概念上以点（句点）作为分隔符排列在
 命名空间的层次结构中。 例如，名为 'scan' 的记录器是记录器 'scan.text'
 ，'scan.html' 和 'scan.pdf' 的父级。 记录器名称可以是你想要的任何名称
@@ -321,7 +318,7 @@ https://groups.google.com/forum/#!forum/comp.lang.python ） ，你应该在
 当然，可以将消息记录到不同的地方。 软件包中的支持包含，用于将日志消息
 写入文件、 HTTP GET/POST 位置、通过 SMTP 发送电子邮件、通用套接字、队
 列或特定于操作系统的日志记录机制（如 syslog 或 Windows NT 事件日志）。
-目标由 *handler* 类提供。 如果你有任何内置处理程序类未满足的特殊要求，
+目标由 	-handler* 类提供。 如果你有任何内置处理程序类未满足的特殊要求，
 则可以创建自己的日志目标类。
 
 默认情况下，没有为任何日志记录消息设置目标。 你可以使用
@@ -335,7 +332,7 @@ https://groups.google.com/forum/#!forum/comp.lang.python ） ，你应该在
 
    severity:logger name:message
 
-你可以通过使用 *format* 参数将格式字符串传递给 "basicConfig()" 来更改
+你可以通过使用 	-format* 参数将格式字符串传递给 "basicConfig()" 来更改
 此设置。有关如何构造格式字符串的所有选项，请参阅 Formatter Objects 。
 
 
@@ -359,16 +356,16 @@ https://groups.google.com/forum/#!forum/comp.lang.python ） ，你应该在
 
 这些是最常见的配置方法：
 
-* "Logger.setLevel()" 指定记录器将处理的最低严重性日志消息，其中
+	- "Logger.setLevel()" 指定记录器将处理的最低严重性日志消息，其中
   debug 是最低内置严重性级别， critical 是最高内置严重性级别。 例如，
   如果严 重性级别为 INFO ，则记录器将仅处理 INFO 、 WARNING 、 ERROR
   和 CRITICAL 消息，并将忽略 DEBUG 消息。
 
-* "Logger.addHandler()" 和 "Logger.removeHandler()" 从记录器对象中添
+	- "Logger.addHandler()" 和 "Logger.removeHandler()" 从记录器对象中添
   加 和删除处理程序对象。处理程序在以下内容中有更详细的介绍 处理程序
   。
 
-* "Logger.addFilter()" 和 "Logger.removeFilter()" 可以添加或移除记录
+	- "Logger.addFilter()" 和 "Logger.removeFilter()" 可以添加或移除记录
   器 对象中的过滤器。 Filter Objects 包含更多的过滤器细节。
 
 你不需要始终在你创建的每个记录器上调用这些方法。 请参阅本节的最后两段
@@ -376,18 +373,18 @@ https://groups.google.com/forum/#!forum/comp.lang.python ） ，你应该在
 
 配置记录器对象后，以下方法将创建日志消息：
 
-* "Logger.debug()" 、 "Logger.info()" 、 "Logger.warning()" 、
+	- "Logger.debug()" 、 "Logger.info()" 、 "Logger.warning()" 、
   "Logger.error()" 和 "Logger.critical()" 都创建日志记录，包含消息和与
   其各自方法名称对应的级别。该消息实际上是一个格式化字符串，它可能包含
   标题字符串替换语法 "%s" 、 "%d" 、 "%f" 等等。其余参数是与消息中的替
-  换字段对应的对象列表。关于 "**kwargs" ，日志记录方法只关注
+  换字段对应的对象列表。关于 "	-*kwargs" ，日志记录方法只关注
   "exc_info" 的关键字，并用它来确定是否记录异常信息。
 
-* "Logger.exception()" 创建与 "Logger.error()" 相似的日志信息。 不同
+	- "Logger.exception()" 创建与 "Logger.error()" 相似的日志信息。 不同
   之 处是， "Logger.exception()" 同时还记录当前的堆栈追踪。仅从异常处
   理程 序调用此方法。
 
-* "Logger.log()" 将日志级别作为显式参数。对于记录消息而言，这比使用
+	- "Logger.log()" 将日志级别作为显式参数。对于记录消息而言，这比使用
   上 面列出的日志级别方便方法更加冗长，但这是自定义日志级别的方法。
 
 "getLogger()" 返回对具有指定名称的记录器实例的引用（如果已提供），或者
@@ -397,15 +394,15 @@ https://groups.google.com/forum/#!forum/comp.lang.python ） ，你应该在
 录器，名称为 "foo.bar" 、 "foo.bar.baz" 和 "foo.bam" 的记录器都是
 "foo" 子项。
 
-记录器具有 *有效等级* 的概念。如果未在记录器上显式设置级别，则使用其父
-级别作为其有效级别。如果父级没有明确的级别设置，则检查 *其* 父级。依此
+记录器具有 	-有效等级* 的概念。如果未在记录器上显式设置级别，则使用其父
+级别作为其有效级别。如果父级没有明确的级别设置，则检查 	-其* 父级。依此
 类推，搜索所有上级元素，直到找到明确设置的级别。根记录器始终具有显式级
 别集（默认情况下为 "WARNING" ）。在决定是否处理事件时，记录器的有效级
 别用于确定事件是否传递给记录器的处理程序。
 
 子记录器将消息传播到与其上级记录器关联的处理程序。因此，不必为应用程序
 使用的所有记录器定义和配置处理程序。为顶级记录器配置处理程序并根据需要
-创建子记录器就足够了。（但是，你可以通过将记录器的 *propagate* 属性设
+创建子记录器就足够了。（但是，你可以通过将记录器的 	-propagate* 属性设
 置 "False" 来关闭传播。）
 
 
@@ -426,14 +423,14 @@ https://groups.google.com/forum/#!forum/comp.lang.python ） ，你应该在
 即不创建自定义处理程序）的应用程序开发人员相关的唯一处理程序方法是以下
 配置方法：
 
-* "setLevel()" 方法，就像在记录器对象中一样，指定将被分派到适当目标
+	- "setLevel()" 方法，就像在记录器对象中一样，指定将被分派到适当目标
   的 最低严重性。为什么有两个 "setLevel()" 方法？记录器中设置的级别确
   定将 传递给其处理程序的消息的严重性。每个处理程序中设置的级别确定处
   理程序 将发送哪些消息。
 
-* "setFormatter()" 选择一个该处理程序使用的 Formatter 对象。
+	- "setFormatter()" 选择一个该处理程序使用的 Formatter 对象。
 
-* "addFilter()" 和 "removeFilter()" 分别在处理程序上配置和取消配置过
+	- "addFilter()" 和 "removeFilter()" 分别在处理程序上配置和取消配置过
   滤 器对象。
 
 应用程序代码不应直接实例化并使用 "Handler" 的实例。 相反， "Handler"
@@ -456,7 +453,7 @@ logging.Formatter.__init__(fmt=None, datefmt=None, style='%')
 
    %Y-%m-%d %H:%M:%S
 
-最后加上毫秒数。 "style" 是 *％*，'{ ' 或 '$' 之一。 如果未指定其中一
+最后加上毫秒数。 "style" 是 	-％*，'{ ' 或 '$' 之一。 如果未指定其中一
 个，则将使用 '％'。
 
 如果 "style" 是 '％'，则消息格式字符串使用 "%(<dictionary key>)s" 样式
@@ -647,15 +644,15 @@ logging.Formatter.__init__(fmt=None, datefmt=None, style='%')
 
 对于3.2之前的Python版本，行为如下：
 
-* 如果 *logging.raiseExceptions* 为 "False" （生产模式），则会以静默
+	- 如果 *logging.raiseExceptions* 为 "False" （生产模式），则会以静默
   方 式丢弃该事件。
 
-* 如果 *logging.raiseExceptions* 为 "True" （开发模式），则会打印一
+	- 如果 *logging.raiseExceptions* 为 "True" （开发模式），则会打印一
   条 消息“无法找到记录器 X.Y.Z 的处理程序”。
 
 在 Python 3.2 及更高版本中，行为如下：
 
-* 事件使用“最后的处理程序”输出，存储在 "logging.lastResort" 中。 这
+	- 事件使用“最后的处理程序”输出，存储在 "logging.lastResort" 中。 这
   个 内部处理程序与任何记录器都没有关联，它的作用类似于
   "StreamHandler" ，它将事件描述消息写入 "sys.stderr" 的当前值（因此服
   从任何可能的重定 向影响）。 没有对消息进行格式化——只打印裸事件描述消
@@ -673,7 +670,7 @@ logging.Formatter.__init__(fmt=None, datefmt=None, style='%')
 并且库代码进行日志记录调用，那么（如上一节所述）严重性为“WARNING”及更
 高级别的事件将打印到 "sys.stderr" 。这被认为是最好的默认行为。
 
-如果由于某种原因，你 *不* 希望在没有任何日志记录配置的情况下打印这些消
+如果由于某种原因，你 	-不* 希望在没有任何日志记录配置的情况下打印这些消
 息，则可以将无操作处理程序附加到库的顶级记录器。这样可以避免打印消息，
 因为将始终为库的事件找到处理程序：它不会产生任何输出。如果库用户配置应
 用程序使用的日志记录，可能是配置将添加一些处理程序，如果级别已适当配置
@@ -681,8 +678,8 @@ logging.Formatter.__init__(fmt=None, datefmt=None, style='%')
 
 日志包中包含一个不做任何事情的处理程序： "NullHandler" （自 Python 3.1
 起）。可以将此处理程序的实例添加到库使用的日志记录命名空间的顶级记录器
-中（ *如果* 你希望在没有日志记录配置的情况下阻止库的记录事件输出到
-"sys.stderr" ）。如果库 *foo* 的所有日志记录都是使用名称匹配 'foo.x'
+中（ 	-如果* 你希望在没有日志记录配置的情况下阻止库的记录事件输出到
+"sys.stderr" ）。如果库 	-foo* 的所有日志记录都是使用名称匹配 'foo.x'
 ， 'foo.x.y' 等的记录器完成的，那么代码:
 
    import logging
@@ -691,8 +688,8 @@ logging.Formatter.__init__(fmt=None, datefmt=None, style='%')
 应该有预计的效果。如果一个组织生成了许多库，则指定的记录器名称可以是
 “orgname.foo” 而不仅仅是 “foo” 。
 
-注解: 强烈建议你 *不要将* "NullHandler" *以外的任何处理程序添加到库
-  的记录 器中* 。这是因为处理程序的配置是使用你的库的应用程序开发人员
+注解: 强烈建议你 	-不要将* "NullHandler" *以外的任何处理程序添加到库
+  的记录 器中	- 。这是因为处理程序的配置是使用你的库的应用程序开发人员
   的权利。 应用程序开发人员了解他们的目标受众以及哪些处理程序最适合他
   们的应用程 序：如果你在“底层”添加处理程序，则可能会干扰他们执行单元
   测试和提供符 合其要求的日志的能力。
@@ -729,14 +726,14 @@ logging.Formatter.__init__(fmt=None, datefmt=None, style='%')
 记录消息被编码为 "LogRecord" 类的实例。当记录器决定实际记录事件时，从
 记录消息创建 "LogRecord" 实例。
 
-记录消息通过使用 *handlers* 进行调度机制，它们是 "Handler" 类的子类的
+记录消息通过使用 	-handlers* 进行调度机制，它们是 "Handler" 类的子类的
 实例。处理程序负责确保记录的消息（以 "LogRecord" 的形式）最终位于特定
 位置（或一组位置），这对该消息的目标受众（例如最终用户、 支持服务台员
 工、系统管理员、开发人员）。传递处理程序用于特定目标的 "LogRecord" 实
 例。 每个记录器可以有零个、一个或多个与之关联的处理程序（通过 "Logger"
 的 "addHandler()" 方法）。除了与记录器直接关联的任何处理程序之外，还调
-用与记录器的 *所有祖先相关联的所有处理程序来分派消息（除非记录器的
-*propagate* 标志设置为false值，这将停止传递到上级处理程序）。
+用与记录器的 	-所有祖先相关联的所有处理程序来分派消息（除非记录器的
+	-propagate* 标志设置为false值，这将停止传递到上级处理程序）。
 
 就像记录器一样，处理程序可以具有与它们相关联的级别。处理程序的级别作为
 过滤器，其方式与记录器级别相同。如果处理程序决定调度一个事件，则使用
@@ -749,7 +746,7 @@ logging.Formatter.__init__(fmt=None, datefmt=None, style='%')
 
 定义你自己的级别是可能的，但不一定是必要的，因为现有级别是根据实践经验
 选择的。但是，如果你确信需要自定义级别，那么在执行此操作时应特别小心，
-如果你正在开发库，则 *定义自定义级别可能是一个非常糟糕的主意* 。 这是
+如果你正在开发库，则 	-定义自定义级别可能是一个非常糟糕的主意* 。 这是
 因为如果多个库作者都定义了他们自己的自定义级别，那么使用开发人员很难控
 制和解释这些多个库的日志记录输出，因为给定的数值可能意味着不同的东西
 对于不同的库。
