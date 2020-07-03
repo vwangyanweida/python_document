@@ -1,21 +1,57 @@
-日志操作手册
-************
 
-作者:
+<!-- vim-markdown-toc GFM -->
+
+* [日志操作手册]
+	* [在多个模块中使用日志]
+	* [在多线程中使用日志]
+	* [使用多个日志处理器和多种格式化]
+	* [在多个地方记录日志]
+	* [日志服务器配置示例]
+	* [处理日志处理器的阻塞]
+* [通过网络发送和接收日志]
+* [在日志记录中添加上下文信息]
+	* [使用日志适配器传递上下文信息]
+	* [使用过滤器传递上下文信息]
+* [从多个进程记录至单个文件]
+	* [Using concurrent.futures.ProcessPoolExecutor]
+* [轮换日志文件]
+* [使用其他日志格式化方式]
+* [Customizing "LogRecord"]
+* [Subclassing QueueHandler - a ZeroMQ example]
+* [Subclassing QueueListener - a ZeroMQ example]
+* [An example dictionary-based configuration]
+* [Using a rotator and namer to customize log rotation processing]
+* [A more elaborate multiprocessing example]
+* [Inserting a BOM into messages sent to a SysLogHandler]
+* [Implementing structured logging]
+* [Customizing handlers with "dictConfig()"]
+* [Using particular formatting styles throughout your application]
+	* [Using LogRecord factories]
+	* [Using custom message objects]
+* [Configuring filters with "dictConfig()"]
+* [Customized exception formatting]
+* [Speaking logging messages]
+* [缓冲日志消息并有条件地输出它们]
+* [通过配置使用UTC (GMT) 格式化时间]
+* [使用上下文管理器进行选择性记录]
+* [A CLI application starter template]
+* [A Qt GUI for logging]
+
+<!-- vim-markdown-toc -->
+# 日志操作手册
+> 作者:
    Vinay Sajip <vinay_sajip at red-dove dot com>
 
 本页包含了许多日志记录相关的概念，这些概念在过去一直被认为很有用。
 
 
-在多个模块中使用日志
-====================
-
-多次调用 "logging.getLogger('someLogger')" 时会返回对同一个 logger 对
+## 在多个模块中使用日志
+1. 多次调用 "logging.getLogger('someLogger')" 时会返回对同一个 logger 对
 象的引用。 这不仅是在同一个模块中，在其他模块调用也是如此，只要是在同
 一个 Python 解释器进程中。 是应该引用同一个对象，此外，应用程序也可以
 在一个模块中定义和配置父 logger，而在单独的模块中创建（但不配置）子
 logger，对子 logger 的所有调用都将传给父 logger。 这里是主模块:
-
+```
    import logging
    import auxiliary_module
 
@@ -45,9 +81,11 @@ logger，对子 logger 的所有调用都将传给父 logger。 这里是主模�
    logger.info('calling auxiliary_module.some_function()')
    auxiliary_module.some_function()
    logger.info('done with auxiliary_module.some_function()')
+```
 
 这里是辅助模块:
 
+```
    import logging
 
    # create logger
@@ -65,9 +103,11 @@ logger，对子 logger 的所有调用都将传给父 logger。 这里是主模�
 
    def some_function():
        module_logger.info('received a call to "some_function"')
+```
 
 输出结果会像这样:
 
+```
    2005-03-23 23:47:11,663 - spam_application - INFO -
       creating an instance of auxiliary_module.Auxiliary
    2005-03-23 23:47:11,665 - spam_application.auxiliary.Auxiliary - INFO -
@@ -88,14 +128,12 @@ logger，对子 logger 的所有调用都将传给父 logger。 这里是主模�
       received a call to 'some_function'
    2005-03-23 23:47:11,673 - spam_application - INFO -
       done with auxiliary_module.some_function()
+```
 
-
-在多线程中使用日志
-==================
-
-在多个线程中记录日志并不需要特殊处理，以下示例展示了如何在主线程（起始
+## 在多线程中使用日志
+1. 在多个线程中记录日志并不需要特殊处理，以下示例展示了如何在主线程（起始
 线程）和其他线程中记录:
-
+```
    import logging
    import threading
    import time
@@ -121,9 +159,11 @@ logger，对子 logger 的所有调用都将传给父 logger。 这里是主模�
 
    if __name__ == '__main__':
        main()
+```
 
 运行结果会像如下这样:
 
+```
       0 Thread-1 Hi from myfunc
       3 MainThread Hello from main
     505 Thread-1 Hi from myfunc
@@ -141,20 +181,17 @@ logger，对子 logger 的所有调用都将传给父 logger。 这里是主模�
    4017 Thread-1 Hi from myfunc
    4513 MainThread Hello from main
    4518 Thread-1 Hi from myfunc
+```
 
 这表明不同线程的日志像期望的那样穿插输出，当然更多的线程也会像这样输出
-。
 
-
-使用多个日志处理器和多种格式化
-==============================
-
-日志记录器是普通的Python对象。"addHandler()" 方法没有限制可以添加的日
+## 使用多个日志处理器和多种格式化
+1. 日志记录器是普通的Python对象。"addHandler()" 方法没有限制可以添加的日
 志处理器数量。有时候，应用程序需要将严重类的消息记录在一个文本文件，而
 将错误类或其他等级的消息输出在控制台中。要进行这样的设定，只需多配置几
 个日志处理器即可，在应用程序代码中的日志记录调用可以保持不变。以下是对
 之前的基于模块配置的示例的略微修改:
-
+```
    import logging
 
    logger = logging.getLogger('simple_example')
@@ -179,6 +216,7 @@ logger，对子 logger 的所有调用都将传给父 logger。 这里是主模�
    logger.warning('warn message')
    logger.error('error message')
    logger.critical('critical message')
+```
 
 需要注意的是，'应用程序' 代码并不关心是否有多个日志处理器。示例中所做
 的改变只是添加和配置了一个新的名为 *fh* 的日志处理器。
@@ -188,14 +226,12 @@ logger，对子 logger 的所有调用都将传给父 logger。 这里是主模�
 在调试结束后注释或删除掉，你可以把它们保留在源码中并不输出。当需要再次
 调试时，只需要改变日志记录器或处理器的过滤等级即可。
 
-
-在多个地方记录日志
-==================
-
-假设有这样一种情况，你需要将日志按不同的格式和不同的情况存储在控制台和
+## 在多个地方记录日志
+1. 假设有这样一种情况，你需要将日志按不同的格式和不同的情况存储在控制台和
 文件中。比如说想把日志等级为DEBUG或更高的消息记录于文件中，而把那些等
 级为INFO或更高的消息输出在控制台。而且记录在文件中的消息格式需要包含时
 间戳，打印在控制台的不需要。以下示例展示了如何做到:
+```
 
    import logging
 
@@ -235,14 +271,17 @@ logger，对子 logger 的所有调用都将传给父 logger。 这里是主模�
    myapp.area1 : INFO     How quickly daft jumping zebras vex.
    myapp.area2 : WARNING  Jail zesty vixen who grabbed pay from quack.
    myapp.area2 : ERROR    The five boxing wizards jump quickly.
+```
 
 而在文件中会看到像这样
 
+```
    10-22 22:19 root         INFO     Jackdaws love my big sphinx of quartz.
    10-22 22:19 myapp.area1  DEBUG    Quick zephyrs blow, vexing daft Jim.
    10-22 22:19 myapp.area1  INFO     How quickly daft jumping zebras vex.
    10-22 22:19 myapp.area2  WARNING  Jail zesty vixen who grabbed pay from quack.
    10-22 22:19 myapp.area2  ERROR    The five boxing wizards jump quickly.
+```
 
 正如你所看到的，DEBUG级别的消息只展示在文件中，而其他消息两个地方都会
 输出。
@@ -251,11 +290,9 @@ logger，对子 logger 的所有调用都将传给父 logger。 这里是主模�
 的日志处理器。
 
 
-日志服务器配置示例
-==================
-
-以下是在一个模块中使用日志服务器配置的示例:
-
+## 日志服务器配置示例
+1. 以下是在一个模块中使用日志服务器配置的示例:
+```
    import logging
    import logging.config
    import time
@@ -284,10 +321,12 @@ logger，对子 logger 的所有调用都将传给父 logger。 这里是主模�
        # cleanup
        logging.config.stopListening()
        t.join()
+```
 
 然后如下的脚本，它接收文件名做为命令行参数，并将该文件以二进制编码的方
 式传给服务器，做为新的日志服务器配置:
 
+```
    #!/usr/bin/env python
    import socket, sys, struct
 
@@ -304,15 +343,13 @@ logger，对子 logger 的所有调用都将传给父 logger。 这里是主模�
    s.send(data_to_send)
    s.close()
    print('complete')
+```
 
-
-处理日志处理器的阻塞
-====================
-
-有时候需要让日志处理程序在不阻塞当前正在记录线程的情况下完成工作。 这
+## 处理日志处理器的阻塞
+1. 有时候需要让日志处理程序在不阻塞当前正在记录线程的情况下完成工作。 这
 在Web应用程序中很常见，当然也会在其他场景中出现。
 
-一个常见的缓慢行为是 "SMTPHandler": 由于开发者无法控制的多种原因（例如
+2. 一个常见的缓慢行为是 "SMTPHandler": 由于开发者无法控制的多种原因（例如
 ，性能不佳的邮件或网络基础架构），发送电子邮件可能需要很长时间。 其实
 几乎所有基于网络的处理程序都可能造成阻塞：即便是 "SocketHandler" 也可
 能在底层进行 DNS 查询，这太慢了（这个查询会深入至套接字代码，位于
