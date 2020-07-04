@@ -8,7 +8,7 @@
 	* [在多个地方记录日志]
 	* [日志服务器配置示例]
 	* [处理日志处理器的阻塞]
-* [通过网络发送和接收日志]
+	* [通过网络发送和接收日志]
 * [在日志记录中添加上下文信息]
 	* [使用日志适配器传递上下文信息]
 	* [使用过滤器传递上下文信息]
@@ -355,25 +355,25 @@ logger，对子 logger 的所有调用都将传给父 logger。 这里是主模�
 能在底层进行 DNS 查询，这太慢了（这个查询会深入至套接字代码，位于
 Python 层之下，这是不受开发者控制的）。
 
-一种解决方案是分成两部分去处理。第一部分，针对那些对性能有要求的关键线
-程的日志记录附加一个 "QueueHandler"。 日志记录器只需简单写入队列，该队
-列可以设置一个足够大的容量甚至不设置容量上限。通常写入队列是一个快速的
-操作，即使可能需要在代码中去捕获例如 "queue.Full" 等异常。 如果你是一
-名处理关键线程的开发者，请务必记录这些信息 (包括建议只为日志处理器附加
-"QueueHandlers") 以便于其他开发者使用你的代码。
+3. 一种解决方案是分成两部分去处理。
+	1. 第一部分，针对那些对性能有要求的关键线程的日志记录附加一个
+	"QueueHandler"。 日志记录器只需简单写入队列，该队列可以设置一个足够大的容量甚至不设置容量上限。
+	通常写入队列是一个快速的操作，即使可能需要在代码中去捕获例如 "queue.Full" 等异常。
+	如果你是一名处理关键线程的开发者，请务必记录这些信息 (包括建议只为日志处理器附加
+	"QueueHandlers") 以便于其他开发者使用你的代码。
 
-解决方案的另一部分是 "QueueListener"，它被设计用来作为 "QueueHandler"
-的对应。 "QueueListener" 非常简单：向其传入一个队列和一些处理句柄，它
-会启动一个内部线程来监听从 "QueueHandlers" (或任何其他可用的
-"LogRecords" 源) 发送过来的 LogRecords 队列。 "LogRecords" 会从队列中
-被移除，并被传递给句柄进行处理。
+	2. 解决方案的另一部分是 "QueueListener"，它被设计用来作为 "QueueHandler"
+	的对应。 "QueueListener" 非常简单：向其传入一个队列和一些处理句柄，它
+	会启动一个内部线程来监听从 "QueueHandlers" (或任何其他可用的
+	"LogRecords" 源) 发送过来的 LogRecords 队列。 "LogRecords" 会从队列中
+	被移除，并被传递给句柄进行处理。
 
-使用一个单独的类 "QueueListener" 优点是可以使用同一个实例去服务于多个
+4. 使用一个单独的类 "QueueListener" 优点是可以使用同一个实例去服务于多个
 ``QueueHandlers``。这样会更节省资源，否则每个处理程序都占用一个线程没
 有任何益处。
 
-以下是使用了这样两个类的示例(省略了导入语句):
-
+5. 以下是使用了这样两个类的示例(省略了导入语句):
+```
    que = queue.Queue(-1)  # no limit on size
    queue_handler = QueueHandler(que)
    handler = logging.StreamHandler()
@@ -389,25 +389,27 @@ Python 层之下，这是不受开发者控制的）。
    # you want to happen.
    root.warning('Look out!')
    listener.stop()
+```
 
 在运行后会产生:
-
+```
    MainThread: Look out!
+```
 
-在 3.5 版更改: 在 Python 3.5 之前，"QueueListener" 总是把从队列中接收
+5. 在 3.5 版更改: 在 Python 3.5 之前，"QueueListener" 总是把从队列中接收
 的每个消息都传给它初始化的日志处理程序。(这是因为它会假设过滤级别总是
 在队列的另一侧去设置的。) 从 Python 3.5 开始，可以通过在监听器构造函数
-中添加一个参数 "respect_handler_level=True" 改变这种情况。当这样设置时
+中添加一个参数 `respect_handler_level=True` 改变这种情况。当这样设置时
 ，监听器会比较每条消息的等级和日志处理器中设置的等级，只把需要传递的消
 息传给对应的日志处理器。
 
+6. 总结:
+<font color=green>Queuehandler将日记记录发送到一个queue中,Queuelinstener启动一个后台线程,不断的消费queue中的日记记录,将日记记录通过handlers操作.</font>
 
-通过网络发送和接收日志
-======================
-
-如果你想在网络上发送日志，并在接收端处理它们。一个简单的方式是通过附加
+## 通过网络发送和接收日志
+1. 如果你想在网络上发送日志，并在接收端处理它们。一个简单的方式是通过附加
 一个 "SocketHandler" 的实例在发送端的根日志处理器中:
-
+```
    import logging, logging.handlers
 
    rootLogger = logging.getLogger('')
@@ -431,10 +433,12 @@ Python 层之下，这是不受开发者控制的）。
    logger1.info('How quickly daft jumping zebras vex.')
    logger2.warning('Jail zesty vixen who grabbed pay from quack.')
    logger2.error('The five boxing wizards jump quickly.')
+```
 
 在接收端，你可以使用 "socketserver" 模块设置一个接收器。这里是一个基础
 示例:
 
+```
    import pickle
    import logging
    import logging.handlers
@@ -519,6 +523,7 @@ Python 层之下，这是不受开发者控制的）。
 
    if __name__ == '__main__':
        main()
+```
 
 首先运行服务端，然后是客户端。在客户端，没有什么内容会打印在控制台中；
 在服务端，你应该会看到如下内容：
