@@ -1,37 +1,47 @@
-"socketserver" --- A framework for network servers
-**************************************************
 
-**Source code:** Lib/socketserver.py
+<!-- vim-markdown-toc GFM -->
 
-======================================================================
+* ["socketserver" --- A framework for network servers]
+* [Server Creation Notes]
+* [Server Objects]
+* [Request Handler Objects]
+* [示例]
+	* ["socketserver.TCPServer" Example]
+	* ["socketserver.UDPServer" Example]
+	* [Asynchronous Mixins]
 
-The "socketserver" module simplifies the task of writing network
-servers.
+<!-- vim-markdown-toc -->
 
-There are four basic concrete server classes:
 
-class socketserver.TCPServer(server_address, RequestHandlerClass, bind_and_activate=True)
+# "socketserver" --- A framework for network servers
+> Source code: Lib/socketserver.py
 
-   This uses the Internet TCP protocol, which provides for continuous
-   streams of data between the client and server. If
-   *bind_and_activate* is true, the constructor automatically attempts
-   to invoke "server_bind()" and "server_activate()".  The other
-   parameters are passed to the "BaseServer" base class.
+1. The "socketserver" module simplifies the task of writing network servers.
 
-class socketserver.UDPServer(server_address, RequestHandlerClass, bind_and_activate=True)
+2. There are four basic concrete server classes:
 
-   This uses datagrams, which are discrete packets of information that
-   may arrive out of order or be lost while in transit.  The
-   parameters are the same as for "TCPServer".
+	1. class socketserver.TCPServer(server_address, RequestHandlerClass, bind_and_activate=True)
 
-class socketserver.UnixStreamServer(server_address, RequestHandlerClass, bind_and_activate=True)
-class socketserver.UnixDatagramServer(server_address, RequestHandlerClass, bind_and_activate=True)
+		This uses the Internet TCP protocol, which provides for continuous
+		streams of data between the client and server. If
+		*bind_and_activate* is true, the constructor automatically attempts
+		to invoke "server_bind()" and "server_activate()".  The other
+		parameters are passed to the "BaseServer" base class.
 
-   These more infrequently used classes are similar to the TCP and UDP
-   classes, but use Unix domain sockets; they're not available on non-
-   Unix platforms.  The parameters are the same as for "TCPServer".
+	2. class socketserver.UDPServer(server_address, RequestHandlerClass, bind_and_activate=True)
 
-These four classes process requests *synchronously*; each request must
+		This uses datagrams, which are discrete packets of information that
+		may arrive out of order or be lost while in transit.  The
+		parameters are the same as for "TCPServer".
+
+	3. class socketserver.UnixStreamServer(server_address, RequestHandlerClass, bind_and_activate=True)
+	4. class socketserver.UnixDatagramServer(server_address, RequestHandlerClass, bind_and_activate=True)
+
+		These more infrequently used classes are similar to the TCP and UDP
+		classes, but use Unix domain sockets; they're not available on non-
+		Unix platforms.  The parameters are the same as for "TCPServer".
+
+3. These four classes process requests *synchronously*; each request must
 be completed before the next request can be started.  This isn't
 suitable if each request takes a long time to complete, because it
 requires a lot of computation, or because it returns a lot of data

@@ -1,3 +1,19 @@
+
+<!-- vim-markdown-toc GFM -->
+
+* [套接字协议族]
+* [模块内容]
+	* [异常]
+	* [常数]
+	* [函数]
+* [Socket Objects]
+* [Notes on socket timeouts]
+	* [Timeouts and the "connect" method]
+	* [Timeouts and the "accept" method]
+* [示例]
+
+<!-- vim-markdown-toc -->
+
 "socket" --- 底层网络接口
 *************************
 
