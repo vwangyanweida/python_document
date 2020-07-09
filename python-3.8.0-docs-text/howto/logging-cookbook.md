@@ -9,13 +9,13 @@
 	* [日志服务器配置示例]
 	* [处理日志处理器的阻塞]
 	* [通过网络发送和接收日志]
-* [在日志记录中添加上下文信息]
-	* [使用日志适配器传递上下文信息]
+	* [在日志记录中添加上下文信息]
+		* [使用日志适配器传递上下文信息]
 	* [使用过滤器传递上下文信息]
-* [从多个进程记录至单个文件]
+	* [从多个进程记录至单个文件]
 	* [Using concurrent.futures.ProcessPoolExecutor]
-* [轮换日志文件]
-* [使用其他日志格式化方式]
+	* [轮换日志文件]
+	* [使用其他日志格式化方式]
 * [Customizing "LogRecord"]
 * [Subclassing QueueHandler - a ZeroMQ example]
 * [Subclassing QueueListener - a ZeroMQ example]
@@ -404,7 +404,8 @@ Python 层之下，这是不受开发者控制的）。
 息传给对应的日志处理器。
 
 6. 总结:
-<font color=green>Queuehandler将日记记录发送到一个queue中,Queuelinstener启动一个后台线程,不断的消费queue中的日记记录,将日记记录通过handlers操作.</font>
+<font color=green>Queuehandler将日记记录发送到一个queue中,Queuelinstener启动一个后台线程,
+不断的消费queue中的日记记录,将日记记录通过handlers操作.</font>
 
 ## 通过网络发送和接收日志
 1. 如果你想在网络上发送日志，并在接收端处理它们。一个简单的方式是通过附加
@@ -446,7 +447,7 @@ Python 层之下，这是不受开发者控制的）。
    import struct
 
 
-   class LogRecordStreamHandler(socketserver.StreamRequestHandler):
+elf.abort  class LogRecordStreamHandler(socketserver.StreamRequestHandler):
        """Handler for a streaming logging request.
 
        This basically logs the record using whatever logging policy is
@@ -527,23 +528,22 @@ Python 层之下，这是不受开发者控制的）。
 
 首先运行服务端，然后是客户端。在客户端，没有什么内容会打印在控制台中；
 在服务端，你应该会看到如下内容：
-
+```
    About to start TCP server...
       59 root            INFO     Jackdaws love my big sphinx of quartz.
       59 myapp.area1     DEBUG    Quick zephyrs blow, vexing daft Jim.
       69 myapp.area1     INFO     How quickly daft jumping zebras vex.
       69 myapp.area2     WARNING  Jail zesty vixen who grabbed pay from quack.
       69 myapp.area2     ERROR    The five boxing wizards jump quickly.
+```
 
 请注意，在某些情况下序列化会存在一些安全。如果这影响到你，那么你可以通
 过覆盖 "makePickle()" 方法，使用自己的实现来解决，并调整上述脚本也使用
 覆盖后的序列化方法。
 
 
-在日志记录中添加上下文信息
-==========================
-
-有时，除了传递给日志记录器调用的参数外，我们还希望日志记录中包含上下文
+## 在日志记录中添加上下文信息
+1. 有时，除了传递给日志记录器调用的参数外，我们还希望日志记录中包含上下文
 信息。例如，有一个网络应用，可能需要记录一些特殊的客户端信息在日志中（
 比如客户端的用户名、IP地址等）。虽然你可以通过设置额外的参数去达到这个
 目的，但这种方式不一定方便。或者你可能想到在每个连接的基础上创建一个
@@ -551,41 +551,39 @@ Python 层之下，这是不受开发者控制的）。
 ，但当 "Logger" 的实例数量取决于你应用程序中想记录的细致程度时，如果
 "Logger" 的实例数量不受限制的话，将会变得难以管理。
 
-
-使用日志适配器传递上下文信息
-----------------------------
-
-一个传递上下文信息和日志事件信息的简单办法是使用类 "LoggerAdapter"。
+### 使用日志适配器传递上下文信息
+1. 一个传递上下文信息和日志事件信息的简单办法是使用类 "LoggerAdapter"。
 这个类设计的像 "Logger"，所以可以直接调用 "debug()"、"info()"、
 "warning()"、 "error()"、"exception()"、 "critical()" 和 "log()"。 这
 些方法在对应的 "Logger" 中使用相同的签名，所以可以交替使用两种类型的实
 例。
 
-当你创建一个 "LoggerAdapter" 的实例时，你会传入一个 "Logger" 的实例和
+2. 当你创建一个 "LoggerAdapter" 的实例时，你会传入一个 "Logger" 的实例和
 一个包含了上下文信息的字典对象。当你调用一个 "LoggerAdapter" 实例的方
 法时，它会把调用委托给内部的 "Logger" 的实例，并为其整理相关的上下文信
 息。这是 "LoggerAdapter" 的一个代码片段:
-
+```
    def debug(self, msg, /, *args, **kwargs):
        """
        Delegate a debug call to the underlying logger, after adding
        contextual information from this adapter instance.
        """
        msg, kwargs = self.process(msg, kwargs)
-       self.logger.debug(msg, *args, **kwargs)
+       self.logger.debug(msg, *args, **kwargs)**
+```
 
-"LoggerAdapter" 的 "process()" 方法是将上下文信息添加到日志的输出中。
+3. "LoggerAdapter" 的 "process()" 方法是将上下文信息添加到日志的输出中。
 它传入日志消息和日志调用的关键字参数，并传回（隐式的）这些修改后的内容
 去调用底层的日志记录器。此方法的默认参数只是一个消息字段，但留有一个
 'extra' 的字段作为关键字参数传给构造器。当然，如果你在调用适配器时传入
 了一个 'extra' 字段的参数，它会被静默覆盖。
 
-使用 'extra' 的优点是这些键值对会被传入 "LogRecord" 实例的 __dict__ 中
+4. 使用 'extra' 的优点是这些键值对会被传入 "LogRecord" 实例的 `__dict__` 中
 ，让你通过 "Formatter" 的实例直接使用定制的字符串，实例能找到这个字典
 类对象的键。 如果你需要一个其他的方法，比如说，想要在消息字符串前后增
 加上下文信息，你只需要创建一个 "LoggerAdapter" 的子类，并覆盖它的
 "process()" 方法来做你想做的事情，以下是一个简单的示例:
-
+```
    class CustomAdapter(logging.LoggerAdapter):
        """
        This example adapter expects the passed in dict-like object to have a
@@ -593,37 +591,35 @@ Python 层之下，这是不受开发者控制的）。
        """
        def process(self, msg, kwargs):
            return '[%s] %s' % (self.extra['connid'], msg), kwargs
+```
 
-你可以这样使用:
-
+5. 你可以这样使用:
+```
    logger = logging.getLogger(__name__)
    adapter = CustomAdapter(logger, {'connid': some_conn_id})
+```
 
-然后，你记录在适配器中的任何事件消息前将添加``some_conn_id``的值。
+6. 然后，你记录在适配器中的任何事件消息前将添加``some_conn_id``的值。
 
 
-使用除字典之外的其它对象传递上下文信息
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-你不需要将一个实际的字典传递给 "LoggerAdapter"-你可以传入一个实现了
-``__getitem__`` 和``__iter__``的类的实例，这样它就像是一个字典。这对于
+7. 使用除字典之外的其它对象传递上下文信息
+	你不需要将一个实际的字典传递给 "LoggerAdapter"-<font color=green>你可以传入一个实现了
+``__getitem__`` 和``__iter__``的类的实例，这样它就像是一个字典</font>。这对于
 你想动态生成值（而字典中的值往往是常量）将很有帮助。
 
 
-使用过滤器传递上下文信息
-------------------------
-
-你也可以使用一个用户定义的类 "Filter" 在日志输出中添加上下文信息。
+## 使用过滤器传递上下文信息
+1. 你也可以使用一个用户定义的类 "Filter" 在日志输出中添加上下文信息。
 "Filter" 的实例是被允许修改传入的 "LogRecords"，包括添加其他的属性，然
 后可以使用合适的格式化字符串输出，或者可以使用一个自定义的类
 "Formatter"。
 
-例如，在一个web应用程序中，正在处理的请求（或者至少是请求的一部分），
+2. 例如，在一个web应用程序中，正在处理的请求（或者至少是请求的一部分），
 可以存储在一个线程本地 ("threading.local") 变量中，然后从``Filter`` 中
 去访问。请求中的信息，如IP地址和用户名将被存储在``LogRecord``中，使用
 上例 "LoggerAdapter" 中的 'ip' 和 'user' 属性名。在这种情况下，可以使
 用相同的格式化字符串来得到上例中类似的输出结果。这是一段示例代码:
-
+```
    import logging
    from random import choice
 
@@ -660,9 +656,10 @@ Python 层之下，这是不受开发者控制的）。
            lvl = choice(levels)
            lvlname = logging.getLevelName(lvl)
            a2.log(lvl, 'A message at %s level with %d %s', lvlname, 2, 'parameters')
+```
 
 在运行时，产生如下内容:
-
+```
    2010-09-06 22:38:15,292 a.b.c DEBUG    IP: 123.231.231.123 User: fred     A debug message
    2010-09-06 22:38:15,300 a.b.c INFO     IP: 192.168.0.1     User: sheila   An info message with some parameters
    2010-09-06 22:38:15,300 d.e.f CRITICAL IP: 127.0.0.1       User: sheila   A message at CRITICAL level with 2 parameters
@@ -675,20 +672,21 @@ Python 层之下，这是不受开发者控制的）。
    2010-09-06 22:38:15,301 d.e.f ERROR    IP: 127.0.0.1       User: sheila   A message at ERROR level with 2 parameters
    2010-09-06 22:38:15,301 d.e.f DEBUG    IP: 123.231.231.123 User: fred     A message at DEBUG level with 2 parameters
    2010-09-06 22:38:15,301 d.e.f INFO     IP: 123.231.231.123 User: fred     A message at INFO level with 2 parameters
+```
 
+## 从多个进程记录至单个文件
+1. 尽管 logging 是线程安全的，
+	- 将单个进程中的多个线程日志记录至单个文件也是受支持的
 
-从多个进程记录至单个文件
-========================
+	- 但将 **多个进程** 中的日志记录至单个文件则 **不受** 支持的，
+	因为在 Python 中并没有在多个进程中实现对单个文件访问的序列化的标准方案。 
+	
+2. 如果你需要将多个进程中的日志记录至单个文件，
+	有一个方案是让所有进程都将日志记录至一个 "SocketHandler"，然后用一个实现了套接字服务器的
+单独进程一边从套接字中读取一边将日志记录至文件。 
 
-尽管 logging 是线程安全的，将单个进程中的多个线程日志记录至单个文件也
-*是* 受支持的，但将 *多个进程* 中的日志记录至单个文件则 *不是* 受支持
-的，因为在 Python 中并没有在多个进程中实现对单个文件访问的序列化的标准
-方案。 如果你需要将多个进程中的日志记录至单个文件，有一个方案是让所有
-进程都将日志记录至一个 "SocketHandler"，然后用一个实现了套接字服务器的
-单独进程一边从套接字中读取一边将日志记录至文件。 （如果愿意的话，你可
-以在一个现有进程中专门开一个线程来执行此项功能。） 这一部分 文档对此方
-式有更详细的介绍，并包含一个可用的套接字接收器，你自己的应用可以在此基
-础上进行适配。
+	（如果愿意的话，你可以在一个现有进程中专门开一个线程来执行此项功能。） 这一部分 文档对此方
+式有更详细的介绍，并包含一个可用的套接字接收器，你自己的应用可以在此基础上进行适配。
 
 You could also write your own handler which uses the "Lock" class from
 the "multiprocessing" module to serialize access to the file from your
@@ -698,13 +696,13 @@ Note that at present, the "multiprocessing" module does not provide
 working lock functionality on all platforms (see
 https://bugs.python.org/issue3770).
 
-或者，你也可以使用 "Queue" 和 "QueueHandler" 将所有的日志事件发送至你
+3. 或者，你也可以使用 "Queue" 和 "QueueHandler" 将所有的日志事件发送至你
 的多进程应用的一个进程中。 以下示例脚本演示了如何执行此操作。 在示例中
 ，一个单独的监听进程负责监听其他进程的日志事件，并根据自己的配置记录。
 尽管示例只演示了这种方法（例如你可能希望使用单独的监听线程而非监听进程
 —— 它们的实现是类似的），但你也可以在应用程序的监听进程和其他进程使用
 不同的配置，它可以作为满足你特定需求的一个基础:
-
+```
    # You'll need these imports in your own code
    import logging
    import logging.handlers
@@ -809,9 +807,11 @@ https://bugs.python.org/issue3770).
 
    if __name__ == '__main__':
        main()
+```
 
 上面脚本的一个变种，仍然在主进程中记录日志，但使用一个单独的线程:
 
+```
    import logging
    import logging.config
    import logging.handlers
@@ -903,6 +903,7 @@ https://bugs.python.org/issue3770).
        # And now tell the logging thread to finish up, too
        q.put(None)
        lp.join()
+```
 
 这段变种的代码展示了如何使用特定的日志记录配置 - 例如``foo``记录器使用
 了特殊的处理程序，将 "foo" 子系统中所有的事件记录至一个文件 "mplog-
@@ -910,21 +911,23 @@ foo.log"。在主进程（即使是在工作进程中产生的日志事件）的
 将直接使用恰当的配置。
 
 
-Using concurrent.futures.ProcessPoolExecutor
---------------------------------------------
-
-If you want to use "concurrent.futures.ProcessPoolExecutor" to start
+## Using concurrent.futures.ProcessPoolExecutor
+1. If you want to use "concurrent.futures.ProcessPoolExecutor" to start
 your worker processes, you need to create the queue slightly
 differently. Instead of
-
+```
    queue = multiprocessing.Queue(-1)
+```
 
 you should use
 
+```
    queue = multiprocessing.Manager().Queue(-1)  # also works with the examples above
+```
 
-and you can then replace the worker creation from this:
+2. and you can then replace the worker creation from this:
 
+```
    workers = []
    for i in range(10):
        worker = multiprocessing.Process(target=worker_process,
@@ -933,22 +936,22 @@ and you can then replace the worker creation from this:
        worker.start()
    for w in workers:
        w.join()
+```
 
 to this (remembering to first import "concurrent.futures"):
 
+```
    with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
        for i in range(10):
            executor.submit(worker_process, queue, worker_configurer)
+```
 
-
-轮换日志文件
-============
-
-有时，你希望当日志文件不断记录增长至一定大小时，打开一个新的文件接着记
+## 轮换日志文件
+1. 有时，你希望当日志文件不断记录增长至一定大小时，打开一个新的文件接着记
 录。 你可能希望只保留一定数量的日志文件，当不断的创建文件到达该数量时
 ，又覆盖掉最开始的文件形成循环。 对于这种使用场景，日志包提供了
 "RotatingFileHandler":
-
+```
    import glob
    import logging
    import logging.handlers
@@ -974,15 +977,17 @@ to this (remembering to first import "concurrent.futures"):
 
    for filename in logfiles:
        print(filename)
+```
 
 结果应该是6个单独的文件，每个文件都包含了应用程序的部分历史日志:
-
+```
    logging_rotatingfile_example.out
    logging_rotatingfile_example.out.1
    logging_rotatingfile_example.out.2
    logging_rotatingfile_example.out.3
    logging_rotatingfile_example.out.4
    logging_rotatingfile_example.out.5
+```
 
 最新的文件始终是:file:*logging_rotatingfile_example.out*，每次到达大小
 限制时，都会使用后缀``.1``重命名。每个现有的备份文件都会被重命名并增加
@@ -992,10 +997,8 @@ to this (remembering to first import "concurrent.futures"):
 *maxBytes* 设置为一个合适的值。
 
 
-使用其他日志格式化方式
-======================
-
-当日志模块被添加至 Python 标准库时，只有一种格式化消息内容的方法即
+## 使用其他日志格式化方式
+1. 当日志模块被添加至 Python 标准库时，只有一种格式化消息内容的方法即
 %-formatting。 在那之后，Python 又增加了两种格式化方法:
 "string.Template" (在 Python 2.4 中新增) 和 "str.format()" (在 Python
 2.6 中新增)。

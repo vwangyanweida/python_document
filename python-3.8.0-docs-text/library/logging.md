@@ -2,7 +2,7 @@
 <!-- vim-markdown-toc GFM -->
 
 	* [logging]
-* [Logger 对象]
+	* [Logger 对象]
 * [日志级别]
 * [处理器对象]
 * [Formatter Objects]
@@ -49,14 +49,13 @@
 	- 格式化程序指定最终输出中日志记录的样式。
 
 
-Logger 对象
-===========
+## Logger 对象
+1. Loggers 有以下的属性和方法。
 
-Loggers 有以下的属性和方法。注意 	- 永远* 不要直接实例化 Loggers，应当通
-过模块级别的函数 "logging.getLogger(name)" 。多次使用相同的名字调用
-"getLogger()" 会一直返回相同的 Logger 对象的引用。
+2. 注意永远不要直接实例化 Loggers，应当通过模块级别的函数 "logging.getLogger(name)" 。
+多次使用相同的名字调用"getLogger()" 会一直返回相同的 Logger 对象的引用。
 
-"name" 是潜在的周期分割层级值, 像``foo.bar.baz`` (例如, 抛出的可以只是
+3. "name" 是潜在的周期分割层级值, 像``foo.bar.baz`` (例如, 抛出的可以只是
 明文的``foo``)。Loggers是进一步在子层次列表的更高loggers列表。例如，有
 个名叫``foo``的logger，名叫``foo.bar``，"foo.bar.baz"，和 "foo.bam" 都
 是 "foo``的衍生logger。logger的名字分级类似Python 包的层级，并且相同的
@@ -64,57 +63,57 @@ Loggers 有以下的属性和方法。注意 	- 永远* 不要直接实例化 Lo
 ``logging.getLogger(__name__)"。这是因为在模块里，在Python包的命名空间
 的模块名为``__name__``。
 
-class logging.Logger
+3. class logging.Logger
 
-   propagate
+	- propagate
 
-      如果这个属性为真，记录到这个记录器的事件将会传递给这个高级别处理
-      器的记录器（原型），此外任何关联到这个记录器的处理器。消息会直接
-      传递给原型记录器的处理器 - 既不是这个原型记录器的级别也不是过滤
-      器是在考虑的问题。
+		1. 如果这个属性为真，记录到这个记录器的事件将会传递给这个高级别处理
+		器的记录器（原型），此外任何关联到这个记录器的处理器。消息会直接
+		传递给原型记录器的处理器 - 既不是这个原型记录器的级别也不是过滤
+		器是在考虑的问题。
 
-      如果等于假，记录消息将不会传递给这个原型记录器的处理器。
+		2. 如果等于假，记录消息将不会传递给这个原型记录器的处理器。
 
-      构造器将这个属性初始化为 "True"。
+		3. 构造器将这个属性初始化为 "True"。
 
-      注解: 如果你关联了一个处理器	- 并且*到它自己的一个或多个记录器，
-        它可能 发出多次相同的记录。总体来说，你不需要关联处理器到一个
-        或多个记 录器 - 如果你只是关联它到一个合适的记录器等级中的最高
-        级别记录 器，它将会看到子记录器所有记录的事件，他们的传播剩下
-        的设置为 ``True``。一个常见的场景是只关联处理器到根记录器，并
-        且让传播照 顾剩下的。
+		4. 注解: 如果你关联了一个处理器	并且到它自己的一个或多个记录器，
+		它可能 发出多次相同的记录。总体来说，你不需要关联处理器到一个
+		或多个记录器 如果你只是关联它到一个合适的记录器等级中的最高
+		级别记录器，它将会看到子记录器所有记录的事件，他们的传播剩下
+		的设置为 ``True``。一个常见的场景是只关联处理器到根记录器，并
+		且让传播照 顾剩下的。
 
-   setLevel(level)
+	- setLevel(level)
 
-      给 logger 设置阈值为 	- level* 。日志等级小于 *level* 会被忽略。严
-      重性为 	- level* 或更高的日志消息将由该 logger 的任何一个或多个
-      handler 发出，除非将处理程序的级别设置为比 	- level* 更高的级别。
+		给 logger 设置阈值为level 。日志等级小于 *level* 会被忽略。严
+		重性为level或更高的日志消息将由该 logger 的任何一个或多个
+		handler 发出，除非将处理程序的级别设置为比 level 更高的级别。
 
-      创建一个 logger 时，设置级别为 "NOTSET"  （当 logger 是根 logger
-      时，将处理所有消息；当 logger 是非根 logger 时，所有消息会委派给
-      父级）。注意根 logger 创建时使用的是 "WARNING" 级别。
+		创建一个 logger 时，设置级别为 "NOTSET"  （当 logger 是根 logger
+		时，将处理所有消息；当 logger 是非根 logger 时，所有消息会委派给
+		父级）。注意根 logger 创建时使用的是 "WARNING" 级别。
 
-      委派给父级的意思是如果一个 logger 的级别设置为 NOTSET，遍历其祖
-      先 logger，直到找到另一个不是 NOTSET 级别的 logger，或者到根
-      logger 为止。
+		委派给父级的意思是如果一个 logger 的级别设置为 NOTSET，遍历其祖
+		先 logger，直到找到另一个不是 NOTSET 级别的 logger，或者到根
+		logger 为止。
 
-      If an ancestor is found with a level other than NOTSET, then
-      that ancestor's level is treated as the effective level of the
-      logger where the ancestor search began, and is used to determine
-      how a logging event is handled.
+		If an ancestor is found with a level other than NOTSET, then
+		that ancestor's level is treated as the effective level of the
+		logger where the ancestor search began, and is used to determine
+		how a logging event is handled.
 
-      If the root is reached, and it has a level of NOTSET, then all
-      messages will be processed. Otherwise, the root's level will be
-      used as the effective level.
+		If the root is reached, and it has a level of NOTSET, then all
+		messages will be processed. Otherwise, the root's level will be
+		used as the effective level.
 
-      参见 日志级别 级别列表。
+		参见 日志级别 级别列表。
 
-      在 3.2 版更改: The 	- level* parameter now accepts a string
-      representation of the level such as 'INFO' as an alternative to
-      the integer constants such as "INFO". Note, however, that levels
-      are internally stored as integers, and methods such as e.g.
-      "getEffectiveLevel()" and "isEnabledFor()" will return/expect to
-      be passed integers.
+		在 3.2 版更改: The 	- level* parameter now accepts a string
+		representation of the level such as 'INFO' as an alternative to
+		the integer constants such as "INFO". Note, however, that levels
+		are internally stored as integers, and methods such as e.g.
+		"getEffectiveLevel()" and "isEnabledFor()" will return/expect to
+		be passed integers.
 
    isEnabledFor(level)
 
