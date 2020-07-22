@@ -1,20 +1,44 @@
-"contextlib" --- Utilities for "with"-statement contexts
-********************************************************
 
-**源代码** Lib/contextlib.py
+<!-- vim-markdown-toc GFM -->
 
-======================================================================
+* [contextlib 29]
+	* [工具 38]
+		* [class contextlib.AbstractContextManager 41]
+		* [class contextlib.AbstractAsyncContextManager 52]
+		* [@contextlib.contextmanager 63]
+		* [@contextlib.asynccontextmanager 120]
+		* [contextlib.closing(thing) 149]
+		* [contextlib.nullcontext(enter_result=None) 176]
+		* [contextlib.suppress(*exceptions) 207]
+		* [contextlib.redirect_stdout(new_target) 245]
+		* [contextlib.redirect_stderr(new_target) 284]
+		* [class contextlib.ContextDecorator 293]
+		* [class contextlib.ExitStack 371]
+		* [class contextlib.AsyncExitStack 480]
+	* [例子和配方 519]
+		* [Supporting a variable number of context managers 525]
+		* [Catching exceptions from "__enter__" methods 547]
+		* [Cleaning up in an "__enter__" implementation 573]
+		* [Replacing any use of "try-finally" and flag variables 618]
+		* [Using a context manager as a function decorator 691]
+		* [Single use, reusable and reentrant context managers 741]
+		* [Reentrant context managers 782]
+		* [Reusable context managers 818]
 
-此模块为涉及 "with" 语句的常见任务提供了实用的程序。更多信息请参见 上
+<!-- vim-markdown-toc -->
+# contextlib 29
+>contextlib" --- Utilities for "with"-statement contexts
+
+1. **源代码** Lib/contextlib.py
+
+2. 此模块为涉及 "with" 语句的常见任务提供了实用的程序。更多信息请参见 上
 下文管理器类型 和 with 语句上下文管理器。
 
 
-工具
-====
+## 工具 38
+1. 提供的函数和类：
 
-提供的函数和类：
-
-class contextlib.AbstractContextManager
+### class contextlib.AbstractContextManager 41
 
    An *abstract base class* for classes that implement
    "object.__enter__()" and "object.__exit__()". A default
@@ -25,7 +49,7 @@ class contextlib.AbstractContextManager
 
    3.6 新版功能.
 
-class contextlib.AbstractAsyncContextManager
+### class contextlib.AbstractAsyncContextManager 52
 
    An *abstract base class* for classes that implement
    "object.__aenter__()" and "object.__aexit__()". A default
@@ -36,13 +60,12 @@ class contextlib.AbstractAsyncContextManager
 
    3.7 新版功能.
 
-@contextlib.contextmanager
+### @contextlib.contextmanager 63
+1. This function is a *decorator* that can be used to define a factory
+	function for "with" statement context managers, without needing to
+	create a class or separate "__enter__()" and "__exit__()" methods.
 
-   This function is a *decorator* that can be used to define a factory
-   function for "with" statement context managers, without needing to
-   create a class or separate "__enter__()" and "__exit__()" methods.
-
-   While many objects natively support use in with statements,
+2. While many objects natively support use in with statements,
    sometimes a resource needs to be managed that isn't a context
    manager in its own right, and doesn't implement a "close()" method
    for use with "contextlib.closing"
@@ -50,6 +73,7 @@ class contextlib.AbstractAsyncContextManager
    An abstract example would be the following to ensure correct
    resource management:
 
+   ```
       from contextlib import contextmanager
 
       @contextmanager
@@ -65,6 +89,7 @@ class contextlib.AbstractAsyncContextManager
       >>> with managed_resource(timeout=3600) as resource:
       ...     # Resource is released at the end of this block,
       ...     # even if code in the block raises an exception
+   ```
 
    被装饰的函数在被调用时，必须返回一个 *generator*-iterator。这个迭代
    器必须只 yield 一个值出来，这个值会被用在 "with" 语句中，绑定到
@@ -93,7 +118,7 @@ class contextlib.AbstractAsyncContextManager
 
    在 3.2 版更改: Use of "ContextDecorator".
 
-@contextlib.asynccontextmanager
+### @contextlib.asynccontextmanager 120
 
    Similar to "contextmanager()", but creates an asynchronous context
    manager.
@@ -122,7 +147,7 @@ class contextlib.AbstractAsyncContextManager
 
    3.7 新版功能.
 
-contextlib.closing(thing)
+### contextlib.closing(thing) 149
 
    Return a context manager that closes *thing* upon completion of the
    block.  This is basically equivalent to:
@@ -149,7 +174,7 @@ contextlib.closing(thing)
    occurs, "page.close()" will be called when the "with" block is
    exited.
 
-contextlib.nullcontext(enter_result=None)
+### contextlib.nullcontext(enter_result=None) 176
 
    Return a context manager that returns *enter_result* from
    "__enter__", but otherwise does nothing. It is intended to be used
@@ -180,7 +205,7 @@ contextlib.nullcontext(enter_result=None)
 
    3.7 新版功能.
 
-contextlib.suppress(*exceptions)
+### contextlib.suppress(*exceptions) 207
 
    Return a context manager that suppresses any of the specified
    exceptions if they occur in the body of a with statement and then
@@ -218,7 +243,7 @@ contextlib.suppress(*exceptions)
 
    3.4 新版功能.
 
-contextlib.redirect_stdout(new_target)
+### contextlib.redirect_stdout(new_target) 245
 
    Context manager for temporarily redirecting "sys.stdout" to another
    file or file-like object.
@@ -257,7 +282,7 @@ contextlib.redirect_stdout(new_target)
 
    3.4 新版功能.
 
-contextlib.redirect_stderr(new_target)
+### contextlib.redirect_stderr(new_target) 284
 
    Similar to "redirect_stdout()" but redirecting "sys.stderr" to
    another file or file-like object.
@@ -266,7 +291,7 @@ contextlib.redirect_stderr(new_target)
 
    3.5 新版功能.
 
-class contextlib.ContextDecorator
+### class contextlib.ContextDecorator 293
 
    A base class that enables a context manager to also be used as a
    decorator.
@@ -344,7 +369,7 @@ class contextlib.ContextDecorator
 
    3.2 新版功能.
 
-class contextlib.ExitStack
+### class contextlib.ExitStack 371
 
    A context manager that is designed to make it easy to
    programmatically combine other context managers and cleanup
@@ -453,7 +478,7 @@ class contextlib.ExitStack
       exit callbacks registered, the arguments passed in will indicate
       that no exception occurred.
 
-class contextlib.AsyncExitStack
+### class contextlib.AsyncExitStack 480
 
    An asynchronous context manager, similar to "ExitStack", that
    supports combining both synchronous and asynchronous context
@@ -492,15 +517,13 @@ class contextlib.AsyncExitStack
    3.7 新版功能.
 
 
-例子和配方
-==========
+## 例子和配方 519
 
 This section describes some examples and recipes for making effective
 use of the tools provided by "contextlib".
 
 
-Supporting a variable number of context managers
-------------------------------------------------
+### Supporting a variable number of context managers 525
 
 The primary use case for "ExitStack" is the one given in the class
 documentation: supporting a variable number of context managers and
@@ -522,8 +545,7 @@ statements to manage arbitrary resources that don't natively support
 the context management protocol.
 
 
-Catching exceptions from "__enter__" methods
---------------------------------------------
+### Catching exceptions from "__enter__" methods 547
 
 It is occasionally desirable to catch exceptions from an "__enter__"
 method implementation, *without* inadvertently catching exceptions
@@ -549,8 +571,7 @@ various situations that can't be handled directly in a "with"
 statement.
 
 
-Cleaning up in an "__enter__" implementation
---------------------------------------------
+### Cleaning up in an "__enter__" implementation 573
 
 As noted in the documentation of "ExitStack.push()", this method can
 be useful in cleaning up an already allocated resource if later steps
@@ -595,8 +616,7 @@ validation function, and maps them to the context management protocol:
            self.release_resource()
 
 
-Replacing any use of "try-finally" and flag variables
------------------------------------------------------
+### Replacing any use of "try-finally" and flag variables 618
 
 A pattern you will sometimes see is a "try-finally" statement with a
 flag variable to indicate whether or not the body of the "finally"
@@ -669,8 +689,7 @@ declared this way cannot take any parameters. Instead, any resources
 to be released must be accessed as closure variables.
 
 
-Using a context manager as a function decorator
------------------------------------------------
+### Using a context manager as a function decorator 691
 
 "ContextDecorator" makes it possible to use a context manager in both
 an ordinary "with" statement and also as a function decorator.
@@ -720,8 +739,7 @@ necessary to use an explicit "with" statement.
      Python "with" 语句的规范描述、背景和示例。
 
 
-Single use, reusable and reentrant context managers
-===================================================
+### Single use, reusable and reentrant context managers 741
 
 Most context managers are written in a way that means they can only be
 used effectively in a "with" statement once. These single use context
@@ -762,8 +780,7 @@ failing to yield if an attempt is made to use them a second time:
    RuntimeError: generator didn't yield
 
 
-Reentrant context managers
---------------------------
+### Reentrant context managers 782
 
 More sophisticated context managers may be "reentrant". These context
 managers can not only be used in multiple "with" statements, but may
@@ -799,8 +816,7 @@ as it makes a global modification to the system state by binding
 "sys.stdout" to a different stream.
 
 
-Reusable context managers
--------------------------
+### Reusable context managers 818
 
 Distinct from both single use and reentrant context managers are
 "reusable" context managers (or, to be completely explicit, "reusable,
