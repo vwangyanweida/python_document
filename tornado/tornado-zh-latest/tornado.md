@@ -1,108 +1,12 @@
-Tornado
-latest
-[                    ] 
-  • 用户指南
-      □ 介绍
-      □ 异步和非阻塞I/O
-      □ 协程
-      □ Queue 示例 - 一个并发网络爬虫
-      □ Tornado web应用的结构
-      □ 模板和UI
-      □ 认证和安全
-      □ 运行和部署
-  • web框架
-      □ tornado.web — RequestHandler 和 Application 类
-      □ tornado.template — 产生灵活的输出
-      □ tornado.escape — 转义和字符串操作
-      □ tornado.locale — 国际化支持
-      □ tornado.websocket — 浏览器与服务器双向通信
-  • HTTP servers and clients
-      □ tornado.httpserver — 非阻塞 HTTP server
-      □ tornado.httpclient — 异步 HTTP 客户端
-      □ tornado.httputil — Manipulate HTTP headers and URLs
-      □ tornado.http1connection – HTTP/1.x client/server implementation
-  • 异步网络
-      □ tornado.ioloop — Main event loop
-      □ tornado.iostream — Convenient wrappers for non-blocking sockets
-      □ tornado.netutil — Miscellaneous network utilities
-      □ tornado.tcpclient — IOStream connection factory
-      □ tornado.tcpserver — 基于 IOStream 的基础 TCP 服务
-  • 协程和并发
-      □ tornado.gen — Simplify asynchronous code
-      □ tornado.concurrent — Work with threads and futures
-      □ tornado.locks – 同步原语
-      □ tornado.queues – 协程的队列
-      □ tornado.process — Utilities for multiple processes
-  • 与其他服务集成
-      □ tornado.auth — Third-party login with OpenID and OAuth
-      □ tornado.wsgi — Interoperability with other Python frameworks and servers
-      □ tornado.platform.asyncio — Bridge between asyncio and Tornado
-      □ tornado.platform.caresresolver — Asynchronous DNS Resolver using C-Ares
-      □ tornado.platform.twisted — Bridges between Twisted and Tornado
-  • 通用工具
-      □ tornado.autoreload — Automatically detect code changes in development
-      □ tornado.log — Logging support
-      □ tornado.options — Command-line parsing
-      □ tornado.stack_context — Exception handling across asynchronous callbacks
-      □ tornado.testing — Unit testing support for asynchronous code
-      □ tornado.util — General-purpose utilities
-  • 常见问题
-  • 版本记录
-      □ What’s new in Tornado 4.3
-      □ What’s new in Tornado 4.2.1
-      □ What’s new in Tornado 4.2
-      □ What’s new in Tornado 4.1
-      □ What’s new in Tornado 4.0.2
-      □ What’s new in Tornado 4.0.1
-      □ What’s new in Tornado 4.0
-      □ What’s new in Tornado 3.2.2
-      □ What’s new in Tornado 3.2.1
-      □ What’s new in Tornado 3.2
-      □ What’s new in Tornado 3.1.1
-      □ What’s new in Tornado 3.1
-      □ What’s new in Tornado 3.0.2
-      □ What’s new in Tornado 3.0.1
-      □ What’s new in Tornado 3.0
-      □ What’s new in Tornado 2.4.1
-      □ What’s new in Tornado 2.4
-      □ What’s new in Tornado 2.3
-      □ What’s new in Tornado 2.2.1
-      □ What’s new in Tornado 2.2
-      □ What’s new in Tornado 2.1.1
-      □ What’s new in Tornado 2.1
-      □ What’s new in Tornado 2.0
-      □ What’s new in Tornado 1.2.1
-      □ What’s new in Tornado 1.2
-      □ What’s new in Tornado 1.1.1
-      □ What’s new in Tornado 1.1
-      □ What’s new in Tornado 1.0.1
-      □ What’s new in Tornado 1.0
+# Tornado
 
-Tornado
-
-  • Docs »
-  • Tornado 4.3 文档
-  • Edit on GitHub
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Tornado Web Server¶
-
-Tornado 是一个Python web框架和异步网络库，起初由 FriendFeed 开发. 通过使用非阻塞网络I/O，
+## Tornado Web Server
+1. ``Tornado 是一个Python web框架和异步网络库，起初由 FriendFeed 开发. 通过使用非阻塞网络I/O，
 Tornado可以支撑上万级的连接，处理长连接, WebSockets ，和其他需要与每个用户保持长久连接的应用.
 
-相关链接¶
-
-  • 下载当前4.3版本
-  • 源码 (github)
-  • 邮件列表: discussion and announcements
-  • Stack Overflow
-  • Wiki
-
-Hello, world¶
-
-这是一个简单的Tornado的web应用:
-
+### Hello, world
+1. 这是一个简单的Tornado的web应用:
+````````
 import tornado.ioloop
 import tornado.web
 
