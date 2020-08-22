@@ -1,0 +1,410 @@
+
+IOLoop and IOStream¶
+
+  • IOStream performance has been improved, especially for small synchronous requests.
+  • New methods tornado.iostream.IOStream.read_until_close and 
+    tornado.iostream.IOStream.read_until_regex.
+  • IOStream.read_bytes and IOStream.read_until_close now take a streaming_callback argument to
+    return data as it is received rather than all at once.
+  • IOLoop.add_timeout now accepts datetime.timedelta objects in addition to absolute
+    timestamps.
+  • PeriodicCallback now sticks to the specified period instead of creeping later due to
+    accumulated errors.
+  • tornado.ioloop.IOLoop and tornado.httpclient.HTTPClient now have close() methods that should
+    be used in applications that create and destroy many of these objects.
+  • IOLoop.install can now be used to use a custom subclass of IOLoop as the singleton without
+    monkey-patching.
+  • IOStream should now always call the close callback instead of the connect callback on a
+    connection error.
+  • The IOStream close callback will no longer be called while there are pending read callbacks
+    that can be satisfied with buffered data.
+
+tornado.simple_httpclient¶
+
+  • Now supports client SSL certificates with the client_key and client_cert parameters to
+    tornado.httpclient.HTTPRequest
+  • Now takes a maximum buffer size, to allow reading files larger than 100MB
+  • Now works with HTTP 1.0 servers that don’t send a Content-Length header
+  • The allow_nonstandard_methods flag on HTTP client requests now permits methods other than 
+    POST and PUT to contain bodies.
+  • Fixed file descriptor leaks and multiple callback invocations in SimpleAsyncHTTPClient
+  • No longer consumes extra connection resources when following redirects.
+  • Now works with buggy web servers that separate headers with \n instead of \r\n\r\n.
+  • Now sets response.request_time correctly.
+  • Connect timeouts now work correctly.
+
+Other modules¶
+
+  • tornado.auth.OpenIdMixin now uses the correct realm when the callback URI is on a different
+    domain.
+  • tornado.autoreload has a new command-line interface which can be used to wrap any script.
+    This replaces the --autoreload argument to tornado.testing.main and is more robust against
+    syntax errors.
+  • tornado.autoreload.watch can be used to watch files other than the sources of imported
+    modules.
+  • tornado.database.Connection has new variants of execute and executemany that return the
+    number of rows affected instead of the last inserted row id.
+  • tornado.locale.load_translations now accepts any properly-formatted locale name, not just
+    those in the predefined LOCALE_NAMES list.
+  • tornado.options.define now takes a group parameter to group options in --help output.
+  • Template loaders now take a namespace constructor argument to add entries to the template
+    namespace.
+  • tornado.websocket now supports the latest (“hybi-10”) version of the protocol (the old
+    version, “hixie-76” is still supported; the correct version is detected automatically).
+  • tornado.websocket now works on Python 3
+
+Bug fixes¶
+
+  • Windows support has been improved. Windows is still not an officially supported platform,
+    but the test suite now passes and tornado.autoreload works.
+  • Uploading files whose names contain special characters will now work.
+  • Cookie values containing special characters are now properly quoted and unquoted.
+  • Multi-line headers are now supported.
+  • Repeated Content-Length headers (which may be added by certain proxies) are now supported in
+    HTTPServer.
+  • Unicode string literals now work in template expressions.
+  • The template {% module %} directive now works even if applications use a template variable
+    named modules.
+  • Requests with “Expect: 100-continue” now work on python 3
+
+What’s new in Tornado 2.0¶
+
+Jun 21, 2011¶
+
+Major changes:
+* Template output is automatically escaped by default; see backwards
+  compatibility note below.
+* The default AsyncHTTPClient implementation is now simple_httpclient.
+* Python 3.2 is now supported.
+
+Backwards compatibility:
+* Template autoescaping is enabled by default.  Applications upgrading from
+  a previous release of Tornado must either disable autoescaping or adapt
+  their templates to work with it.  For most applications, the simplest
+  way to do this is to pass autoescape=None to the Application constructor.
+  Note that this affects certain built-in methods, e.g. xsrf_form_html
+  and linkify, which must now be called with {% raw %} instead of {}
+* Applications that wish to continue using curl_httpclient instead of
+  simple_httpclient may do so by calling
+    AsyncHTTPClient.configure("tornado.curl_httpclient.CurlAsyncHTTPClient")
+  at the beginning of the process.  Users of Python 2.5 will probably want
+  to use curl_httpclient as simple_httpclient only supports ssl on Python 2.6+.
+* Python 3 compatibility involved many changes throughout the codebase,
+  so users are encouraged to test their applications more thoroughly than
+  usual when upgrading to this release.
+
+Other changes in this release:
+* Templates support several new directives:
+  - {% autoescape ...%} to control escaping behavior
+  - {% raw ... %} for unescaped output
+  - {% module ... %} for calling UIModules
+* {% module Template(path, **kwargs) %} may now be used to call another
+  template with an independent namespace
+* All IOStream callbacks are now run directly on the IOLoop via add_callback.
+* HTTPServer now supports IPv6 where available.  To disable, pass
+  family=socket.AF_INET to HTTPServer.bind().
+* HTTPClient now supports IPv6, configurable via allow_ipv6=bool on the
+  HTTPRequest.  allow_ipv6 defaults to false on simple_httpclient and true
+  on curl_httpclient.
+* RequestHandlers can use an encoding other than utf-8 for query parameters
+  by overriding decode_argument()
+* Performance improvements, especially for applications that use a lot of
+  IOLoop timeouts
+* HTTP OPTIONS method no longer requires an XSRF token.
+* JSON output (RequestHandler.write(dict)) now sets Content-Type to
+  application/json
+* Etag computation can now be customized or disabled by overriding
+  RequestHandler.compute_etag
+* USE_SIMPLE_HTTPCLIENT environment variable is no longer supported.
+  Use AsyncHTTPClient.configure instead.
+
+What’s new in Tornado 1.2.1¶
+
+Mar 3, 2011¶
+
+We are pleased to announce the release of Tornado 1.2.1, available from
+https://github.com/downloads/facebook/tornado/tornado-1.2.1.tar.gz
+
+This release contains only two small changes relative to version 1.2:
+* FacebookGraphMixin has been updated to work with a recent change to the
+  Facebook API.
+* Running "setup.py install" will no longer attempt to automatically
+  install pycurl.  This wasn't working well on platforms where the best way
+  to install pycurl is via something like apt-get instead of easy_install.
+
+This is an important upgrade if you are using FacebookGraphMixin, but
+otherwise it can be safely ignored.
+
+What’s new in Tornado 1.2¶
+
+Feb 20, 2011¶
+
+We are pleased to announce the release of Tornado 1.2, available from
+https://github.com/downloads/facebook/tornado/tornado-1.2.tar.gz
+
+Backwards compatibility notes:
+* This release includes the backwards-incompatible security change from
+  version 1.1.1.  Users upgrading from 1.1 or earlier should read the
+  release notes from that release:
+  http://groups.google.com/group/python-tornado/browse_thread/thread/b36191c781580cde
+* StackContexts that do something other than catch exceptions may need to
+  be modified to be reentrant.
+  https://github.com/tornadoweb/tornado/commit/7a7e24143e77481d140fb5579bc67e4c45cbcfad
+* When XSRF tokens are used, the token must also be present on PUT and
+  DELETE requests (anything but GET and HEAD)
+
+New features:
+* A new HTTP client implementation is available in the module
+  tornado.simple_httpclient.  This HTTP client does not depend on pycurl.
+  It has not yet been tested extensively in production, but is intended
+  to eventually replace the pycurl-based HTTP client in a future release of
+  Tornado.  To transparently replace tornado.httpclient.AsyncHTTPClient with
+  this new implementation, you can set the environment variable
+  USE_SIMPLE_HTTPCLIENT=1 (note that the next release of Tornado will
+  likely include a different way to select HTTP client implementations)
+* Request logging is now done by the Application rather than the
+  RequestHandler.  Logging behavior may be customized by either overriding
+  Application.log_request in a subclass or by passing log_function
+  as an Application setting
+* Application.listen(port): Convenience method as an alternative to
+  explicitly creating an HTTPServer
+* tornado.escape.linkify(): Wrap urls in <a> tags
+* RequestHandler.create_signed_value(): Create signatures like the
+  secure_cookie methods without setting cookies.
+* tornado.testing.get_unused_port(): Returns a port selected in the same
+  way as inAsyncHTTPTestCase
+* AsyncHTTPTestCase.fetch(): Convenience method for synchronous fetches
+* IOLoop.set_blocking_signal_threshold(): Set a callback to be run when
+  the IOLoop is blocked.
+* IOStream.connect(): Asynchronously connect a client socket
+* AsyncHTTPClient.handle_callback_exception(): May be overridden
+  in subclass for custom error handling
+* httpclient.HTTPRequest has two new keyword arguments, validate_cert and
+  ca_certs. Setting validate_cert=False will disable all certificate checks
+  when fetching https urls.  ca_certs may be set to a filename containing
+  trusted certificate authorities (defaults will be used if this is
+  unspecified)
+* HTTPRequest.get_ssl_certificate(): Returns the client's SSL certificate
+  (if client certificates were requested in the server's ssl_options
+* StaticFileHandler can be configured to return a default file (e.g.
+  index.html) when a directory is requested
+* Template directives of the form "{% from x import y %}" are now
+  supported (in addition to the existing support for "{% import x
+  %}"
+* FacebookGraphMixin.get_authenticated_user now accepts a new
+  parameter 'extra_fields' which may be used to request additional
+  information about the user
+
+Bug fixes:
+* auth: Fixed KeyError with Facebook offline_access
+* auth: Uses request.uri instead of request.path as the default redirect
+  so that parameters are preserved.
+* escape: xhtml_escape() now returns a unicode string, not
+  utf8-encoded bytes
+* ioloop: Callbacks added with add_callback are now run in the order they
+  were added
+* ioloop: PeriodicCallback.stop can now be called from inside the callback.
+* iostream: Fixed several bugs in SSLIOStream
+* iostream: Detect when the other side has closed the connection even with
+  the select()-based IOLoop
+* iostream: read_bytes(0) now works as expected
+* iostream: Fixed bug when writing large amounts of data on windows
+* iostream: Fixed infinite loop that could occur with unhandled exceptions
+* httpclient: Fix bugs when some requests use proxies and others don't
+* httpserver: HTTPRequest.protocol is now set correctly when using the
+  built-in SSL support
+* httpserver: When using multiple processes, the standard library's
+  random number generator is re-seeded in each child process
+* httpserver: With xheaders enabled, X-Forwarded-Proto is supported as an
+  alternative to X-Scheme
+* httpserver: Fixed bugs in multipart/form-data parsing
+* locale: format_date() now behaves sanely with dates in the future
+* locale: Updates to the language list
+* stack_context: Fixed bug with contexts leaking through reused IOStreams
+* stack_context: Simplified semantics and improved performance
+* web: The order of css_files from UIModules is now preserved
+* web: Fixed error with default_host redirect
+* web: StaticFileHandler works when os.path.sep != '/' (i.e. on Windows)
+* web: Fixed a caching-related bug in StaticFileHandler when a file's
+  timestamp has changed but its contents have not.
+* web: Fixed bugs with HEAD requests and e.g. Etag headers
+* web: Fix bugs when different handlers have different static_paths
+* web: @removeslash will no longer cause a redirect loop when applied to the
+  root path
+* websocket: Now works over SSL
+* websocket: Improved compatibility with proxies
+
+Many thanks to everyone who contributed patches, bug reports, and feedback
+that went into this release!
+
+-Ben
+
+What’s new in Tornado 1.1.1¶
+
+Feb 8, 2011¶
+
+Tornado 1.1.1 is a BACKWARDS-INCOMPATIBLE security update that fixes an
+XSRF vulnerability.  It is available at
+https://github.com/downloads/facebook/tornado/tornado-1.1.1.tar.gz
+
+This is a backwards-incompatible change.  Applications that previously
+relied on a blanket exception for XMLHTTPRequest may need to be modified
+to explicitly include the XSRF token when making ajax requests.
+
+The tornado chat demo application demonstrates one way of adding this
+token (specifically the function postJSON in demos/chat/static/chat.js).
+
+More information about this change and its justification can be found at
+http://www.djangoproject.com/weblog/2011/feb/08/security/
+http://weblog.rubyonrails.org/2011/2/8/csrf-protection-bypass-in-ruby-on-rails
+
+What’s new in Tornado 1.1¶
+
+Sep 7, 2010¶
+
+We are pleased to announce the release of Tornado 1.1, available from
+https://github.com/downloads/facebook/tornado/tornado-1.1.tar.gz
+
+Changes in this release:
+* RequestHandler.async_callback and related functions in other classes
+  are no longer needed in most cases (although it's harmless to continue
+  using them).  Uncaught exceptions will now cause the request to be closed
+  even in a callback.  If you're curious how this works, see the new
+  tornado.stack_context module.
+* The new tornado.testing module contains support for unit testing
+  asynchronous IOLoop-based code.
+* AsyncHTTPClient has been rewritten (the new implementation was
+  available as AsyncHTTPClient2 in Tornado 1.0; both names are
+  supported for backwards compatibility).
+* The tornado.auth module has had a number of updates, including support
+  for OAuth 2.0 and the Facebook Graph API, and upgrading Twitter and
+  Google support to OAuth 1.0a.
+* The websocket module is back and supports the latest version (76) of the
+  websocket protocol.  Note that this module's interface is different
+  from the websocket module that appeared in pre-1.0 versions of Tornado.
+* New method RequestHandler.initialize() can be overridden in subclasses
+  to simplify handling arguments from URLSpecs.  The sequence of methods
+  called during initialization is documented at
+  http://tornadoweb.org/documentation#overriding-requesthandler-methods
+* get_argument() and related methods now work on PUT requests in addition
+  to POST.
+* The httpclient module now supports HTTP proxies.
+* When HTTPServer is run in SSL mode, the SSL handshake is now non-blocking.
+* Many smaller bug fixes and documentation updates
+
+Backwards-compatibility notes:
+* While most users of Tornado should not have to deal with the stack_context
+  module directly, users of worker thread pools and similar constructs may
+  need to use stack_context.wrap and/or NullContext to avoid memory leaks.
+* The new AsyncHTTPClient still works with libcurl version 7.16.x, but it
+  performs better when both libcurl and pycurl are at least version 7.18.2.
+* OAuth transactions started under previous versions of the auth module
+  cannot be completed under the new module.  This applies only to the
+  initial authorization process; once an authorized token is issued that
+  token works with either version.
+
+Many thanks to everyone who contributed patches, bug reports, and feedback
+that went into this release!
+
+-Ben
+
+What’s new in Tornado 1.0.1¶
+
+Aug 13, 2010¶
+
+This release fixes a bug with RequestHandler.get_secure_cookie, which would
+in some circumstances allow an attacker to tamper with data stored in the
+cookie.
+
+What’s new in Tornado 1.0¶
+
+July 22, 2010¶
+
+We are pleased to announce the release of Tornado 1.0, available
+from
+https://github.com/downloads/facebook/tornado/tornado-1.0.tar.gz.
+There have been many changes since version 0.2; here are some of
+the highlights:
+
+New features:
+* Improved support for running other WSGI applications in a
+  Tornado server (tested with Django and CherryPy)
+* Improved performance on Mac OS X and BSD (kqueue-based IOLoop),
+  and experimental support for win32
+* Rewritten AsyncHTTPClient available as
+  tornado.httpclient.AsyncHTTPClient2 (this will become the
+  default in a future release)
+* Support for standard .mo files in addition to .csv in the locale
+  module
+* Pre-forking support for running multiple Tornado processes at
+  once (see HTTPServer.start())
+* SSL and gzip support in HTTPServer
+* reverse_url() function refers to urls from the Application
+  config by name from templates and RequestHandlers
+* RequestHandler.on_connection_close() callback is called when the
+  client has closed the connection (subject to limitations of the
+  underlying network stack, any proxies, etc)
+* Static files can now be served somewhere other than /static/ via
+  the static_url_prefix application setting
+* URL regexes can now use named groups ("(?P<name>)") to pass
+  arguments to get()/post() via keyword instead of position
+* HTTP header dictionary-like objects now support multiple values
+  for the same header via the get_all() and add() methods.
+* Several new options in the httpclient module, including
+  prepare_curl_callback and header_callback
+* Improved logging configuration in tornado.options.
+* UIModule.html_body() can be used to return html to be inserted
+  at the end of the document body.
+
+Backwards-incompatible changes:
+* RequestHandler.get_error_html() now receives the exception
+  object as a keyword argument if the error was caused by an
+  uncaught exception.
+* Secure cookies are now more secure, but incompatible with
+  cookies set by Tornado 0.2.  To read cookies set by older
+  versions of Tornado, pass include_name=False to
+  RequestHandler.get_secure_cookie()
+* Parameters passed to RequestHandler.get/post() by extraction
+  from the path now have %-escapes decoded, for consistency with
+  the processing that was already done with other query
+  parameters.
+
+Many thanks to everyone who contributed patches, bug reports, and
+feedback that went into this release!
+
+-Ben
+
+  • 索引
+  • 模块索引
+  • 搜索页面
+
+讨论和支持¶
+
+你可以讨论Tornado在 Tornado 开发者邮件列表, 报告bug在 GitHub issue tracker.
+
+其他资源可以在 Tornado wiki 上找到. 新版本会宣布在 announcements mailing list.
+
+Tornado is available under the Apache License, Version 2.0.
+
+This web site and all documentation is licensed under Creative Commons 3.0.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+© Copyright 2009-2017, The Tornado Authors. Revision 14f4412a.
+
+Built with Sphinx using a theme provided by Read the Docs.
+Read the Docs v: latest
+
+Versions
+    latest
+
+Downloads
+    htmlzip
+    epub
+
+On Read the Docs
+    Project Home
+    Builds
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Free document hosting provided by Read the Docs.
