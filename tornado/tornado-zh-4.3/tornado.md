@@ -374,8 +374,7 @@ def minute_loop2():
         yield do_something()  # 计时后运行.
         yield nxt             # 等待计时结束.
 
-Queue 示例 - 一个并发网络爬虫¶
-
+## Queue 示例 - 一个并发网络爬虫¶
 Tornado的 tornado.queues 模块实现了异步生产者/消费者模式的协程, 类似于通过Python 标准库的 queue
 实现线程模式.
 
@@ -555,7 +554,6 @@ Application 构造函数有很多关键字参数可以用于自定义应用程�
 表请查看 Application.settings .
 
 ### RequestHandler 子类
-
 Tornado web 应用程序的大部分工作是在 RequestHandler 子类下完成的. 处理子类的主入口点是一个命名为
 处理HTTP方法的函数: get(), post(), 等等. 每个处理程序可以定义一个或者多个这种方法来处理不同的
 HTTP动作. 如上所述, 这些方法将被匹配路由规则的捕获组对应的参数调用.
@@ -569,8 +567,7 @@ BaseHandler 类, 复写一些方法例如 write_error 和 get_current_user 然�
 BaseHandler 而不是 RequestHandler 在你所有具体的处理程序中.
 
 #### 处理输入请求
-
-处理请求的程序(request handler)可以使用 self.request 访问代表当前请求的对象. 通过
+1. 处理请求的程序(request handler)可以使用 self.request 访问代表当前请求的对象. 通过
 HTTPServerRequest 的类定义查看完整的属性列表.
 
 使用HTML表单格式请求的数据会被解析并且可以在一些方法中使用, 例如 get_query_argument 和
