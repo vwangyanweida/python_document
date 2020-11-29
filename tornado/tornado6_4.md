@@ -1,9 +1,49 @@
-## Tornado Web Server           ¶
+
+<!-- vim-markdown-toc GFM -->
+
+	* [Tornado Web Server           ¶ 41](#tornado-web-server------------41)
+		* [Hello, world¶ 46](#hello-world-46)
+		* [asyncio Integration¶ 81](#asyncio-integration-81)
+		* [Installation¶ 86](#installation-86)
+	* [Documentation¶ 114](#documentation-114)
+	* [User’s guide¶ 118](#users-guide-118)
+		* [Introduction¶ 120](#introduction-120)
+	* [Asynchronous and non-Blocking I/O¶ 142](#asynchronous-and-non-blocking-io-142)
+	* [Blocking¶ 152](#blocking-152)
+		* [Asynchronous¶ 162](#asynchronous-162)
+			* [Examples¶ 183](#examples-183)
+		* [Coroutines¶ 244](#coroutines-244)
+* [Decorated:                    # Native: 271](#decorated---------------------native-271)
+* [Normal function declaration 273](#normal-function-declaration-273)
+* [with decorator                # "async def" keywords 274](#with-decorator-----------------async-def-keywords-274)
+* [Simplified inner loop of tornado.gen.Runner 322](#simplified-inner-loop-of-tornadogenrunner-322)
+* [The IOLoop will catch the exception and print a stack trace in 361](#the-ioloop-will-catch-the-exception-and-print-a-stack-trace-in-361)
+* [the logs. Note that this doesn't look like a normal call, since 362](#the-logs-note-that-this-doesnt-look-like-a-normal-call-since-362)
+* [we pass the function object to be called by the IOLoop. 363](#we-pass-the-function-object-to-be-called-by-the-ioloop-363)
+* [run_sync() doesn't take arguments, so we must wrap the 372](#run_sync-doesnt-take-arguments-so-we-must-wrap-the-372)
+* [call in a lambda. 373](#call-in-a-lambda-373)
+* [Coroutines that loop forever are generally started with 465](#coroutines-that-loop-forever-are-generally-started-with-465)
+* [spawn_callback(). 466](#spawn_callback-466)
+* [!/usr/bin/env python3 493](#usrbinenv-python3-493)
+* [BAD: uses a default host pattern of r'.*' 1259](#bad-uses-a-default-host-pattern-of-r-1259)
+* [GOOD: only matches localhost or its ip address. 1262](#good-only-matches-localhost-or-its-ip-address-1262)
+* [GOOD: same as previous example using tornado.routing. 1267](#good-same-as-previous-example-using-tornadorouting-1267)
+		* [base.html 2811](#basehtml-2811)
+		* [bold.html 2827](#boldhtml-2827)
+		* [Python code 2847](#python-code-2847)
+		* [The template 2852](#the-template-2852)
+* [Fetch the url and print its body 4415](#fetch-the-url-and-print-its-body-4415)
+* [Just print the headers 4418](#just-print-the-headers-4418)
+* [myapp/db.py 7518](#myappdbpy-7518)
+* [myapp/server.py 7529](#myappserverpy-7529)
+
+<!-- vim-markdown-toc -->
+## Tornado Web Server           ¶ 41
 1. Tornado is a Python web framework and asynchronous networking library, originally developed at FriendFeed. By using non-blocking
 network I/O, Tornado can scale to tens of thousands of open connections, making it ideal for long polling, WebSockets, and other
 applications that require a long-lived connection to each user.
 
-### Hello, world¶
+### Hello, world¶ 46
 1. Here is a simple “Hello, world” example web app for Tornado:
 ```
 import tornado.ioloop
@@ -38,12 +78,12 @@ In general, Tornado code is not thread-safe. The only method in Tornado that is 
 You can also use IOLoop.run_in_executor to asynchronously run a blocking function on another thread, but note that the function passed
 to run_in_executor should avoid referencing any Tornado objects. run_in_executor is the recommended way to interact with blocking code.
 
-### asyncio Integration¶
+### asyncio Integration¶ 81
 
 Tornado is integrated with the standard library asyncio module and **shares the same event loop **(by default since Tornado 5.0). In
 general, libraries designed for use with asyncio can be mixed freely with Tornado.
 
-### Installation¶
+### Installation¶ 86
 
 pip install tornado
 
@@ -71,13 +111,13 @@ On Windows, Tornado requires the WindowsSelectorEventLoop. This is the default i
 event loop that is not compatible with Tornado. Applications that use Tornado on Windows with Python 3.8 must call 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy()) at the beginning of their main file/function.
 
-## Documentation¶
+## Documentation¶ 114
 
 This documentation is also available in PDF and Epub formats.
 
-## User’s guide¶
+## User’s guide¶ 118
 
-### Introduction¶
+### Introduction¶ 120
 1. Tornado is a Python web framework and asynchronous networking library, originally developed at FriendFeed. By using non-blocking
 network I/O, Tornado can scale to tens of thousands of open connections, making it ideal for long polling, WebSockets, and other
 applications that require a long-lived connection to each user.
@@ -99,7 +139,7 @@ The Tornado web framework and HTTP server together offer a full-stack alternativ
 server as a container for other WSGI frameworks (WSGIContainer), this combination has limitations and to take full advantage of Tornado
 you will need to use Tornado’s web framework and HTTP server together.
 
-## Asynchronous and non-Blocking I/O¶
+## Asynchronous and non-Blocking I/O¶ 142
 
 Real-time web features require a long-lived mostly-idle connection per user. In a traditional synchronous web server, this implies
 devoting one thread to each user, which can be very expensive.
@@ -109,7 +149,7 @@ aim to be asynchronous and non-blocking because only one operation can be active
 
 The terms asynchronous and non-blocking are closely related and are often used interchangeably, but they are not quite the same thing.
 
-## Blocking¶
+## Blocking¶ 152
 
 A function blocks when it waits for something to happen before returning. A function may block for many reasons: network I/O, disk I/O,
 mutexes, etc. In fact, every function blocks, at least a little bit, while it is running and using the CPU (for an extreme example that
@@ -119,7 +159,7 @@ which by design use hundreds of milliseconds of CPU time, far more than a typica
 A function can be blocking in some respects and non-blocking in others. In the context of Tornado we generally talk about blocking in
 the context of network I/O, although all kinds of blocking are to be minimized.
 
-### Asynchronous¶
+### Asynchronous¶ 162
 
 An asynchronous function returns before it is finished, and generally causes some work to happen in the background before triggering
 some future action in the application (as opposed to normal synchronous functions, which do everything they are going to do before
@@ -140,7 +180,7 @@ lightweight threads to offer performance comparable to asynchronous systems, but
 Asynchronous operations in Tornado generally return placeholder objects (Futures), with the exception of some low-level components like
 the IOLoop that use callbacks. Futures are usually transformed into their result with the await or yield keywords.
 
-#### Examples¶
+#### Examples¶ 183
 1. Here is a sample synchronous function:
 ```
 from tornado.httpclient import HTTPClient
@@ -201,7 +241,7 @@ since try/except blocks work as you would expect in coroutines while this is dif
 
 	Coroutines will be discussed in depth in the next section of this guide.
 
-### Coroutines¶
+### Coroutines¶ 244
 
 Coroutines are the recommended way to write asynchronous code in Tornado. Coroutines use the Python await or yield keyword to suspend
 and resume execution instead of a chain of callbacks (cooperative lightweight threads as seen in frameworks like gevent are sometimes
@@ -228,10 +268,10 @@ Python is required. Examples in the Tornado documentation will generally use the
 
 Translation between the two forms is generally straightforward:
 
-# Decorated:                    # Native:
+# Decorated:                    # Native: 271
 
-# Normal function declaration
-# with decorator                # "async def" keywords
+# Normal function declaration 273
+# with decorator                # "async def" keywords 274
 @gen.coroutine
 def a():                        async def a():
     # "yield" all async funcs       # "await" all async funcs
@@ -279,7 +319,7 @@ caller by returning a Future.
 
 Here is a simplified version of the coroutine decorator’s inner loop:
 
-# Simplified inner loop of tornado.gen.Runner
+# Simplified inner loop of tornado.gen.Runner 322
 def run(self):
     # send(x) makes the current yield return x.
     # It returns when the next yield is reached
@@ -318,9 +358,9 @@ async def good_call():
 Sometimes you may want to “fire and forget” a coroutine without waiting for its result. In this case it is recommended to use
 IOLoop.spawn_callback, which makes the IOLoop responsible for the call. If it fails, the IOLoop will log a stack trace:
 
-# The IOLoop will catch the exception and print a stack trace in
-# the logs. Note that this doesn't look like a normal call, since
-# we pass the function object to be called by the IOLoop.
+# The IOLoop will catch the exception and print a stack trace in 361
+# the logs. Note that this doesn't look like a normal call, since 362
+# we pass the function object to be called by the IOLoop. 363
 IOLoop.current().spawn_callback(divide, 1, 0)
 
 Using IOLoop.spawn_callback in this way is recommended for functions using @gen.coroutine, but it is required for functions using async
@@ -329,8 +369,8 @@ def (otherwise the coroutine runner will not start).
 Finally, at the top level of a program, if the IOLoop is not yet running, you can start the IOLoop, run the coroutine, and then stop
 the IOLoop with the IOLoop.run_sync method. This is often used to start the main function of a batch-oriented program:
 
-# run_sync() doesn't take arguments, so we must wrap the
-# call in a lambda.
+# run_sync() doesn't take arguments, so we must wrap the 372
+# call in a lambda. 373
 IOLoop.current().run_sync(lambda: divide(1, 0))
 
 Coroutine patterns¶
@@ -422,8 +462,8 @@ async def minute_loop():
         await do_something()
         await gen.sleep(60)
 
-# Coroutines that loop forever are generally started with
-# spawn_callback().
+# Coroutines that loop forever are generally started with 465
+# spawn_callback(). 466
 IOLoop.current().spawn_callback(minute_loop)
 
 Sometimes a more complicated loop may be desirable. For example, the previous loop runs every 60+N seconds, where N is the running time
@@ -450,7 +490,7 @@ new ones in the queue, then calls task_done to decrement the counter once. Event
 seen before, and there is also no work left in the queue. Thus that worker’s call to task_done decrements the counter to zero. The main
 coroutine, which is waiting for join, is unpaused and finishes.
 
-#!/usr/bin/env python3
+#!/usr/bin/env python3 493
 
 import time
 from datetime import timedelta
@@ -1216,15 +1256,15 @@ Applications that cannot use TLS and rely on network-level access controls (for 
 be accessed by the local machine) should guard against DNS rebinding by validating the Host HTTP header. This means passing a
 restrictive hostname pattern to either a HostMatches router or the first argument of Application.add_handlers:
 
-# BAD: uses a default host pattern of r'.*'
+# BAD: uses a default host pattern of r'.*' 1259
 app = Application([('/foo', FooHandler)])
 
-# GOOD: only matches localhost or its ip address.
+# GOOD: only matches localhost or its ip address. 1262
 app = Application()
 app.add_handlers(r'(localhost|127\.0\.0\.1)',
                  [('/foo', FooHandler)])
 
-# GOOD: same as previous example using tornado.routing.
+# GOOD: same as previous example using tornado.routing. 1267
 app = Application([
     (HostMatches(r'(localhost|127\.0\.0\.1)'),
         [('/foo', FooHandler)]),
@@ -2768,7 +2808,7 @@ print(loader.load("test.html").generate(myvalue="XXX"))
 
 We compile all templates to raw Python. Error-reporting is currently… uh, interesting. Syntax for the templates:
 
-### base.html
+### base.html 2811
 <html>
   <head>
     <title>{% block title %}Default title{% end %}</title>
@@ -2784,7 +2824,7 @@ We compile all templates to raw Python. Error-reporting is currently… uh, inte
   </body>
 </html>
 
-### bold.html
+### bold.html 2827
 {% extends "base.html" %}
 
 {% block title %}A bolder title{% end %}
@@ -2804,12 +2844,12 @@ Translating directly to Python means you can apply functions to expressions easi
 You can pass functions in to your template just like any other variable (In a RequestHandler, override
 RequestHandler.get_template_namespace):
 
-### Python code
+### Python code 2847
 def add(x, y):
    return x + y
 template.execute(add=add)
 
-### The template
+### The template 2852
 {{ add(1, 2) }}
 
 We provide the functions escape(), url_escape(), json_encode(), and squeeze() to all templates by default.
@@ -4372,10 +4412,10 @@ Command-line interface¶
 
 This module provides a simple command-line interface to fetch a url using Tornado’s HTTP client. Example usage:
 
-# Fetch the url and print its body
+# Fetch the url and print its body 4415
 python -m tornado.httpclient http://www.google.com
 
-# Just print the headers
+# Just print the headers 4418
 python -m tornado.httpclient --print_headers --print_body=false http://www.google.com
 
 Implementations¶
@@ -7475,7 +7515,7 @@ so feel free to use argparse or other configuration libraries if you prefer them
 Options must be defined with tornado.options.define before use, generally at the top level of a module. The options are then accessible
 as attributes of tornado.options.options:
 
-# myapp/db.py
+# myapp/db.py 7518
 from tornado.options import define, options
 
 define("mysql_host", default="127.0.0.1:3306", help="Main user DB")
@@ -7486,7 +7526,7 @@ def connect():
     db = database.Connection(options.mysql_host)
     ...
 
-# myapp/server.py
+# myapp/server.py 7529
 from tornado.options import define, options
 
 define("port", default=8080, help="port to listen on")
