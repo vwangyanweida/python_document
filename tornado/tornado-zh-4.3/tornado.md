@@ -597,17 +597,16 @@ Content-Type); 如果没用这种格式, 原生上传的数据可以调用 self.
 由于HTML表单编码格式的怪异 (e.g. 在单数和复数参数的含糊不清), Tornado 不会试图统一表单参数和其他
 输入类型的参数. 特别是, 我们不解析JSON请求体. 应用程序希望使用JSON代替表单编码可以复写 prepare
 来解析它们的请求:
-
+```
 def prepare(self):
     if self.request.headers["Content-Type"].startswith("application/json"):
         self.json_args = json.loads(self.request.body)
     else:
         self.json_args = None
+```
 
 #### 复写RequestHandler的方法
-
-除了 get()/post()/等, 在 RequestHandler 中的某些其他方法被设计成了在必要的时候让子类重写. 在每个
-请求中, 会发生下面的调用序列:
+1. 除了 get()/post()/等, 在 RequestHandler 中的某些其他方法被设计成了在必要的时候让子类重写. 在每个请求中, 会发生下面的调用序列:
 
  1. 在每次请求时生成一个新的 RequestHandler 对象
  2. initialize() 被 Application 配置中的初始化参数被调用. initialize 通常应该只保存成员变量传递
@@ -10384,24 +10383,3 @@ feedback that went into this release!
 Tornado is available under the Apache License, Version 2.0.
 
 This web site and all documentation is licensed under Creative Commons 3.0.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-© Copyright 2009-2017, The Tornado Authors. Revision 14f4412a.
-
-Built with Sphinx using a theme provided by Read the Docs.
-Read the Docs v: latest
-
-Versions
-    latest
-
-Downloads
-    htmlzip
-    epub
-
-On Read the Docs
-    Project Home
-    Builds
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Free document hosting provided by Read the Docs.

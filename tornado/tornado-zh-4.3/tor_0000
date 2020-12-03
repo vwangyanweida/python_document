@@ -534,13 +534,12 @@ BaseHandler 类, 复写一些方法例如 write_error 和 get_current_user 然�
 BaseHandler 而不是 RequestHandler 在你所有具体的处理程序中.
 
 #### 处理输入请求
-
-处理请求的程序(request handler)可以使用 self.request 访问代表当前请求的对象. 通过
+1. 处理请求的程序(request handler)可以使用 self.request 访问代表当前请求的对象. 通过
 HTTPServerRequest 的类定义查看完整的属性列表.
 
-使用HTML表单格式请求的数据会被解析并且可以在一些方法中使用, 例如 get_query_argument 和
+2. 使用HTML表单格式请求的数据会被解析并且可以在一些方法中使用, 例如 get_query_argument 和
 get_body_argument.
-
+```
 class MyFormHandler(tornado.web.RequestHandler):
     def get(self):
         self.write('<html><body><form action="/myform" method="POST">'
@@ -551,10 +550,11 @@ class MyFormHandler(tornado.web.RequestHandler):
     def post(self):
         self.set_header("Content-Type", "text/plain")
         self.write("You wrote " + self.get_body_argument("message"))
-
-由于HTLM表单编码不确定一个标签的参数是单一值还是一个列表, RequestHandler 有明确的方法来允许应用
-程序表明是否它期望接收一个列表. 对于列表, 使用 get_query_arguments 和 get_body_arguments 而不是
-它们的单数形式.
+```
+!!!!!!!!
+3. 由于HTLM表单编码不确定一个标签的参数是单一值还是一个列表, RequestHandler 有明确的方法来
+允许应用程序表明是否它期望接收一个列表. 对于列表, 使用 get_query_arguments 和 
+get_body_arguments 而不是它们的单数形式.
 
 通过一个表单上传的文件可以使用 self.request.files, 它遍历名字(HTML 标签 <input type="file"> 的
 name)到一个文件列表. 每个文件都是一个字典的形式 {"filename":..., "content_type":..., "body":...}

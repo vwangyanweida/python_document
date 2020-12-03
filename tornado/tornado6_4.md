@@ -25,6 +25,7 @@
 * [Coroutines that loop forever are generally started with 465](#coroutines-that-loop-forever-are-generally-started-with-465)
 * [spawn_callback(). 466](#spawn_callback-466)
 * [!/usr/bin/env python3 493](#usrbinenv-python3-493)
+			* [Handling request input¶](#handling-request-input)
 * [BAD: uses a default host pattern of r'.*' 1259](#bad-uses-a-default-host-pattern-of-r-1259)
 * [GOOD: only matches localhost or its ip address. 1262](#good-only-matches-localhost-or-its-ip-address-1262)
 * [GOOD: same as previous example using tornado.routing. 1267](#good-same-as-previous-example-using-tornadorouting-1267)
@@ -659,7 +660,7 @@ Many methods in RequestHandler are designed to be overridden in subclasses and b
 define a BaseHandler class that overrides methods such as write_error and get_current_user and then subclass your own BaseHandler
 instead of RequestHandler for all your specific handlers.
 
-Handling request input¶
+#### Handling request input¶
 
 The request handler can access the object representing the current request with self.request. See the class definition for
 HTTPServerRequest for a complete list of attributes.
