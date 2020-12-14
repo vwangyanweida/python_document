@@ -628,7 +628,7 @@ def prepare(self):
   • get_user_locale - 返回 Locale 对象给当前用户使用
   • set_default_headers - 可以被用来设置额外的响应头(例如自定义的 Server 头)
 
-错误处理¶
+### 错误处理
 
 如果一个处理程序抛出一个异常, Tornado会调用 RequestHandler.write_error 来生成一个错误页.
 tornado.web.HTTPError 可以被用来生成一个指定的状态码; 所有其他的异常都会返回一个500状态.
